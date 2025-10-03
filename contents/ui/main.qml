@@ -6,6 +6,11 @@
 *   systemctl --user restart plasma-plasmashell
 *   plasmoidviewer --applet com.github.eugenesan.finstats
 *   plasmawindowed com.github.eugenesan.finstats
+*   plasmapkg2 -i .
+*
+* https://develop.kde.org/docs/plasma/widget/properties/
+*
+* TODO: Enable tooltips
 */
 
 import QtQuick
@@ -18,13 +23,39 @@ PlasmoidItem {
 	id: root
 	Layout.fillHeight: true
 	Layout.minimumWidth: myLabel.implicitWidth + 10
-    //Layout.minimumHeight: 30
+	//Layout.minimumHeight: 30
 	property bool metalsReady: false
 	property bool btcReady: false
 	property bool btcfeeReady: false
 	property variant metalsData: [0,0]
 	property variant btcData: [0]
 	property variant btcfeeData: [0]
+
+	/*
+	toolTipTextFormat: Text.RichText
+	toolTipMainText: i18n("My Applet Title")
+	toolTipSubText: i18n("This is a description of my applet.")
+	*/
+
+	MouseArea {
+		// Refresh the label and reset time on mouse click
+		anchors.fill: parent
+		acceptedButtons: Qt.LeftButton
+		onClicked: (mouse) => {
+			console.log("finstats::*::clicked-fetch-data");
+			text: "...k·. ..../..·.."
+			fetchData()
+			// Once fetch requests were sent, enable data ready timer
+			datareadyWait.running = true
+			console.log("finstats::*::clicked-timer-reset");
+			refreshTimer.restart()
+		}
+		/*
+		hoverEnabled: true
+		onEntered: console.log("finstats::*::hover-enter");
+		onExited: console.log("finstats::*::hover-exit");
+		*/
+	}
 
 	ColumnLayout {
 		// A simple label to display the JSON data
@@ -33,7 +64,6 @@ PlasmoidItem {
 			horizontalAlignment: Text.AlignHCenter
 			verticalAlignment: Text.AlignVCenter
 			//Layout.fillWidth: true
-			text: "...k·. ..../..·.."
 		}
 	}
 
@@ -78,6 +108,7 @@ PlasmoidItem {
 	}
 
 	Component.onCompleted: {
+		myLabel.text = "...k·. ..../..·.."
 		fetchData()
 
 		// Resume monitoring data ready
