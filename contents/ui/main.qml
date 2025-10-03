@@ -9,8 +9,6 @@
 *   plasmapkg2 -i .
 *
 * https://develop.kde.org/docs/plasma/widget/properties/
-*
-* TODO: Enable tooltips
 */
 
 import QtQuick
@@ -23,7 +21,6 @@ PlasmoidItem {
 	id: root
 	Layout.fillHeight: true
 	Layout.minimumWidth: myLabel.implicitWidth + 10
-	//Layout.minimumHeight: 30
 	property bool metalsReady: false
 	property bool btcReady: false
 	property bool btcfeeReady: false
@@ -31,13 +28,18 @@ PlasmoidItem {
 	property variant btcData: [0]
 	property variant btcfeeData: [0]
 
-	/*
-	toolTipTextFormat: Text.RichText
-	toolTipMainText: i18n("My Applet Title")
-	toolTipSubText: i18n("This is a description of my applet.")
-	*/
+	ToolTipArea {
+		id: toolTip
+		width: parent.width
+		height: parent.height
+		anchors.fill: parent
+		mainText: "Financial Stats"
+		active: true
+		interactive: true
+	}
 
 	MouseArea {
+		id: mouseAreaValue
 		// Refresh the label and reset time on mouse click
 		anchors.fill: parent
 		acceptedButtons: Qt.LeftButton
@@ -50,11 +52,16 @@ PlasmoidItem {
 			console.log("finstats::*::clicked-timer-reset");
 			refreshTimer.restart()
 		}
-		/*
+
 		hoverEnabled: true
-		onEntered: console.log("finstats::*::hover-enter");
-		onExited: console.log("finstats::*::hover-exit");
-		*/
+		onEntered: {
+			toolTip.showToolTip()
+			//console.log("finstats::*::hover-enter")
+		}
+		onExited: {
+			toolTip.hideToolTip()
+			//console.log("finstats::*::hover-exit")}
+		}
 	}
 
 	ColumnLayout {
@@ -91,15 +98,34 @@ PlasmoidItem {
 			if (( root.metalsReady == root.btcReady == root.btcfeeReady == true ) && ( datareadyWait.running == true )) {
 				// Once all data fetched, build label
 				console.log("finstats::*::building-label:", datareadyWait.running)
+
 				// Disable timer to avoid duplicate calls
 				datareadyWait.running = false
+
+				// Get the current date and time
+				var today = new Date();
+				// Format the date and time for display Example: "2025-10-02 22:30:00"
+				var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm:ss");
+
 				// Unicode symbols collection Ⓑ₿Ș$≐🜚🜛·
+
+				// Build panel view text
 				myLabel.text = /*"₿" + */ JSON.stringify(Math.round(root.btcData[0]/1000)) + "k";
 				myLabel.text += "·" + JSON.stringify(Math.round(root.btcfeeData[0]))// + "Ș";
 				myLabel.text += " " + JSON.stringify(Math.round(root.metalsData[0]))// + "🜚";
 				myLabel.text += "/" + JSON.stringify(Math.round(root.metalsData[1]))// + "🜛";
 				myLabel.text += "·" + JSON.stringify(Math.round(root.metalsData[0]/root.metalsData[1]));
 				console.log("finstats::*::label-ready:", myLabel.text)
+
+				// Build tooltip text
+				var myTT_text = "<b>Date</b>: " + formattedDateTime;
+				myTT_text += "<br><b>₿</b>: "  + JSON.stringify(Math.round(root.btcData[0])) + "·$";
+				myTT_text += "<br><b>Fee</b>: " + JSON.stringify(Math.round(root.btcfeeData[0])) + "·Sats/vKb";
+				myTT_text += "<br><b>Au</b>: " + JSON.stringify(Math.round(root.metalsData[0])) + "·$";
+				myTT_text += "<br><b>Ag</b>: " + JSON.stringify(Math.round(root.metalsData[1])) + "·$";
+				myTT_text += "<br><b>Au/Ag</b>: " + JSON.stringify(Math.round(root.metalsData[0]/root.metalsData[1]));
+				console.log("finstats::*::tooltip-ready:", myTT_text)
+				toolTip.subText = myTT_text
 			} else {
 				// Not all data is ready or duplicate call
 				console.log("finstats::*::skipping-build:", datareadyWait.running)
