@@ -9,6 +9,8 @@
 *   plasmapkg2 -i .
 *
 * https://develop.kde.org/docs/plasma/widget/properties/
+* https://develop.kde.org/docs/features/configuration/porting_kf6/
+* https://develop.kde.org/docs/plasma/widget/testing/
 */
 
 import QtQuick
@@ -109,20 +111,20 @@ PlasmoidItem {
 				// Unicode symbols collection Ⓑ₿Ș$≐🜚🜛·
 
 				// Build panel view text
-				myLabel.text = /*"₿" + */ JSON.stringify(Math.round(root.btcData[0]/1000)) + "k";
-				myLabel.text += "·" + JSON.stringify(Math.round(root.btcfeeData[0]))// + "Ș";
-				myLabel.text += " " + JSON.stringify(Math.round(root.metalsData[0]))// + "🜚";
-				myLabel.text += "/" + JSON.stringify(Math.round(root.metalsData[1]))// + "🜛";
-				myLabel.text += "·" + JSON.stringify(Math.round(root.metalsData[0]/root.metalsData[1]));
+				myLabel.text  = (root.btcData[0]/1000).toFixed(1) // + "k";
+				//myLabel.text += "·" + root.btcfeeData[0] // + "Ș";
+				myLabel.text += "☉" + (root.metalsData[0]/1000).toFixed(1) // + "🜚";
+				//myLabel.text += "/" + root.metalsData[1]) // + "🜛";
+				//myLabel.text += "·" + (root.metalsData[0]/root.metalsData[1]).toFixed(1);
 				console.log("finstats::*::label-ready:", myLabel.text)
 
 				// Build tooltip text
 				var myTT_text = "<b>Date</b>: " + formattedDateTime;
-				myTT_text += "<br><b>₿</b>: "  + JSON.stringify(Math.round(root.btcData[0])) + "·$";
-				myTT_text += "<br><b>Ș</b>: " + JSON.stringify(Math.round(root.btcfeeData[0])) + "·Ș/vKb";
-				myTT_text += "<br><b>Au</b>: " + JSON.stringify(Math.round(root.metalsData[0])) + "·$";
-				myTT_text += "<br><b>Ag</b>: " + JSON.stringify(Math.round(root.metalsData[1])) + "·$";
-				myTT_text += "<br><b>Au/Ag</b>: " + JSON.stringify(Math.round(root.metalsData[0]/root.metalsData[1]));
+				myTT_text += "<br><b>₿</b>: "  + root.btcData[0] + "·$";
+				myTT_text += "<br><b>Ș</b>: " + root.btcfeeData[0] + "·Ș/vKb";
+				myTT_text += "<br><b>Au</b>: " + root.metalsData[0] + "·$";
+				myTT_text += "<br><b>Ag</b>: " + root.metalsData[1] + "·$";
+				myTT_text += "<br><b>Au/Ag</b>: " + (root.metalsData[0]/root.metalsData[1]).toFixed(1);
 				console.log("finstats::*::tooltip-ready:", myTT_text)
 				toolTip.subText = myTT_text
 			} else {
@@ -133,7 +135,7 @@ PlasmoidItem {
 	}
 
 	Component.onCompleted: {
-		myLabel.text = "...k·. ..../..·.."
+		myLabel.text = ".....·..."
 		fetchData()
 
 		// Resume monitoring data ready
@@ -163,9 +165,9 @@ PlasmoidItem {
 								data = data[keys[x]];
 							}
 							console.log("finstats::Metals::PostParsing:", y, data)
-							data = Math.round(parseInt(data))
+							data = parseInt(data)
 							// Save filtered value
-							root.metalsData[y] = JSON.stringify(data)
+							root.metalsData[y] = data
 						}
 					} catch (e) {
 						console.log("finstats::Metals::JSON parsing error:", e)
@@ -195,9 +197,9 @@ PlasmoidItem {
 								data = data[keys[x]];
 							}
 							console.log("finstats::BTC::PostParsing:", y, data)
-							data = Math.round(parseInt(data))
+							data = parseInt(data)
 							// Save filtered value
-							root.btcData[y] = JSON.stringify(data)
+							root.btcData[y] = data
 						}
 					} catch (e) {
 						console.log("finstats::BTC::JSON parsing error:", e)
@@ -227,9 +229,9 @@ PlasmoidItem {
 								data = data[keys[x]];
 							}
 							console.log("finstats::BTCFee::PostParsing:", y, data)
-							data = Math.round(parseInt(data))
+							data = parseInt(data)
 							// Save filtered value
-							root.btcfeeData[y] = JSON.stringify(data)
+							root.btcfeeData[y] = data
 						}
 					} catch (e) {
 						console.log("finstats::BTCFee::JSON parsing error:", e)
