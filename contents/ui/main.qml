@@ -40,12 +40,11 @@ PlasmoidItem {
 
 	MouseArea {
 		id: mouseAreaValue
-		// Refresh the label and reset time on mouse click
 		anchors.fill: parent
 		acceptedButtons: Qt.LeftButton
+		// Refresh the label and reset time on mouse click
 		onClicked: (mouse) => {
 			console.log("finstats::*::clicked-fetch-data");
-			text: "...k·. ..../..·.."
 			fetchData()
 			// Once fetch requests were sent, enable data ready timer
 			datareadyWait.running = true
@@ -120,7 +119,7 @@ PlasmoidItem {
 				// Build tooltip text
 				var myTT_text = "<b>Date</b>: " + formattedDateTime;
 				myTT_text += "<br><b>₿</b>: "  + JSON.stringify(Math.round(root.btcData[0])) + "·$";
-				myTT_text += "<br><b>Fee</b>: " + JSON.stringify(Math.round(root.btcfeeData[0])) + "·Sats/vKb";
+				myTT_text += "<br><b>Ș</b>: " + JSON.stringify(Math.round(root.btcfeeData[0])) + "·Ș/vKb";
 				myTT_text += "<br><b>Au</b>: " + JSON.stringify(Math.round(root.metalsData[0])) + "·$";
 				myTT_text += "<br><b>Ag</b>: " + JSON.stringify(Math.round(root.metalsData[1])) + "·$";
 				myTT_text += "<br><b>Au/Ag</b>: " + JSON.stringify(Math.round(root.metalsData[0]/root.metalsData[1]));
@@ -144,10 +143,9 @@ PlasmoidItem {
 	function fetchData() {
 		var urls = [ "https://data-asg.goldprice.org/dbXRates/USD", "https://mempool.space/api/v1/prices",
 						"https://mempool.space/api/v1/fees/recommended" ]
-		var metalsPaths = [ "items.0.xauPrice", "items.0.xagPrice" ];
+		var metalsPaths = [ "items.0.xauPrice", "items.0.xagPrice" ]
 		var btcPaths = [ "USD" ]
 		var btcfeePaths = [ "economyFee" ] //"fastestFee":6,"halfHourFee":5,"hourFee":4,"economyFee":2,"minimumFee":1
-		myLabel.text = ""
 
 		var mxhr = new XMLHttpRequest()
 		mxhr.onreadystatechange = function() {
@@ -245,6 +243,10 @@ PlasmoidItem {
 			}
 		}
 
+		mxhr.open("GET", urls[0], true)
+		mxhr.timeout = 2000;
+		mxhr.send()
+
 		bxhr.open("GET", urls[1], true)
 		bxhr.timeout = 2000;
 		bxhr.send()
@@ -252,9 +254,5 @@ PlasmoidItem {
 		fxhr.open("GET", urls[2], true)
 		fxhr.timeout = 2000;
 		fxhr.send()
-
-		mxhr.open("GET", urls[0], true)
-		mxhr.timeout = 2000;
-		mxhr.send()
 	}
 }
