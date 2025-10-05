@@ -20,6 +20,7 @@ Item {
 	property alias cfg_satSymbol: satSymbol.text
 	property alias cfg_auSymbol: auSymbol.text
 	property alias cfg_agSymbol: agSymbol.text
+	property alias cfg_ratioSymbol: ratioSymbol.text
 	property alias cfg_btcStack: btcStack.value
 	property alias cfg_auStack: auStack.value
 	property alias cfg_agStack: agStack.value
@@ -145,6 +146,20 @@ Item {
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use to indicate Silver")
+				}
+
+				// Ratio symbol
+				Label {
+					Layout.minimumWidth: root.width / 2
+					text: i18n("Ratio symbol:")
+					horizontalAlignment: Label.AlignRight
+				}
+				TextField {
+					id: ratioSymbol
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which symbol to use to indicate ratio")
 				}
 
 				// BTC size

@@ -6,7 +6,7 @@
 			<default>false</default>
 		</entry>
 		<entry name="stackSymbol" type="String">
-			<default>⊕</default>
+			<default>∑</default>
 		</entry>
 		<entry name="curSymbol" type="String">
 			<default>$</default>
@@ -22,6 +22,9 @@
 		</entry>
 		<entry name="agSymbol" type="String">
 			<default>🜛</default>
+		</entry>
+		<entry name="ratioSymbol" type="String">
+			<default>◕</default>
 		</entry>
 		<entry name="btcStack" type="Int">
 			<default>1</default>

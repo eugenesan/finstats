@@ -1,7 +1,7 @@
 /*
 * SPDX-FileCopyrightText: Copyright 2025 Eugene San (eugenesan)
 * SPDX-License-Identifier: GPL-3.0-or-later
-* SPDX-SnippetComment: Financial Stats Applet for Plasma 6
+* SPDX-SnippetComment: Finance Stats Applet for Plasma 6
 * Debug:
 *   systemctl --user restart plasma-plasmashell
 *   plasmoidviewer --applet com.github.eugenesan.finstats
@@ -28,23 +28,18 @@ import org.kde.plasma.components
 PlasmoidItem {
 	id: root
 	Layout.fillHeight: true
-	Layout.minimumWidth: myLabel.implicitWidth + 10
+	Layout.minimumWidth: myLabel.implicitWidth + 5
 
-	// Indicates if fetch finished
+	// Stores status of fetch process
 	property bool metalsReady: false
 	property bool btcReady: false
 	property bool btcfeeReady: false
 	property int dataReadyAttemp: 0
 
-	// Indicates if fetch was successful + error code
-	//property variant metalsStatus: [0,0]
-	//property variant btcStatus: [0,0]
-	//property variant btcfeeStatus: [0,0]
-
 	// Stores fetched data
 	property variant metalsData: [0.0,0.0]
-	property variant btcData: [0.0]
-	property variant btcfeeData: [0.0]
+	property variant btcData: [0]
+	property variant btcfeeData: [0]
 
 	// Global vars from config
 	property bool showStacks: plasmoid.configuration.showStacks
@@ -54,6 +49,7 @@ PlasmoidItem {
 	property string satSymbol: plasmoid.configuration.satSymbol
 	property string auSymbol: plasmoid.configuration.auSymbol
 	property string agSymbol: plasmoid.configuration.agSymbol
+	property string ratioSymbol: plasmoid.configuration.ratioSymbol
 	property int btcStack: plasmoid.configuration.btcStack
 	property int auStack: plasmoid.configuration.auStack
 	property int agStack: plasmoid.configuration.agStack
@@ -77,7 +73,7 @@ PlasmoidItem {
 		width: parent.width
 		height: parent.height
 		anchors.fill: parent
-		mainText: "Financial Stats"
+		mainText: "Finance Stats"
 		active: true
 		interactive: true
 	}
@@ -102,11 +98,9 @@ PlasmoidItem {
 		hoverEnabled: true
 		onEntered: {
 			toolTip.showToolTip()
-			//console.log("finstats::*::hover-enter")
 		}
 		onExited: {
 			toolTip.hideToolTip()
-			//console.log("finstats::*::hover-exit")}
 		}
 	}
 
@@ -116,12 +110,11 @@ PlasmoidItem {
 			id: myLabel
 			horizontalAlignment: Text.AlignHCenter
 			verticalAlignment: Text.AlignVCenter
-			//Layout.fillWidth: true
 		}
 	}
 
 	Component.onCompleted: {
-		myLabel.text = ".....·..."
+		myLabel.text = "..... │ ..."
 		fetchData()
 
 		// Resume monitoring data ready
@@ -145,7 +138,7 @@ PlasmoidItem {
 		}
 	}
 
-	// Wait for all data be fetched
+	// Wait for data to be fetched and build applet/tooltip text
 	Timer {
 		id: datareadyWait
 		interval: 1000
@@ -177,25 +170,25 @@ PlasmoidItem {
 					var agNet = (root.metalsData[1] * agStack)
 				}
 
-				// Build panel view text. Unicode symbols collection Ⓑ₿Ș$≐🜚🜛·
+				// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛·∣│◕)
 				myLabel.text  = (root.btcData[0]/1000).toFixed(decPlaces) // + "k"
-				//myLabel.text += "·" + root.btcfeeData[0] // + "·" + satSymbol + "/vKb"
-				myLabel.text += "·" + (root.metalsData[0]/1000).toFixed(decPlaces) // + "·" + auSymbol
-				//myLabel.text += "/" + root.metalsData[1]) // + "·" + agSymbol
-				//myLabel.text += "·" + (root.metalsData[0]/root.metalsData[1]).toFixed(1)
+				//myLabel.text += " │ " + root.btcfeeData[0] // + "·" + satSymbol + "/vKb"
+				myLabel.text += " │ " + (root.metalsData[0]/1000).toFixed(decPlaces) // + "·" + auSymbol
+				//myLabel.text += " │ " + (root.metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
+				//myLabel.text += " │ " + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlaces)
 				console.log("finstats::*::label-ready:", myLabel.text)
 
 				// Build tooltip text
 				myTT_text += "<br><b>" + btcSymbol + "</b>: "  + root.btcData[0] + "·" + curSymbol
-				myTT_text += " | <b>" + satSymbol + "</b>: " + root.btcfeeData[0] + "·" + satSymbol + "/vKb"
-				myTT_text += "<br><b>" + auSymbol + "</b>: " + root.metalsData[0] + "·" + curSymbol
-				myTT_text += " | <b>" + agSymbol + "</b>: " + root.metalsData[1] + "·" + curSymbol
-				myTT_text += " <b>[</b>" + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlacesTT) + "<b>]</b>";
+				myTT_text += " │ <b>" + satSymbol + "</b>: " + root.btcfeeData[0] + "·" + satSymbol + "/vKb"
+				myTT_text += "<br><b>" + auSymbol + "</b>: " + (root.metalsData[0]).toFixed(decPlacesTT) + "·" + curSymbol
+				myTT_text += " │ <b>" + agSymbol + "</b>: " + (root.metalsData[1]).toFixed(decPlacesTT) + "·" + curSymbol
+				myTT_text += " │ <b>" + ratioSymbol + "</b>:" + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlacesTT);
 				if (showStacks) {
-					myTT_text += "<br><b>" + auSymbol + "" + stackSymbol + "</b>: " + (auNet).toFixed(decPlacesTT) + "·" + curSymbol
-					myTT_text += " | <b>" + agSymbol + "" + stackSymbol + "</b>: " + (agNet).toFixed(decPlacesTT) + "·" + curSymbol
-					myTT_text += "<br><b>" + btcSymbol + "" + stackSymbol + "</b>: " + (btcNet).toFixed(decPlacesTT) + "·" + curSymbol
-					myTT_text += " | <b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + "·" + curSymbol
+					myTT_text += "<br><b>" + stackSymbol + "" + auSymbol + "</b>: " + (auNet).toFixed(decPlacesTT) + "·" + curSymbol
+					myTT_text += " │ <b>" + stackSymbol + agSymbol + "</b>: " + (agNet).toFixed(decPlacesTT) + "·" + curSymbol
+					myTT_text += "<br><b>" + stackSymbol + btcSymbol + "</b>: " + (btcNet).toFixed(decPlacesTT) + "·" + curSymbol
+					myTT_text += " │ <b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + "·" + curSymbol
 					console.log("finstats::*::tooltip-add-stacks:", myTT_text)
 				} else {
 					console.log("finstats::*::tooltip-skip-stacks:", myTT_text)
@@ -241,22 +234,19 @@ PlasmoidItem {
 								data = data[keys[x]];
 							}
 							console.log("finstats::Metals::PostParsing:", y, data)
-							data = parseInt(data)
+							data = parseFloat(data)
 							// Save filtered value
 							root.metalsData[y] = data
 						}
 					} catch (e) {
 						console.log("finstats::Metals::JSON parsing error:", e)
-						//metalsStatus = [2, e]
 					}
 				} else {
 					console.log("finstats::Metals::HTTP Error:", mxhr.status)
-					//metalsStatus = [2, mxhr.status]
 				}
 
 				// Signal data is ready
 				root.metalsReady = true
-				//metalsStatus = [1, 0]
 				console.log("finstats::Metals::PostFetch:Ready")
 			}
 		}
@@ -283,16 +273,13 @@ PlasmoidItem {
 						}
 					} catch (e) {
 						console.log("finstats::BTC::JSON parsing error:", e)
-						//btcStatus = [2, e]
 					}
 				} else {
 					console.log("finstats::BTC::HTTP Error:", bxhr.status)
-						//btcStatus = [2, bxhr.status]
 				}
 
 				// Signal data is ready
 				root.btcReady = true
-				//btcStatus = [1, 0]
 				console.log("finstats::BTC::PostFetch:Ready")
 			}
 		}
@@ -319,35 +306,29 @@ PlasmoidItem {
 						}
 					} catch (e) {
 						console.log("finstats::BTCFee::JSON parsing error:", e)
-						//btcfeeStatus = [2, e]
 					}
 				} else {
 					console.log("finstats::BTCFee::HTTP Error:", fxhr.status)
-					//btcfeeStatus = [2, fxhr.status]
 				}
 
 				// Signal data is ready
 				root.btcfeeReady = true
-				//btcfeeStatus = [1, 0]
 				console.log("finstats::BTCFee::PostFetch:Ready")
 			}
 		}
 
-		// Reset statuses and que fetches
+		// Reset results readiness and que fetch requests
 		metalsReady = false
-		//metalsStatus = [0,0]
 		mxhr.open("GET", metalsUrl, true)
 		mxhr.timeout = 3000;
 		mxhr.send()
 
 		btcReady = false
-		//btcStatus = [0,0]
 		bxhr.open("GET", btcUrl, true)
 		bxhr.timeout = 3000;
 		bxhr.send()
 
 		btcfeeReady = false
-		//btcfeeStatus = [0,0]
 		fxhr.open("GET", btcfeeUrl, true)
 		fxhr.timeout = 3000;
 		fxhr.send()
