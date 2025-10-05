@@ -26,9 +26,24 @@ PlasmoidItem {
 	property bool metalsReady: false
 	property bool btcReady: false
 	property bool btcfeeReady: false
-	property variant metalsData: [0,0]
-	property variant btcData: [0]
-	property variant btcfeeData: [0]
+	property variant metalsData: [0.0,0.0]
+	property variant btcData: [0.0]
+	property variant btcfeeData: [0.0]
+
+	property bool showStacks: plasmoid.configuration.showStacks
+	property string stackSymbol: plasmoid.configuration.stackSymbol
+	property string curSymbol: plasmoid.configuration.curSymbol
+	property string btcSymbol: plasmoid.configuration.btcSymbol
+	property string satSymbol: plasmoid.configuration.satSymbol
+	property string auSymbol: plasmoid.configuration.auSymbol
+	property string agSymbol: plasmoid.configuration.agSymbol
+	property int btcStack: plasmoid.configuration.btcStack
+	property int auStack: plasmoid.configuration.auStack
+	property int agStack: plasmoid.configuration.agStack
+	property int btcCost: plasmoid.configuration.btcCost
+	property int capGain: plasmoid.configuration.capGain
+	property int decPlaces: plasmoid.configuration.decPlaces
+	property int timeRefresh: plasmoid.configuration.timeRefresh
 
 	ToolTipArea {
 		id: toolTip
@@ -75,10 +90,18 @@ PlasmoidItem {
 		}
 	}
 
+	Component.onCompleted: {
+		myLabel.text = ".....·..."
+		fetchData()
+
+		// Resume monitoring data ready
+		datareadyWait.running = true
+	}
+
 	// Refresh applet every 15 minutes
 	Timer {
 		id: refreshTimer
-		interval: 15 * 60 * 1000
+		interval: timeRefresh * 60 * 1000
 		running: true
 		repeat: true
 		onTriggered: {
@@ -108,23 +131,32 @@ PlasmoidItem {
 				// Format the date and time for display Example: "2025-10-02 22:30:00"
 				var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm:ss");
 
+				// Calculate stuff
+				var btcNet = ((root.btcData[0] * (btcStack - (btcStack * (capGain/100)))) + (btcCost * (btcStack * (capGain/100))))
+				var auNet = (root.metalsData[0] * auStack)
+				var agNet = (root.metalsData[1] * agStack)
+
 				// Unicode symbols collection Ⓑ₿Ș$≐🜚🜛·
 
 				// Build panel view text
-				myLabel.text  = (root.btcData[0]/1000).toFixed(1) // + "k";
-				//myLabel.text += "·" + root.btcfeeData[0] // + "Ș";
-				myLabel.text += "☉" + (root.metalsData[0]/1000).toFixed(1) // + "🜚";
-				//myLabel.text += "/" + root.metalsData[1]) // + "🜛";
-				//myLabel.text += "·" + (root.metalsData[0]/root.metalsData[1]).toFixed(1);
+				myLabel.text  = (root.btcData[0]/1000).toFixed(decPlaces) // + "k"
+				//myLabel.text += "·" + root.btcfeeData[0] // + "·" + satSymbol + "/vKb"
+				myLabel.text += "·" + (root.metalsData[0]/1000).toFixed(decPlaces) // + "·" + auSymbol
+				//myLabel.text += "/" + root.metalsData[1]) // + "·" + agSymbol
+				//myLabel.text += "·" + (root.metalsData[0]/root.metalsData[1]).toFixed(1)
 				console.log("finstats::*::label-ready:", myLabel.text)
 
 				// Build tooltip text
 				var myTT_text = "<b>Date</b>: " + formattedDateTime;
-				myTT_text += "<br><b>₿</b>: "  + root.btcData[0] + "·$";
-				myTT_text += "<br><b>Ș</b>: " + root.btcfeeData[0] + "·Ș/vKb";
-				myTT_text += "<br><b>Au</b>: " + root.metalsData[0] + "·$";
-				myTT_text += "<br><b>Ag</b>: " + root.metalsData[1] + "·$";
-				myTT_text += "<br><b>Au/Ag</b>: " + (root.metalsData[0]/root.metalsData[1]).toFixed(1);
+				myTT_text += "<br><b>" + btcSymbol + "</b>: "  + root.btcData[0] + "·" + curSymbol
+				myTT_text += " | <b>" + satSymbol + "</b>: " + root.btcfeeData[0] + "·" + satSymbol + "/vKb"
+				myTT_text += "<br><b>" + auSymbol + "</b>: " + root.metalsData[0] + "·" + curSymbol
+				myTT_text += " | <b>" + agSymbol + "</b>: " + root.metalsData[1] + "·" + curSymbol
+				myTT_text += " <b>[</b>" + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlaces) + "<b>]</b>";
+				myTT_text += "<br><b>" + auSymbol + "" + stackSymbol + "</b>: " + (auNet).toFixed(decPlaces) + "·" + curSymbol
+				myTT_text += " | <b>" + agSymbol + "" + stackSymbol + "</b>: " + (agNet).toFixed(decPlaces) + "·" + curSymbol
+				myTT_text += "<br><b>" + btcSymbol + "" + stackSymbol + "</b>: " + (btcNet).toFixed(decPlaces) + "·" + curSymbol
+				myTT_text += " | <b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlaces) + "·" + curSymbol
 				console.log("finstats::*::tooltip-ready:", myTT_text)
 				toolTip.subText = myTT_text
 			} else {
@@ -132,14 +164,6 @@ PlasmoidItem {
 				console.log("finstats::*::skipping-build:", datareadyWait.running)
 			}
 		}
-	}
-
-	Component.onCompleted: {
-		myLabel.text = ".....·..."
-		fetchData()
-
-		// Resume monitoring data ready
-		datareadyWait.running = true
 	}
 
 	function fetchData() {

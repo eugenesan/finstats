@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+	<kcfgfile name=""/>
+	<group name="General">
+		<entry name="showStacks" type="Bool">
+			<default>false</default>
+		</entry>
+		<entry name="stackSymbol" type="String">
+			<default>⊕</default>
+		</entry>
+		<entry name="curSymbol" type="String">
+			<default>$</default>
+		</entry>
+		<entry name="btcSymbol" type="String">
+			<default>₿</default>
+		</entry>
+		<entry name="satSymbol" type="String">
+			<default>Ș</default>
+		</entry>
+		<entry name="auSymbol" type="String">
+			<default>🜚</default>
+		</entry>
+		<entry name="agSymbol" type="String">
+			<default>🜛</default>
+		</entry>
+		<entry name="btcStack" type="Int">
+			<default>1</default>
+		</entry>
+		<entry name="auStack" type="Int">
+			<default>2</default>
+		</entry>
+		<entry name="agStack" type="Int">
+			<default>3</default>
+		</entry>
+		<entry name="btcCost" type="Int">
+			<default>100000</default>
+		</entry>
+		<entry name="capGain" type="Int">
+			<default>15</default>
+		</entry>
+		<entry name="decPlaces" type="Int">
+			<default>1</default>
+		</entry>
+		<entry name="timeRefresh" type="Int">
+			<default>30</default>
+		</entry>
+	</group>
+</kcfg>
