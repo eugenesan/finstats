@@ -26,7 +26,15 @@ Item {
 	property alias cfg_btcCost: btcCost.value
 	property alias cfg_capGain: capGain.value
 	property alias cfg_decPlaces: decPlaces.value
+	property alias cfg_decPlacesTT: decPlacesTT.value
 	property alias cfg_timeRefresh: timeRefresh.value
+	property alias cfg_btcUrl: btcUrl.text
+	property alias cfg_btcKey: btcKey.text
+	property alias cfg_btcfeeUrl: btcfeeUrl.text
+	property alias cfg_btcfeeKey: btcfeeKey.text
+	property alias cfg_metalsUrl: metalsUrl.text
+	property alias cfg_metalsKeyAu: metalsKeyAu.text
+	property alias cfg_metalsKeyAg: metalsKeyAg.text
 
 	ScrollView {
 		width: parent.width
@@ -211,6 +219,18 @@ Item {
 					to: 9
 				}
 
+				// Decimal places ToolTip
+				Label {
+					Layout.minimumWidth: root.width / 2
+					text: i18n("Decimal places to display on ToolTip:")
+					horizontalAlignment: Label.AlignRight
+				}
+				SpinBox {
+					from: 0
+					id: decPlacesTT
+					to: 9
+				}
+
 				// Time Refresh
 				Label {
 					Layout.minimumWidth: root.width / 2
@@ -225,6 +245,104 @@ Item {
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Minutes to refresh the coin value. Valid range: 1–60.")
+				}
+
+				// BTC URL
+				Label {
+					Layout.minimumWidth: root.width / 2
+					text: i18n("BTC fetch URL:")
+					horizontalAlignment: Label.AlignRight
+				}
+				TextField {
+					id: btcUrl
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which URL to fetch BTC from")
+				}
+
+				// BTC Key
+				Label {
+					Layout.minimumWidth: root.width / 2
+					text: i18n("BTC JSON key:")
+					horizontalAlignment: Label.AlignRight
+				}
+				TextField {
+					id: btcKey
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which JSON key to extract for BTC value")
+				}
+
+				// BTC fee URL
+				Label {
+					Layout.minimumWidth: root.width / 2
+					text: i18n("BTC Fee fetch URL:")
+					horizontalAlignment: Label.AlignRight
+				}
+				TextField {
+					id: btcfeeUrl
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which URL to fetch BTC fee from")
+				}
+
+				// BTC fee Key
+				Label {
+					Layout.minimumWidth: root.width / 2
+					text: i18n("BTC Fee JSON key:")
+					horizontalAlignment: Label.AlignRight
+				}
+				TextField {
+					id: btcfeeKey
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which JSON key to extract for BTC fee value")
+				}
+
+				// Metals URL
+				Label {
+					Layout.minimumWidth: root.width / 2
+					text: i18n("Metals fetch URL:")
+					horizontalAlignment: Label.AlignRight
+				}
+				TextField {
+					id: metalsUrl
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which URL to Metals from")
+				}
+
+				// Au Key
+				Label {
+					Layout.minimumWidth: root.width / 2
+					text: i18n("Au JSON key:")
+					horizontalAlignment: Label.AlignRight
+				}
+				TextField {
+					id: metalsKeyAu
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which JSON key to extract for Au value")
+				}
+
+				// Ag Key
+				Label {
+					Layout.minimumWidth: root.width / 2
+					text: i18n("Au JSON key:")
+					horizontalAlignment: Label.AlignRight
+				}
+				TextField {
+					id: metalsKeyAg
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which JSON key to extract for Ag value")
 				}
 
 				// Applet version

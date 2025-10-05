@@ -41,8 +41,33 @@
 		<entry name="decPlaces" type="Int">
 			<default>1</default>
 		</entry>
+		<entry name="decPlacesTT" type="Int">
+			<default>2</default>
+		</entry>
 		<entry name="timeRefresh" type="Int">
 			<default>30</default>
+		</entry>
+		<entry name="btcUrl" type="String">
+			<default>https://mempool.space/api/v1/prices</default>
+		</entry>
+		<entry name="btcKey" type="String">
+			<default>USD</default>
+		</entry>
+		<entry name="btcfeeUrl" type="String">
+			<default>https://mempool.space/api/v1/fees/recommended</default>
+		</entry>
+		<entry name="btcfeeKey" type="String">
+			<default>economyFee</default>
+			<options>fastestFee,halfHourFee,hourFee,economyFee,minimumFee</options>
+		</entry>
+		<entry name="metalsUrl" type="String">
+			<default>https://data-asg.goldprice.org/dbXRates/USD</default>
+		</entry>
+		<entry name="metalsKeyAu" type="String">
+			<default>items.0.xauPrice</default>
+		</entry>
+		<entry name="metalsKeyAg" type="String">
+			<default>items.0.xagPrice</default>
 		</entry>
 	</group>
 </kcfg>
