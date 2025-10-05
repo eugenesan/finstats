@@ -11,6 +11,10 @@
 * https://develop.kde.org/docs/plasma/widget/properties/
 * https://develop.kde.org/docs/features/configuration/porting_kf6/
 * https://develop.kde.org/docs/plasma/widget/testing/
+*
+* TODO: Fix config page: Symbols: Strings -> Symbols?, Fix tooltips
+*       Split decimal places for panel view and tooltip
+*       Try to align columns in tooltip?
 */
 
 import QtQuick
@@ -131,10 +135,12 @@ PlasmoidItem {
 				// Format the date and time for display Example: "2025-10-02 22:30:00"
 				var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm:ss");
 
-				// Calculate stuff
-				var btcNet = ((root.btcData[0] * (btcStack - (btcStack * (capGain/100)))) + (btcCost * (btcStack * (capGain/100))))
-				var auNet = (root.metalsData[0] * auStack)
-				var agNet = (root.metalsData[1] * agStack)
+				// Calculate stacks
+				if (showStacks) {
+					var btcNet = ((root.btcData[0] * (btcStack - (btcStack * (capGain/100)))) + (btcCost * (btcStack * (capGain/100))))
+					var auNet = (root.metalsData[0] * auStack)
+					var agNet = (root.metalsData[1] * agStack)
+				}
 
 				// Unicode symbols collection Ⓑ₿Ș$≐🜚🜛·
 
@@ -153,10 +159,15 @@ PlasmoidItem {
 				myTT_text += "<br><b>" + auSymbol + "</b>: " + root.metalsData[0] + "·" + curSymbol
 				myTT_text += " | <b>" + agSymbol + "</b>: " + root.metalsData[1] + "·" + curSymbol
 				myTT_text += " <b>[</b>" + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlaces) + "<b>]</b>";
-				myTT_text += "<br><b>" + auSymbol + "" + stackSymbol + "</b>: " + (auNet).toFixed(decPlaces) + "·" + curSymbol
-				myTT_text += " | <b>" + agSymbol + "" + stackSymbol + "</b>: " + (agNet).toFixed(decPlaces) + "·" + curSymbol
-				myTT_text += "<br><b>" + btcSymbol + "" + stackSymbol + "</b>: " + (btcNet).toFixed(decPlaces) + "·" + curSymbol
-				myTT_text += " | <b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlaces) + "·" + curSymbol
+				if (showStacks) {
+					myTT_text += "<br><b>" + auSymbol + "" + stackSymbol + "</b>: " + (auNet).toFixed(decPlaces) + "·" + curSymbol
+					myTT_text += " | <b>" + agSymbol + "" + stackSymbol + "</b>: " + (agNet).toFixed(decPlaces) + "·" + curSymbol
+					myTT_text += "<br><b>" + btcSymbol + "" + stackSymbol + "</b>: " + (btcNet).toFixed(decPlaces) + "·" + curSymbol
+					myTT_text += " | <b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlaces) + "·" + curSymbol
+					console.log("finstats::*::tooltip-add-stacks:", myTT_text)
+				} else {
+					console.log("finstats::*::tooltip-skip-stacks:", myTT_text)
+				}
 				console.log("finstats::*::tooltip-ready:", myTT_text)
 				toolTip.subText = myTT_text
 			} else {
