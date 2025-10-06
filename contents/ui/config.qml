@@ -5,7 +5,7 @@
  */
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts 1.11
+import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 
 Item {
@@ -42,16 +42,59 @@ Item {
 		height: parent.height
 
 		ColumnLayout {
-			//Layout.preferredWidth: parent.width - Kirigami.Units.largeSpacing * 2
-			//Layout.minimumWidth: preferredWidth
-			//Layout.maximumWidth: preferredWidth
-			spacing: Kirigami.Units.smallSpacing * 3
-
 			GridLayout {
-				//Layout.preferredWidth: parent.width
-				//Layout.minimumWidth: preferredWidth
-				//Layout.maximumWidth: preferredWidth
 				columns: 2
+
+				Label {
+					text: i18n("Load BTC source:")
+				}
+				ComboBox {
+					id: loadPresetCombo
+					textRole: "text"
+
+					model: [{
+						text: i18n("Bitstamp BTC-USD"),
+						url: "https://www.bitstamp.net/api/ticker/",
+						key: "last"
+					}, {
+						text: i18n("Coinbase BTC-USD"),
+						url: "https://api.coinbase.com/v2/prices/BTC-USD/spot",
+						key: "data.amount"
+					}, {
+						text: i18n("Mempool BTC-USD"),
+						url: "https://mempool.space/api/v1/prices",
+						key: "USD"
+					}, {
+						text: i18n("Bitfinex BTC-USD"),
+						url: "https://api.bitfinex.com/v1/pubticker/BTCUSD",
+						key: "last_price"
+					}, {
+						text: i18n("Gemini BTC-USD"),
+						url: "https://api.gemini.com/v1/pubticker/btcusd",
+						key: "last"
+					}, {
+						text: i18n("Kraken BTC-USD"),
+						url: "https://api.kraken.com/0/public/Ticker?pair=XBTUSD",
+						key: "result.XXBTZUSD.c.0"
+					}]
+
+					Component.onCompleted: {
+						for (var i = 0, length = model.length; i < length; ++i) {
+							if (model[i].url === cfg_btcUrl) {
+								currentIndex = i
+								console.log("finstats::*::config:current-model:", currentIndex, model[currentIndex].url, model[currentIndex].key);
+								return
+							}
+						}
+					}
+
+					onCurrentIndexChanged: {
+						console.log("finstats::*::config:comboselect:", currentIndex, model[currentIndex].url, model[currentIndex].key);
+						// Perform actions based on the new index
+						cfg_btcUrl = model[currentIndex].url
+						cfg_btcKey = model[currentIndex].key
+					}
+				}
 
 				// Show stacks
 				Label {

@@ -12,11 +12,12 @@
 * https://develop.kde.org/docs/features/configuration/porting_kf6/
 * https://develop.kde.org/docs/plasma/widget/testing/
 *
-* TODO: * Fix config page: Symbols: Strings -> Symbols?, Fix tooltips
+* TODO: * Fix config page:
+*         - Split config page (too long?)
+*         - Work on config page formatting
+*         - Symbols: Strings -> Symbols?, Fix tooltips
 *       * Try to align columns in tooltip?
-*       * Split config page (too long?)
 *       * Figure out why it complains about "Setting initial properties failed" on config page
-*       * Purge unused *Status
 */
 
 import QtQuick
@@ -179,7 +180,7 @@ PlasmoidItem {
 				console.log("finstats::*::label-ready:", myLabel.text)
 
 				// Build tooltip text
-				myTT_text += "<br><b>" + btcSymbol + "</b>: "  + root.btcData[0] + "·" + curSymbol
+				myTT_text += "<br><b>" + btcSymbol + "</b>: "  + (root.btcData[0]).toFixed(decPlacesTT) + "·" + curSymbol
 				myTT_text += " │ <b>" + satSymbol + "</b>: " + root.btcfeeData[0] + "·" + satSymbol + "/vKb"
 				myTT_text += "<br><b>" + auSymbol + "</b>: " + (root.metalsData[0]).toFixed(decPlacesTT) + "·" + curSymbol
 				myTT_text += " │ <b>" + agSymbol + "</b>: " + (root.metalsData[1]).toFixed(decPlacesTT) + "·" + curSymbol
@@ -267,7 +268,7 @@ PlasmoidItem {
 								data = data[keys[x]];
 							}
 							console.log("finstats::BTC::PostParsing:", y, data)
-							data = parseInt(data)
+							data = parseFloat(data)
 							// Save filtered value
 							root.btcData[y] = data
 						}

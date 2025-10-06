@@ -51,10 +51,10 @@
 			<default>30</default>
 		</entry>
 		<entry name="btcUrl" type="String">
-			<default>https://mempool.space/api/v1/prices</default>
+			<default>https://www.bitstamp.net/api/ticker/</default>
 		</entry>
 		<entry name="btcKey" type="String">
-			<default>USD</default>
+			<default>last</default>
 		</entry>
 		<entry name="btcfeeUrl" type="String">
 			<default>https://mempool.space/api/v1/fees/recommended</default>
