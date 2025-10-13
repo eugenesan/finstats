@@ -17,7 +17,7 @@ Item {
 	property alias cfg_stackSymbol: stackSymbol.text
 	property alias cfg_curSymbol: curSymbol.text
 	property alias cfg_btcSymbol: btcSymbol.text
-	property alias cfg_satSymbol: satSymbol.text
+	property alias cfg_satsSymbol: satsSymbol.text
 	property alias cfg_auSymbol: auSymbol.text
 	property alias cfg_agSymbol: agSymbol.text
 	property alias cfg_ratioSymbol: ratioSymbol.text
@@ -43,10 +43,12 @@ Item {
 
 		ColumnLayout {
 			GridLayout {
+				id: gridLayout
 				columns: 2
 
+				// BTC sources
 				Label {
-					text: i18n("Load BTC source:")
+					text: i18n("Load BTC presets:")
 				}
 				ComboBox {
 					id: loadPresetCombo
@@ -96,11 +98,116 @@ Item {
 					}
 				}
 
+				// BTC URL
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("BTC fetch URL:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: btcUrl
+					Layout.minimumWidth: root.width * 0.6
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which URL to fetch BTC from")
+				}
+
+				// BTC Key
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("BTC JSON key:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: btcKey
+					Layout.minimumWidth: root.width * 0.6
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which JSON key to extract for BTC value")
+				}
+
+				// BTC fee URL
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("BTC Fee fetch URL:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: btcfeeUrl
+					Layout.minimumWidth: root.width * 0.6
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which URL to fetch BTC fee from")
+				}
+
+				// BTC fee Key
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("BTC Fee JSON key:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: btcfeeKey
+					Layout.minimumWidth: root.width * 0.6
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which JSON key to extract for BTC fee value")
+				}
+
+				// Metals URL
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Metals fetch URL:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: metalsUrl
+					Layout.minimumWidth: root.width * 0.6
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which URL to Metals from")
+				}
+
+				// Au Key
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Au JSON key:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: metalsKeyAu
+					Layout.minimumWidth: root.width * 0.6
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which JSON key to extract for Au value")
+				}
+
+				// Ag Key
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Ag JSON key:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: metalsKeyAg
+					Layout.minimumWidth: root.width * 0.6
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which JSON key to extract for Ag value")
+				}
+
 				// Show stacks
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("Show Stacks:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				CheckBox {
 					id: showStacks
@@ -109,9 +216,9 @@ Item {
 
 				// Stack symbol
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("Stack symbol:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
 					id: stackSymbol
@@ -123,9 +230,9 @@ Item {
 
 				// Currency symbol
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("Currency symbol:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
 					id: curSymbol
@@ -137,9 +244,9 @@ Item {
 
 				// BTC symbol
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("BTC symbol:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
 					id: btcSymbol
@@ -149,14 +256,14 @@ Item {
 					ToolTip.text: i18n("Which symbol to use to indicate BTC")
 				}
 
-				// Sat symbol
+				// Sats symbol
 				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("Sat symbol:")
-					horizontalAlignment: Label.AlignRight
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Sats symbol:")
+					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
-					id: satSymbol
+					id: satsSymbol
 					text: "#000000"
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
@@ -165,9 +272,9 @@ Item {
 
 				// Au symbol
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("Au symbol:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
 					id: auSymbol
@@ -179,9 +286,9 @@ Item {
 
 				// Ag symbol
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("Ag symbol:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
 					id: agSymbol
@@ -193,9 +300,9 @@ Item {
 
 				// Ratio symbol
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("Ratio symbol:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
 					id: ratioSymbol
@@ -207,9 +314,9 @@ Item {
 
 				// BTC size
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("BTC stack size:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
 					from: 0
@@ -219,9 +326,9 @@ Item {
 
 				// Au size
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("Au stack size:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
 					from: 0
@@ -231,9 +338,9 @@ Item {
 
 				// Ag size
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("Ag stack size:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
 					from: 0
@@ -243,9 +350,9 @@ Item {
 
 				// BTC cost
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("BTC cost basis:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
 					from: 0
@@ -255,9 +362,9 @@ Item {
 
 				// Cap gains
 				Label {
-					Layout.minimumWidth: root.width / 2
+					Layout.minimumWidth: root.width / 3
 					text: i18n("Capital gains tax:")
-					horizontalAlignment: Label.AlignRight
+					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
 					from: 0
@@ -267,9 +374,9 @@ Item {
 
 				// Decimal places
 				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("Decimal places to display:")
-					horizontalAlignment: Label.AlignRight
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Applet decimal places:")
+					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
 					from: 0
@@ -279,9 +386,9 @@ Item {
 
 				// Decimal places ToolTip
 				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("Decimal places to display on ToolTip:")
-					horizontalAlignment: Label.AlignRight
+					Layout.minimumWidth: root.width / 3
+					text: i18n("ToolTip decimal places:")
+					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
 					from: 0
@@ -289,11 +396,11 @@ Item {
 					to: 9
 				}
 
-				// Time Refresh
+				// Refresh timer
 				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("Time Refresh (minutes):")
-					horizontalAlignment: Label.AlignRight
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Refresh timer (minutes):")
+					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
 					id: timeRefresh
@@ -305,114 +412,14 @@ Item {
 					ToolTip.text: i18n("Minutes to refresh the coin value. Valid range: 1–60.")
 				}
 
-				// BTC URL
-				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("BTC fetch URL:")
-					horizontalAlignment: Label.AlignRight
-				}
-				TextField {
-					id: btcUrl
-					text: "#000000"
-					onTextChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which URL to fetch BTC from")
-				}
-
-				// BTC Key
-				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("BTC JSON key:")
-					horizontalAlignment: Label.AlignRight
-				}
-				TextField {
-					id: btcKey
-					text: "#000000"
-					onTextChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which JSON key to extract for BTC value")
-				}
-
-				// BTC fee URL
-				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("BTC Fee fetch URL:")
-					horizontalAlignment: Label.AlignRight
-				}
-				TextField {
-					id: btcfeeUrl
-					text: "#000000"
-					onTextChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which URL to fetch BTC fee from")
-				}
-
-				// BTC fee Key
-				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("BTC Fee JSON key:")
-					horizontalAlignment: Label.AlignRight
-				}
-				TextField {
-					id: btcfeeKey
-					text: "#000000"
-					onTextChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which JSON key to extract for BTC fee value")
-				}
-
-				// Metals URL
-				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("Metals fetch URL:")
-					horizontalAlignment: Label.AlignRight
-				}
-				TextField {
-					id: metalsUrl
-					text: "#000000"
-					onTextChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which URL to Metals from")
-				}
-
-				// Au Key
-				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("Au JSON key:")
-					horizontalAlignment: Label.AlignRight
-				}
-				TextField {
-					id: metalsKeyAu
-					text: "#000000"
-					onTextChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which JSON key to extract for Au value")
-				}
-
-				// Ag Key
-				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("Au JSON key:")
-					horizontalAlignment: Label.AlignRight
-				}
-				TextField {
-					id: metalsKeyAg
-					text: "#000000"
-					onTextChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which JSON key to extract for Ag value")
-				}
-
 				// Applet version
 				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("Financial Stats")
-					horizontalAlignment: Label.AlignRight
+					text: i18n("Financial Stats Applet")
+					horizontalAlignment: Label.AlignLeft
 				}
 
 				Label {
-					Layout.minimumWidth: root.width / 2
-					text: i18n("v0.2 (2025-10-04)")
+					text: i18n("v0.3 (2025-10-13)")
 				}
 
 			}  // Closing GridLayout

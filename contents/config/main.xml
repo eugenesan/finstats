@@ -13,15 +13,19 @@
 		</entry>
 		<entry name="btcSymbol" type="String">
 			<default>₿</default>
+			<alt>Ⓑ</alt>
 		</entry>
-		<entry name="satSymbol" type="String">
+		<entry name="satsSymbol" type="String">
 			<default>Ș</default>
+			<alt>≐</alt>
 		</entry>
 		<entry name="auSymbol" type="String">
-			<default>🜚</default>
+			<default>☀</default>
+			<alt>🜚</alt>
 		</entry>
 		<entry name="agSymbol" type="String">
-			<default>🜛</default>
+			<default>☾</default>
+			<alt>🜛</alt>
 		</entry>
 		<entry name="ratioSymbol" type="String">
 			<default>◕</default>

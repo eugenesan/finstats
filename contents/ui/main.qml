@@ -14,8 +14,9 @@
 *
 * TODO: * Fix config page:
 *         - Split config page (too long?)
-*         - Work on config page formatting
-*         - Symbols: Strings -> Symbols?, Fix tooltips
+*         - Symbols: Strings -> Symbols?
+*         - Fix tooltips
+*         - Implement alt symbols
 *       * Try to align columns in tooltip?
 *       * Figure out why it complains about "Setting initial properties failed" on config page
 */
@@ -47,7 +48,7 @@ PlasmoidItem {
 	property string stackSymbol: plasmoid.configuration.stackSymbol
 	property string curSymbol: plasmoid.configuration.curSymbol
 	property string btcSymbol: plasmoid.configuration.btcSymbol
-	property string satSymbol: plasmoid.configuration.satSymbol
+	property string satsSymbol: plasmoid.configuration.satsSymbol
 	property string auSymbol: plasmoid.configuration.auSymbol
 	property string agSymbol: plasmoid.configuration.agSymbol
 	property string ratioSymbol: plasmoid.configuration.ratioSymbol
@@ -150,7 +151,7 @@ PlasmoidItem {
 			// Get the current date and time
 			var today = new Date();
 			// Format the date and time for display
-			var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm:ss");
+			var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm");
 			var myTT_text = "<b>Date</b>: " + formattedDateTime;
 
 			// Check if all the results marked as fetched and dataready timer still enabled
@@ -173,7 +174,7 @@ PlasmoidItem {
 
 				// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛·∣│◕)
 				myLabel.text  = (root.btcData[0]/1000).toFixed(decPlaces) // + "k"
-				//myLabel.text += " │ " + root.btcfeeData[0] // + "·" + satSymbol + "/vKb"
+				//myLabel.text += " │ " + root.btcfeeData[0] // + "·" + satsSymbol + "/vKb"
 				myLabel.text += " │ " + (root.metalsData[0]/1000).toFixed(decPlaces) // + "·" + auSymbol
 				//myLabel.text += " │ " + (root.metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
 				//myLabel.text += " │ " + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlaces)
@@ -181,20 +182,20 @@ PlasmoidItem {
 
 				// Build tooltip text
 				myTT_text += "<br><b>" + btcSymbol + "</b>: "  + (root.btcData[0]).toFixed(decPlacesTT) + "·" + curSymbol
-				myTT_text += " │ <b>" + satSymbol + "</b>: " + root.btcfeeData[0] + "·" + satSymbol + "/vKb"
+				myTT_text += " │ <b>" + satsSymbol + "</b>: " + root.btcfeeData[0] + "·" + satsSymbol + "/vKb"
 				myTT_text += "<br><b>" + auSymbol + "</b>: " + (root.metalsData[0]).toFixed(decPlacesTT) + "·" + curSymbol
 				myTT_text += " │ <b>" + agSymbol + "</b>: " + (root.metalsData[1]).toFixed(decPlacesTT) + "·" + curSymbol
-				myTT_text += " │ <b>" + ratioSymbol + "</b>:" + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlacesTT);
+				myTT_text += " │ <b>" + ratioSymbol + "</b>: " + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlacesTT);
 				if (showStacks) {
+					console.log("finstats::*::tooltip-before-stacks:", myTT_text)
 					myTT_text += "<br><b>" + stackSymbol + "" + auSymbol + "</b>: " + (auNet).toFixed(decPlacesTT) + "·" + curSymbol
 					myTT_text += " │ <b>" + stackSymbol + agSymbol + "</b>: " + (agNet).toFixed(decPlacesTT) + "·" + curSymbol
 					myTT_text += "<br><b>" + stackSymbol + btcSymbol + "</b>: " + (btcNet).toFixed(decPlacesTT) + "·" + curSymbol
 					myTT_text += " │ <b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + "·" + curSymbol
-					console.log("finstats::*::tooltip-add-stacks:", myTT_text)
+					//console.log("finstats::*::tooltip-with-stacks:", myTT_text)
 				} else {
-					console.log("finstats::*::tooltip-skip-stacks:", myTT_text)
+					console.log("finstats::*::tooltip-without-stacks:", myTT_text)
 				}
-				console.log("finstats::*::tooltip-ready:", myTT_text)
 				toolTip.subText = myTT_text
 			} else {
 				// Not all data is ready, invalid results or duplicate call
