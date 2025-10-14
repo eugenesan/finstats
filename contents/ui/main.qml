@@ -44,10 +44,12 @@ PlasmoidItem {
 	property variant btcfeeData: [0]
 
 	// Global vars from config
+	property string version: plasmoid.configuration.version
 	property bool showStacks: plasmoid.configuration.showStacks
 	property string stackSymbol: plasmoid.configuration.stackSymbol
 	property string curSymbol: plasmoid.configuration.curSymbol
 	property string btcSymbol: plasmoid.configuration.btcSymbol
+	property string btcfeeSymbol: plasmoid.configuration.btcfeeSymbol
 	property string satsSymbol: plasmoid.configuration.satsSymbol
 	property string auSymbol: plasmoid.configuration.auSymbol
 	property string agSymbol: plasmoid.configuration.agSymbol
@@ -75,7 +77,7 @@ PlasmoidItem {
 		width: parent.width
 		height: parent.height
 		anchors.fill: parent
-		mainText: "Finance Stats"
+		mainText: "Finance Stats " + version
 		active: true
 		interactive: true
 	}
@@ -182,10 +184,11 @@ PlasmoidItem {
 
 				// Build tooltip text
 				myTT_text += "<br><b>" + btcSymbol + "</b>: "  + (root.btcData[0]).toFixed(decPlacesTT) + "·" + curSymbol
-				myTT_text += " │ <b>" + satsSymbol + "</b>: " + root.btcfeeData[0] + "·" + satsSymbol + "/vKb"
+				myTT_text += " │ <b>" + btcfeeSymbol + "</b>: " + root.btcfeeData[0] + "·" + satsSymbol
 				myTT_text += "<br><b>" + auSymbol + "</b>: " + (root.metalsData[0]).toFixed(decPlacesTT) + "·" + curSymbol
 				myTT_text += " │ <b>" + agSymbol + "</b>: " + (root.metalsData[1]).toFixed(decPlacesTT) + "·" + curSymbol
-				myTT_text += " │ <b>" + ratioSymbol + "</b>: " + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlacesTT);
+				myTT_text += "<br><b>" + ratioSymbol + "BTC/Au</b>: " + (root.btcData[0]/root.metalsData[0]).toFixed(decPlacesTT);
+				myTT_text += " │ <b>" + ratioSymbol + "Au/Ag</b>: " + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlacesTT);
 				if (showStacks) {
 					console.log("finstats::*::tooltip-before-stacks:", myTT_text)
 					myTT_text += "<br><b>" + stackSymbol + "" + auSymbol + "</b>: " + (auNet).toFixed(decPlacesTT) + "·" + curSymbol

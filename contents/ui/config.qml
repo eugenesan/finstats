@@ -13,10 +13,12 @@ Item {
 
 	signal configurationChanged
 
+	property alias cfg_version: version.text
 	property alias cfg_showStacks: showStacks.checked
 	property alias cfg_stackSymbol: stackSymbol.text
 	property alias cfg_curSymbol: curSymbol.text
 	property alias cfg_btcSymbol: btcSymbol.text
+	property alias cfg_btcfeeSymbol: btcfeeSymbol.text
 	property alias cfg_satsSymbol: satsSymbol.text
 	property alias cfg_auSymbol: auSymbol.text
 	property alias cfg_agSymbol: agSymbol.text
@@ -256,6 +258,20 @@ Item {
 					ToolTip.text: i18n("Which symbol to use to indicate BTC")
 				}
 
+				// fee BTC symbol
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("BTC fee symbol:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: btcfeeSymbol
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which symbol to use to indicate BTC fee")
+				}
+
 				// Sats symbol
 				Label {
 					Layout.minimumWidth: root.width / 3
@@ -419,7 +435,7 @@ Item {
 				}
 
 				Label {
-					text: i18n("v0.3 (2025-10-13)")
+					id: version
 				}
 
 			}  // Closing GridLayout
