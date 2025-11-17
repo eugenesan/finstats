@@ -145,7 +145,7 @@ PlasmoidItem {
 	// Wait for data to be fetched and build applet/tooltip text
 	Timer {
 		id: datareadyWait
-		interval: 1000
+		interval: 6000
 		running: true
 		repeat: true
 
@@ -162,7 +162,7 @@ PlasmoidItem {
 				 (root.btcData[0]>0) && (root.btcfeeData[0]>0) && (root.metalsData[0]>0) && (root.metalsData[1]>0)
 			   ) {
 				// Once all data fetched, build label
-				console.log("finstats::dataready::status:building-label", dataReadyAttemp, root.metalsReady, root.btcReady, root.btcfeeReady, root.btcData[0], root.btcfeeData[0], root.metalsData[0], root.metalsData[1])
+				console.log("finstats::dataready::status:building-label", dataReadyAttemp, datareadyWait.running, root.metalsReady, root.btcReady, root.btcfeeReady, root.btcData[0], root.btcfeeData[0], root.metalsData[0], root.metalsData[1])
 
 				// Disable timer to avoid duplicate calls
 				datareadyWait.running = false
@@ -203,7 +203,7 @@ PlasmoidItem {
 			} else {
 				// Not all data is ready, invalid results or duplicate call
 				dataReadyAttemp++
-				console.log("finstats::dataready::status:skipping-build", dataReadyAttemp, root.metalsReady, root.btcReady, root.btcfeeReady, root.btcData[0], root.btcfeeData[0], root.metalsData[0], root.metalsData[1])
+				console.log("finstats::dataready::status:skipping-build", dataReadyAttemp, datareadyWait.running, root.metalsReady, root.btcReady, root.btcfeeReady, root.btcData[0], root.btcfeeData[0], root.metalsData[0], root.metalsData[1])
 			}
 
 			// Retry 10 time and if still failed, set refresh timer to 5 minutes
@@ -212,7 +212,7 @@ PlasmoidItem {
 				refreshTimer.interval = 5 * 60 * 1000
 				myTT_text += "<br>Failed to fetch, will retry in 5 minutes"
 				toolTip.subText = myTT_text
-				console.log("finstats::dataready::lastattemp")
+				console.log("finstats::dataready::lastattemp", refreshTimer.interval)
 			}
 		}
 	}
