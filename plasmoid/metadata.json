@@ -3,14 +3,17 @@
 	"KPlugin": {
 		"Authors": [
 		{
-			"Name": "Eugene San"
+			"Name": "Eugene San (eugenesan)",
+			"Email": "eugenesan@gmail.com"
 		}
 		],
 		"Category": "Utilities",
-		"Description": "A widget that displays JSON data from a URL.",
+		"Description": "Plasma widget that displays Financial Stats",
 		"Id": "com.github.eugenesan.finstats",
 		"License": "GPL",
-		"Name": "Finance Stats",
+		"Name": "Financial Stats",
+		"Version": "0.6",
+		"Website": "https://github.com/eugenesan/finstats",
 		"Icon": "bitcoin128",
 		"EnabledByDefault": false
 	},

@@ -13,7 +13,6 @@ Item {
 
 	signal configurationChanged
 
-	property alias cfg_version: version.text
 	property alias cfg_showStacks: showStacks.checked
 	property alias cfg_stackSymbol: stackSymbol.text
 	property alias cfg_curSymbol: curSymbol.text
@@ -50,7 +49,7 @@ Item {
 
 				// BTC sources
 				Label {
-					text: i18n("Load BTC presets:")
+					text: i18n("Load BTC preset:")
 				}
 				ComboBox {
 					id: loadPresetCombo
@@ -425,19 +424,8 @@ Item {
 					stepSize: 1
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Minutes to refresh the coin value. Valid range: 1–60.")
+					ToolTip.text: i18n("Minutes to refresh the values. Valid range: 1–60.")
 				}
-
-				// Applet version
-				Label {
-					text: i18n("Financial Stats Applet")
-					horizontalAlignment: Label.AlignLeft
-				}
-
-				Label {
-					id: version
-				}
-
 			}  // Closing GridLayout
 		}      // Closing ColumnLayout
 	}          // Closing ScrollView

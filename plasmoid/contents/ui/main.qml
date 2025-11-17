@@ -1,24 +1,7 @@
 /*
 * SPDX-FileCopyrightText: Copyright 2025 Eugene San (eugenesan)
 * SPDX-License-Identifier: GPL-3.0-or-later
-* SPDX-SnippetComment: Finance Stats Applet for Plasma 6
-* Debug:
-*   systemctl --user restart plasma-plasmashell
-*   plasmoidviewer --applet com.github.eugenesan.finstats
-*   plasmawindowed com.github.eugenesan.finstats
-*   plasmapkg2 -i .
-*
-* https://develop.kde.org/docs/plasma/widget/properties/
-* https://develop.kde.org/docs/features/configuration/porting_kf6/
-* https://develop.kde.org/docs/plasma/widget/testing/
-*
-* TODO: * Fix config page:
-*         - Split config page (too long?)
-*         - Symbols: Strings -> Symbols?
-*         - Fix tooltips
-*         - Implement alt symbols
-*       * Try to align columns in tooltip?
-*       * Figure out why it complains about "Setting initial properties failed" on config page
+* SPDX-SnippetComment: Financial Stats Widget for Plasma 6
 */
 
 import QtQuick
@@ -77,7 +60,7 @@ PlasmoidItem {
 		width: parent.width
 		height: parent.height
 		anchors.fill: parent
-		mainText: "Finance Stats " + version
+		mainText: "Financial Stats"
 		active: true
 		interactive: true
 	}
@@ -154,7 +137,7 @@ PlasmoidItem {
 			var today = new Date();
 			// Format the date and time for display
 			var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm");
-			var myTT_text = "<b>Date</b>: " + formattedDateTime;
+			var myTT_text = "<b>Timestamp</b>: " + formattedDateTime;
 
 			// Check if all the results marked as fetched and dataready timer still enabled
 			if ( (datareadyWait.running == true) && (root.metalsReady == root.btcReady == root.btcfeeReady == true) &&
