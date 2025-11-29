@@ -30,6 +30,8 @@ Item {
 	property alias cfg_decPlaces: decPlaces.value
 	property alias cfg_decPlacesTT: decPlacesTT.value
 	property alias cfg_timeRefresh: timeRefresh.value
+	property alias cfg_timeRetry: timeRetry.value
+	property alias cfg_timeRefetch: timeRefetch.value
 	property alias cfg_btcUrl: btcUrl.text
 	property alias cfg_btcKey: btcKey.text
 	property alias cfg_btcfeeUrl: btcfeeUrl.text
@@ -425,6 +427,38 @@ Item {
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Minutes to refresh the values. Valid range: 1–60.")
+				}
+
+				// Retry parse timer
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Retry parse timer (seconds):")
+					horizontalAlignment: Label.AlignLeft
+				}
+				SpinBox {
+					id: timeRetry
+					from: 1
+					to: 60
+					stepSize: 1
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Seconds to retry parsing the values. Valid range: 1–60.")
+				}
+
+				// Retry fetch timer
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Retry fetch timer (minutes):")
+					horizontalAlignment: Label.AlignLeft
+				}
+				SpinBox {
+					id: timeRefetch
+					from: 1
+					to: 60
+					stepSize: 1
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Minutes to retry fetching the values. Valid range: 1–60.")
 				}
 			}  // Closing GridLayout
 		}      // Closing ColumnLayout

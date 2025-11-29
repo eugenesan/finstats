@@ -57,6 +57,12 @@
 		<entry name="timeRefresh" type="Int">
 			<default>30</default>
 		</entry>
+		<entry name="timeRetry" type="Int">
+			<default>3</default>
+		</entry>
+		<entry name="timeRefetch" type="Int">
+			<default>5</default>
+		</entry>
 		<entry name="btcUrl" type="String">
 			<default>https://www.bitstamp.net/api/ticker/</default>
 		</entry>

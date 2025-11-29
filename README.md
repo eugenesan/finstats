@@ -12,42 +12,52 @@ URLs and stack values are configurable.
 
 The widget is intented to provide quick glance values (panel widget) and detailed stats (using hover-on pop-up text) of major Financial Items like Bitcoin, Gold and Silver.
 
-## Installing
+## Installing/Updating
 
-1. Bash script
-    - Update: `wget https://github.com/eugenesan/finstats/releases/latest/download/finstats.plasmoid -O ${TMPDIR:-/tmp}/finstats.plasmoid && kpackagetool6 -t Plasma/Applet -u ${TMPDIR:-/tmp}/finstat.plasmoid && systemctl --user restart plasma-plasmashell.service`
+From shell:
+* Update
+```
+wget https://github.com/eugenesan/finstats/releases/latest/download/finstats.plasmoid -O ${TMPDIR:-/tmp}/finstats.plasmoid && kpackagetool6 -t Plasma/Applet -u ${TMPDIR:-/tmp}/finstat.plasmoid && systemctl --user restart plasma-plasmashell.service
+```
 
-    - Install `wget https://github.com/eugenesan/finstats/releases/latest/download/finstats.plasmoid -O ${TMPDIR:-/tmp}/finstats.plasmoid && kpackagetool6 -t Plasma/Applet -i ${TMPDIR:-/tmp}/finstat.plasmoid && systemctl --user restart plasma-plasmashell.service`
+* Install
+```
+wget https://github.com/eugenesan/finstats/releases/latest/download/finstats.plasmoid -O ${TMPDIR:-/tmp}/finstats.plasmoid && kpackagetool6 -t Plasma/Applet -i ${TMPDIR:-/tmp}/finstat.plasmoid && systemctl --user restart plasma-plasmashell.service
+```
 
-2. Manual with Plasma UI
-    - Install via "Add Widgets..." -> "Get New Widgets..." -> "Download..."
-    - Install from [KDE Store](https://store.kde.org/p/xxxxxx)
-    - Download Latest \*.plasmoid from [Releases page](https://github.com/eugenesan/finstats/releases) and install it via "Add Widgets..." -> "Get New Widgets..." -> "Install Widget From Local file"
+Manual with Plasma UI:
+* Install via "Add Widgets..." -> "Get New Widgets..." -> "Download..."
+* Install from [KDE Store](https://store.kde.org/p/xxxxxx)
+* Download Latest \*.plasmoid from [Releases page](https://github.com/eugenesan/finstats/releases) and install it via "Add Widgets..." -> "Get New Widgets..." -> "Install Widget From Local file"
 
-## 🆘 In cases of panel freezes or crashes 🆘
+## In cases of panel freezes or crashes 🆘
 
 There is a chance that the widget will be incompatible with your OS distribution. In such cases you can use the following script to downgrade the panel version:
-`
+```
 wget https://github.com/eugenesan/finstats/releases/download/v0.6.8/finstat.plasmoid -O ${TMPDIR:-/tmp}/finstat.plasmoid && kpackagetool6 -t Plasma/Applet -u ${TMPDIR:-/tmp}/finstat.plasmoid && systemctl --user restart plasma-plasmashell.service
-`
+```
 
 Or you can remove the widget:
-`
+```
 kpackagetool6 --type Plasma/Applet --remove com.github.eugenesan.finstat
-`
+```
 
 Please, don't forget to fill the report about the issues.
 
 ## Debugging:
+
+Links:
 * https://develop.kde.org/docs/plasma/widget/properties/
 * https://develop.kde.org/docs/features/configuration/porting_kf6/
 * https://develop.kde.org/docs/plasma/widget/testing/
-`
+
+Useful shell commands:
+```
 $ systemctl --user restart plasma-plasmashell
 $ plasmoidviewer --applet com.github.eugenesan.finstats
 $ plasmawindowed com.github.eugenesan.finstats
 $ plasmapkg2 -i .
-`
+```
 
 ## License
 

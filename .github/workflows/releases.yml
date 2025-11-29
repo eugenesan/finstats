@@ -1,9 +1,10 @@
 name: Releases
 
-on: 
+on:
   push:
     tags:
     - 'v*'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,11 +16,11 @@ jobs:
       uses: thedoctor0/zip-release@0.7.5
       with:
         type: 'zip'
-        filename: 'finstat.plasmoid'
+        filename: 'finstats.plasmoid'
         directory: 'plasmoid'
     - name: Upload Release
       uses: ncipollo/release-action@v1.12.0
       with:
-        artifacts: "package/finstats.plasmoid"
+        artifacts: "plasmoid/finstats.plasmoid"
         token: ${{ secrets.GITHUB_TOKEN }}
         generateReleaseNotes: true

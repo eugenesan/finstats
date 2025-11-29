@@ -45,6 +45,8 @@ PlasmoidItem {
 	property int decPlaces: plasmoid.configuration.decPlaces
 	property int decPlacesTT: plasmoid.configuration.decPlacesTT
 	property int timeRefresh: plasmoid.configuration.timeRefresh
+	property int timeRetry: plasmoid.configuration.timeRetry
+	property int timeRefetch: plasmoid.configuration.timeRefetch
 
 	// Fetch paramaters from config
 	property string btcUrl: plasmoid.configuration.btcUrl
@@ -72,7 +74,7 @@ PlasmoidItem {
 		// Refresh the label and reset time on mouse click
 		onClicked: (mouse) => {
 			console.log("finstats::*::clicked-fetch-data");
-			// Restore configured refresh interval and attempt acounter in case it was shortened by datareadyWait
+			// Restore configured refresh interval and attempt counter in case they were affected by datareadyWait
 			refreshTimer.interval = timeRefresh * 60 * 1000
 			dataReadyAttemp = 0
 			fetchData()
@@ -128,7 +130,7 @@ PlasmoidItem {
 	// Wait for data to be fetched and build applet/tooltip text
 	Timer {
 		id: datareadyWait
-		interval: 6000
+		interval: timeRetry * 1000
 		running: true
 		repeat: true
 
@@ -192,7 +194,7 @@ PlasmoidItem {
 			// Retry 10 time and if still failed, set refresh timer to 5 minutes
 			if (dataReadyAttemp > 10) {
 				running = false
-				refreshTimer.interval = 5 * 60 * 1000
+				refreshTimer.interval = timeRefetch * 60 * 1000
 				myTT_text += "<br>Failed to fetch, will retry in 5 minutes"
 				toolTip.subText = myTT_text
 				console.log("finstats::dataready::lastattemp", refreshTimer.interval)
@@ -308,17 +310,17 @@ PlasmoidItem {
 		// Reset results readiness and que fetch requests
 		metalsReady = false
 		mxhr.open("GET", metalsUrl, true)
-		mxhr.timeout = 3000;
+		mxhr.timeout = timeRetry * 1000;
 		mxhr.send()
 
 		btcReady = false
 		bxhr.open("GET", btcUrl, true)
-		bxhr.timeout = 3000;
+		bxhr.timeout = timeRetry * 1000;
 		bxhr.send()
 
 		btcfeeReady = false
 		fxhr.open("GET", btcfeeUrl, true)
-		fxhr.timeout = 3000;
+		fxhr.timeout = timeRetry * 1000;
 		fxhr.send()
 	}
 }
