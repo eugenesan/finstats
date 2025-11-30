@@ -142,38 +142,39 @@ PlasmoidItem {
 			var myTT_text = "<b>Timestamp</b>: " + formattedDateTime;
 
 			// Check if all the results marked as fetched and dataready timer still enabled
-			if ( (datareadyWait.running == true) && (root.metalsReady == root.btcReady == root.btcfeeReady == true) &&
+			if ( (datareadyWait.running == true) && (metalsReady == btcReady == btcfeeReady == true) &&
 				 // Make sure none of the results are zero
-				 (root.btcData[0]>0) && (root.btcfeeData[0]>0) && (root.metalsData[0]>0) && (root.metalsData[1]>0)
+				 (btcData[0]>0) && (btcfeeData[0]>0) && (metalsData[0]>0) && (metalsData[1]>0)
 			   ) {
 				// Once all data fetched, build label
-				console.log("finstats::dataready::status:building-label", dataReadyAttemp, datareadyWait.running, root.metalsReady, root.btcReady, root.btcfeeReady, root.btcData[0], root.btcfeeData[0], root.metalsData[0], root.metalsData[1])
+				console.log("finstats::dataready::status:building-label", dataReadyAttemp, datareadyWait.running, metalsReady, btcReady, btcfeeReady, btcData[0], btcfeeData[0], metalsData[0], metalsData[1])
 
 				// Disable timer to avoid duplicate calls
 				datareadyWait.running = false
 
 				// Calculate stacks
 				if (showStacks) {
-					var btcNet = ((root.btcData[0] * (btcStack - (btcStack * (capGain/100)))) + (btcCost * (btcStack * (capGain/100))))
-					var auNet = (root.metalsData[0] * auStack)
-					var agNet = (root.metalsData[1] * agStack)
+					var btcTax = (((btcData[0] * btcStack) - (btcCost * btcStack)) / 100 * capGain)
+					var btcNet = ((btcData[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax))
+					var auNet = (metalsData[0] * auStack)
+					var agNet = (metalsData[1] * agStack)
 				}
 
 				// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛·∣│◕)
-				myLabel.text  = (root.btcData[0]/1000).toFixed(decPlaces) // + "k"
-				//myLabel.text += " │ " + root.btcfeeData[0] // + "·" + satsSymbol + "/vKb"
-				myLabel.text += " │ " + (root.metalsData[0]/1000).toFixed(decPlaces) // + "·" + auSymbol
-				//myLabel.text += " │ " + (root.metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
-				//myLabel.text += " │ " + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlaces)
+				myLabel.text  = (btcData[0]/1000).toFixed(decPlaces) // + "k"
+				//myLabel.text += " │ " + btcfeeData[0] // + "·" + satsSymbol + "/vKb"
+				myLabel.text += " │ " + (metalsData[0]/1000).toFixed(decPlaces) // + "·" + auSymbol
+				//myLabel.text += " │ " + (metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
+				//myLabel.text += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
 				console.log("finstats::*::label-ready:", myLabel.text)
 
 				// Build tooltip text
-				myTT_text += "<br><b>" + btcSymbol + "</b>: "  + (root.btcData[0]).toFixed(decPlacesTT) + "·" + curSymbol
-				myTT_text += " │ <b>" + btcfeeSymbol + "</b>: " + root.btcfeeData[0] + "·" + satsSymbol
-				myTT_text += "<br><b>" + auSymbol + "</b>: " + (root.metalsData[0]).toFixed(decPlacesTT) + "·" + curSymbol
-				myTT_text += " │ <b>" + agSymbol + "</b>: " + (root.metalsData[1]).toFixed(decPlacesTT) + "·" + curSymbol
-				myTT_text += "<br><b>" + ratioSymbol + "BTC/Au</b>: " + (root.btcData[0]/root.metalsData[0]).toFixed(decPlacesTT);
-				myTT_text += " │ <b>" + ratioSymbol + "Au/Ag</b>: " + (root.metalsData[0]/root.metalsData[1]).toFixed(decPlacesTT);
+				myTT_text += "<br><b>" + btcSymbol + "</b>: "  + (btcData[0]).toFixed(decPlacesTT) + "·" + curSymbol
+				myTT_text += " │ <b>" + btcfeeSymbol + "</b>: " + btcfeeData[0] + "·" + satsSymbol
+				myTT_text += "<br><b>" + auSymbol + "</b>: " + (metalsData[0]).toFixed(decPlacesTT) + "·" + curSymbol
+				myTT_text += " │ <b>" + agSymbol + "</b>: " + (metalsData[1]).toFixed(decPlacesTT) + "·" + curSymbol
+				myTT_text += "<br><b>" + ratioSymbol + "BTC/Au</b>: " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT);
+				myTT_text += " │ <b>" + ratioSymbol + "Au/Ag</b>: " + (metalsData[0]/metalsData[1]).toFixed(decPlacesTT);
 				if (showStacks) {
 					console.log("finstats::*::tooltip-before-stacks:", myTT_text)
 					myTT_text += "<br><b>" + stackSymbol + "" + auSymbol + "</b>: " + (auNet).toFixed(decPlacesTT) + "·" + curSymbol
@@ -188,7 +189,7 @@ PlasmoidItem {
 			} else {
 				// Not all data is ready, invalid results or duplicate call
 				dataReadyAttemp++
-				console.log("finstats::dataready::status:skipping-build", dataReadyAttemp, datareadyWait.running, root.metalsReady, root.btcReady, root.btcfeeReady, root.btcData[0], root.btcfeeData[0], root.metalsData[0], root.metalsData[1])
+				console.log("finstats::dataready::status:skipping-build", dataReadyAttemp, datareadyWait.running, metalsReady, btcReady, btcfeeReady, btcData[0], btcfeeData[0], metalsData[0], metalsData[1])
 			}
 
 			// Retry 10 time and if still failed, set refresh timer to 5 minutes
@@ -226,7 +227,7 @@ PlasmoidItem {
 							console.log("finstats::Metals::PostParsing:", y, data)
 							data = parseFloat(data)
 							// Save filtered value
-							root.metalsData[y] = data
+							metalsData[y] = data
 						}
 					} catch (e) {
 						console.log("finstats::Metals::JSON parsing error:", e)
@@ -236,7 +237,7 @@ PlasmoidItem {
 				}
 
 				// Signal data is ready
-				root.metalsReady = true
+				metalsReady = true
 				console.log("finstats::Metals::PostFetch:Ready")
 			}
 		}
@@ -259,7 +260,7 @@ PlasmoidItem {
 							console.log("finstats::BTC::PostParsing:", y, data)
 							data = parseFloat(data)
 							// Save filtered value
-							root.btcData[y] = data
+							btcData[y] = data
 						}
 					} catch (e) {
 						console.log("finstats::BTC::JSON parsing error:", e)
@@ -269,7 +270,7 @@ PlasmoidItem {
 				}
 
 				// Signal data is ready
-				root.btcReady = true
+				btcReady = true
 				console.log("finstats::BTC::PostFetch:Ready")
 			}
 		}
@@ -292,7 +293,7 @@ PlasmoidItem {
 							console.log("finstats::BTCFee::PostParsing:", y, data)
 							data = parseInt(data)
 							// Save filtered value
-							root.btcfeeData[y] = data
+							btcfeeData[y] = data
 						}
 					} catch (e) {
 						console.log("finstats::BTCFee::JSON parsing error:", e)
@@ -302,7 +303,7 @@ PlasmoidItem {
 				}
 
 				// Signal data is ready
-				root.btcfeeReady = true
+				btcfeeReady = true
 				console.log("finstats::BTCFee::PostFetch:Ready")
 			}
 		}
