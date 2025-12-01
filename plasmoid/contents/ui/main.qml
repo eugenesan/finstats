@@ -23,8 +23,8 @@ PlasmoidItem {
 
 	// Stores fetched data
 	property variant metalsData: [0.0,0.0]
-	property variant btcData: [0]
-	property variant btcfeeData: [0]
+	property variant btcData: [0.0]
+	property variant btcfeeData: [0.0]
 
 	// Global vars from config
 	property string version: plasmoid.configuration.version
@@ -219,7 +219,7 @@ PlasmoidItem {
 						for (var y = 0; y < metalsPaths.length; y++) {
 							var data = JSON.parse(mxhr.responseText)
 							var keys = metalsPaths[y].split(".");
-							console.log("finstats::Metals::PreParsing:", data,y, keys)
+							console.log("finstats::Metals::PreParsing:", data, y, keys)
 							for (var x = 0; x < keys.length; x++) {
 								console.log("finstats::Metals::Parsing:", x, metalsPaths[y], keys[x])
 								data = data[keys[x]];
@@ -291,7 +291,7 @@ PlasmoidItem {
 								data = data[keys[x]];
 							}
 							console.log("finstats::BTCFee::PostParsing:", y, data)
-							data = parseInt(data)
+							data = parseFloat(data)
 							// Save filtered value
 							btcfeeData[y] = data
 						}
