@@ -62,6 +62,7 @@ $ systemctl --user restart plasma-plasmashell
 $ plasmoidviewer --applet com.github.eugenesan.finstats
 $ plasmawindowed com.github.eugenesan.finstats
 $ plasmapkg2 -i .
+$ export QML_XHR_DUMP=1
 ```
 
 ## License

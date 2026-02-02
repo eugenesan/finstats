@@ -22,12 +22,11 @@ PlasmoidItem {
 	property int dataReadyAttemp: 0
 
 	// Stores fetched data
-	property variant metalsData: [0.0,0.0]
-	property variant btcData: [0.0]
-	property variant btcfeeData: [0.0]
+	property variant metalsData: [-0.1,-0.1]
+	property variant btcData: [-0.1]
+	property variant btcfeeData: [-0.1]
 
 	// Global vars from config
-	property string version: plasmoid.configuration.version
 	property bool showStacks: plasmoid.configuration.showStacks
 	property string stackSymbol: plasmoid.configuration.stackSymbol
 	property string curSymbol: plasmoid.configuration.curSymbol
@@ -135,12 +134,6 @@ PlasmoidItem {
 		repeat: true
 
 		onTriggered: {
-			// Get the current date and time
-			var today = new Date();
-			// Format the date and time for display
-			var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm");
-			var myTT_text = "<b>Timestamp</b>: " + formattedDateTime;
-
 			// Check if all the results marked as fetched and dataready timer still enabled
 			if ( (datareadyWait.running == true) && (metalsReady == btcReady == btcfeeReady == true) &&
 				 // Make sure none of the results are zero
@@ -152,55 +145,73 @@ PlasmoidItem {
 				// Disable timer to avoid duplicate calls
 				datareadyWait.running = false
 
-				// Calculate stacks
-				if (showStacks) {
-					var btcTax = (((btcData[0] * btcStack) - (btcCost * btcStack)) / 100 * capGain)
-					var btcNet = ((btcData[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax))
-					var auNet = (metalsData[0] * auStack)
-					var agNet = (metalsData[1] * agStack)
-				}
-
-				// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛·∣│◕)
-				myLabel.text  = (btcData[0]/1000).toFixed(decPlaces) // + "k"
-				//myLabel.text += " │ " + btcfeeData[0] // + "·" + satsSymbol + "/vKb"
-				myLabel.text += " │ " + (metalsData[0]/1000).toFixed(decPlaces) // + "·" + auSymbol
-				//myLabel.text += " │ " + (metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
-				//myLabel.text += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
-				console.log("finstats::*::label-ready:", myLabel.text)
-
-				// Build tooltip text
-				myTT_text += "<br><b>" + btcSymbol + "</b>: "  + (btcData[0]).toFixed(decPlacesTT) + "·" + curSymbol
-				myTT_text += " │ <b>" + btcfeeSymbol + "</b>: " + btcfeeData[0] + "·" + satsSymbol
-				myTT_text += "<br><b>" + auSymbol + "</b>: " + (metalsData[0]).toFixed(decPlacesTT) + "·" + curSymbol
-				myTT_text += " │ <b>" + agSymbol + "</b>: " + (metalsData[1]).toFixed(decPlacesTT) + "·" + curSymbol
-				myTT_text += "<br><b>" + ratioSymbol + "BTC/Au</b>: " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT);
-				myTT_text += " │ <b>" + ratioSymbol + "Au/Ag</b>: " + (metalsData[0]/metalsData[1]).toFixed(decPlacesTT);
-				if (showStacks) {
-					console.log("finstats::*::tooltip-before-stacks:", myTT_text)
-					myTT_text += "<br><b>" + stackSymbol + "" + auSymbol + "</b>: " + (auNet).toFixed(decPlacesTT) + "·" + curSymbol
-					myTT_text += " │ <b>" + stackSymbol + agSymbol + "</b>: " + (agNet).toFixed(decPlacesTT) + "·" + curSymbol
-					myTT_text += "<br><b>" + stackSymbol + btcSymbol + "</b>: " + (btcNet).toFixed(decPlacesTT) + "·" + curSymbol
-					myTT_text += " │ <b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + "·" + curSymbol
-					//console.log("finstats::*::tooltip-with-stacks:", myTT_text)
-				} else {
-					console.log("finstats::*::tooltip-without-stacks:", myTT_text)
-				}
-				toolTip.subText = myTT_text
+				// Call full build
+				buildData(true)
 			} else {
 				// Not all data is ready, invalid results or duplicate call
 				dataReadyAttemp++
 				console.log("finstats::dataready::status:skipping-build", dataReadyAttemp, datareadyWait.running, metalsReady, btcReady, btcfeeReady, btcData[0], btcfeeData[0], metalsData[0], metalsData[1])
 			}
 
-			// Retry 10 time and if still failed, set refresh timer to 5 minutes
-			if (dataReadyAttemp > 10) {
+			// Retry 3 times and if still failed, set refresh timer as configured
+			if (dataReadyAttemp > 3) {
 				running = false
+				// Call partial build
+				buildData(false)
 				refreshTimer.interval = timeRefetch * 60 * 1000
-				myTT_text += "<br>Failed to fetch, will retry in 5 minutes"
-				toolTip.subText = myTT_text
-				console.log("finstats::dataready::lastattemp", refreshTimer.interval)
+				console.log("finstats::dataready::lastattemp", timeRetry, refreshTimer.interval)
 			}
 		}
+	}
+
+	function buildData(isFull) {
+		console.log("finstats::*::buildData:", isFull)
+
+		// Get the current date and time
+		var today = new Date();
+		// Format the date and time for display
+		var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm");
+		var myTT_text = "<b>⏱: </b>" + formattedDateTime;
+
+		// Indicate incomplete data fetch
+		if (!isFull) {
+			myTT_text += " ⚠️"
+		}
+
+		// Calculate stacks
+		if (showStacks) {
+			var btcTax = (((btcData[0] * btcStack) - (btcCost * btcStack)) / 100 * capGain)
+			var btcNet = ((btcData[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax))
+			var auNet = (metalsData[0] * auStack)
+			var agNet = (metalsData[1] * agStack)
+		}
+
+		// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛·∣│◕)
+		myLabel.text  = (btcData[0]/1000).toFixed(decPlaces) // + "k"
+		//myLabel.text += " │ " + btcfeeData[0] // + "·" + satsSymbol + "/vKb"
+		myLabel.text += " │ " + (metalsData[0]/1000).toFixed(decPlaces) // + "·" + auSymbol
+		//myLabel.text += " │ " + (metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
+		//myLabel.text += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
+		console.log("finstats::*::label-ready:", myLabel.text)
+
+		// Build tooltip text
+		myTT_text += "<br><b>" + btcSymbol + "</b>: "  + (btcData[0]).toFixed(decPlacesTT) + "·" + curSymbol
+		myTT_text += " │ <b>" + btcfeeSymbol + "</b>: " + btcfeeData[0] + "·" + satsSymbol
+		myTT_text += "<br><b>" + auSymbol + "</b>: " + (metalsData[0]).toFixed(decPlacesTT) + "·" + curSymbol
+		myTT_text += " │ <b>" + agSymbol + "</b>: " + (metalsData[1]).toFixed(decPlacesTT) + "·" + curSymbol
+		myTT_text += "<br><b>" + ratioSymbol + "BTC/Au</b>: " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT);
+		myTT_text += " │ <b>" + ratioSymbol + "Au/Ag</b>: " + (metalsData[0]/metalsData[1]).toFixed(decPlacesTT);
+		if (showStacks) {
+			console.log("finstats::*::tooltip-before-stacks:", myTT_text)
+			myTT_text += "<br><b>" + stackSymbol + "" + auSymbol + "</b>: " + (auNet).toFixed(decPlacesTT) + "·" + curSymbol
+			myTT_text += " │ <b>" + stackSymbol + agSymbol + "</b>: " + (agNet).toFixed(decPlacesTT) + "·" + curSymbol
+			myTT_text += "<br><b>" + stackSymbol + btcSymbol + "</b>: " + (btcNet).toFixed(decPlacesTT) + "·" + curSymbol
+			myTT_text += " │ <b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + "·" + curSymbol
+			//console.log("finstats::*::tooltip-with-stacks:", myTT_text)
+		} else {
+			console.log("finstats::*::tooltip-without-stacks:", myTT_text)
+		}
+		toolTip.subText = myTT_text
 	}
 
 	// Initiate fetch requests
@@ -239,6 +250,8 @@ PlasmoidItem {
 				// Signal data is ready
 				metalsReady = true
 				console.log("finstats::Metals::PostFetch:Ready")
+			} else {
+				console.log("finstats::Metals::readyStatus:", mxhr.readyState)
 			}
 		}
 
@@ -272,6 +285,8 @@ PlasmoidItem {
 				// Signal data is ready
 				btcReady = true
 				console.log("finstats::BTC::PostFetch:Ready")
+			} else {
+				console.log("finstats::BTC::readyStatus:", bxhr.readyState)
 			}
 		}
 
@@ -305,22 +320,27 @@ PlasmoidItem {
 				// Signal data is ready
 				btcfeeReady = true
 				console.log("finstats::BTCFee::PostFetch:Ready")
+			} else {
+				console.log("finstats::BTCFee::readyStatus:", fxhr.readyState)
 			}
 		}
 
 		// Reset results readiness and que fetch requests
 		metalsReady = false
 		mxhr.open("GET", metalsUrl, true)
+		mxhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0');
 		mxhr.timeout = timeRetry * 1000;
 		mxhr.send()
 
 		btcReady = false
 		bxhr.open("GET", btcUrl, true)
+		bxhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0');
 		bxhr.timeout = timeRetry * 1000;
 		bxhr.send()
 
 		btcfeeReady = false
 		fxhr.open("GET", btcfeeUrl, true)
+		fxhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0');
 		fxhr.timeout = timeRetry * 1000;
 		fxhr.send()
 	}

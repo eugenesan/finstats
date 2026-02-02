@@ -58,7 +58,7 @@
 			<default>30</default>
 		</entry>
 		<entry name="timeRetry" type="Int">
-			<default>3</default>
+			<default>5</default>
 		</entry>
 		<entry name="timeRefetch" type="Int">
 			<default>5</default>
