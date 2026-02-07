@@ -14,6 +14,8 @@ Item {
 	signal configurationChanged
 
 	property alias cfg_showStacks: showStacks.checked
+	property alias cfg_showMetals: showMetals.checked
+	property alias cfg_showBTCFee: showBTCFee.checked
 	property alias cfg_stackSymbol: stackSymbol.text
 	property alias cfg_curSymbol: curSymbol.text
 	property alias cfg_btcSymbol: btcSymbol.text
@@ -29,6 +31,7 @@ Item {
 	property alias cfg_capGain: capGain.value
 	property alias cfg_decPlaces: decPlaces.value
 	property alias cfg_decPlacesTT: decPlacesTT.value
+	property alias cfg_priceDivider: priceDivider.value
 	property alias cfg_timeRefresh: timeRefresh.value
 	property alias cfg_timeRetry: timeRetry.value
 	property alias cfg_timeRefetch: timeRefetch.value
@@ -99,6 +102,9 @@ Item {
 						cfg_btcUrl = model[currentIndex].url
 						cfg_btcKey = model[currentIndex].key
 					}
+
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Load preset for fetching Bitcoin price")
 				}
 
 				// BTC URL
@@ -131,6 +137,19 @@ Item {
 					ToolTip.text: i18n("Which JSON key to extract for BTC value")
 				}
 
+				// Show btcfee
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Show BTC Fee:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				CheckBox {
+					id: showBTCFee
+					onCheckedChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Wether to display BTC Fee in the applet and ToolTip.")
+				}
+
 				// BTC fee URL
 				Label {
 					Layout.minimumWidth: root.width / 3
@@ -161,6 +180,19 @@ Item {
 					ToolTip.text: i18n("Which JSON key to extract for BTC fee value")
 				}
 
+				// Show metals
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Show Metals:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				CheckBox {
+					id: showMetals
+					onCheckedChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Wether to display metals in the applet and ToolTip.")
+				}
+
 				// Metals URL
 				Label {
 					Layout.minimumWidth: root.width / 3
@@ -176,10 +208,10 @@ Item {
 					ToolTip.text: i18n("Which URL to Metals from")
 				}
 
-				// Au Key
+				// Metals Au Key
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Au JSON key:")
+					text: i18n("Metals Au JSON key:")
 					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
@@ -191,10 +223,10 @@ Item {
 					ToolTip.text: i18n("Which JSON key to extract for Au value")
 				}
 
-				// Ag Key
+				// Metals Ag Key
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Ag JSON key:")
+					text: i18n("Metals Ag JSON key:")
 					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
@@ -204,17 +236,6 @@ Item {
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which JSON key to extract for Ag value")
-				}
-
-				// Show stacks
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Show Stacks:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				CheckBox {
-					id: showStacks
-					text: i18n("ShowStacks")
 				}
 
 				// Stack symbol
@@ -259,7 +280,7 @@ Item {
 					ToolTip.text: i18n("Which symbol to use to indicate BTC")
 				}
 
-				// fee BTC symbol
+				// BTC fee symbol
 				Label {
 					Layout.minimumWidth: root.width / 3
 					text: i18n("BTC fee symbol:")
@@ -287,10 +308,10 @@ Item {
 					ToolTip.text: i18n("Which symbol to use to indicate Satoshi")
 				}
 
-				// Au symbol
+				// Metals Au symbol
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Au symbol:")
+					text: i18n("Metals Au symbol:")
 					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
@@ -301,10 +322,10 @@ Item {
 					ToolTip.text: i18n("Which symbol to use to indicate Gold")
 				}
 
-				// Ag symbol
+				// Metals Ag symbol
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Ag symbol:")
+					text: i18n("Metals Ag symbol:")
 					horizontalAlignment: Label.AlignLeft
 				}
 				TextField {
@@ -329,6 +350,19 @@ Item {
 					ToolTip.text: i18n("Which symbol to use to indicate ratio")
 				}
 
+				// Show stacks
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Show Stacks:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				CheckBox {
+					id: showStacks
+					onCheckedChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Wether to display stacks summary in the ToolTip.")
+				}
+
 				// BTC size
 				Label {
 					Layout.minimumWidth: root.width / 3
@@ -336,33 +370,42 @@ Item {
 					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
-					from: 0
 					id: btcStack
+					from: 0
 					to: 999
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Count of Bitcoin in the stack. Valid range: 0–999.")
 				}
 
-				// Au size
+				// Metals Au size
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Au stack size:")
+					text: i18n("Metals Au stack size:")
 					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
-					from: 0
 					id: auStack
+					from: 0
 					to: 999
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Count of Silver in the stack. Valid range: 0–999.")
 				}
 
-				// Ag size
+				// Metals Ag size
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Ag stack size:")
+					text: i18n("Metals Ag stack size:")
 					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
-					from: 0
 					id: agStack
+					from: 0
 					to: 999
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Count of Silver in the stack. Valid range: 0–999.")
 				}
 
 				// BTC cost
@@ -372,21 +415,27 @@ Item {
 					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
-					from: 0
 					id: btcCost
+					from: 0
 					to: 999999
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Bitcoin cost basis. Valid range: 0–999999.")
 				}
 
-				// Cap gains
+				// Capital gains
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Capital gains tax:")
+					text: i18n("Capital gains tax (%):")
 					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
-					from: 0
 					id: capGain
+					from: 0
 					to: 99
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Capital gains tax ammount. Valid range: 0–99.")
 				}
 
 				// Decimal places
@@ -396,21 +445,42 @@ Item {
 					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
-					from: 0
 					id: decPlaces
+					from: 0
 					to: 9
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Decimal places for applet. Valid range: 0–9.")
 				}
 
-				// Decimal places ToolTip
+				// Decimal places tooltip
 				Label {
 					Layout.minimumWidth: root.width / 3
 					text: i18n("ToolTip decimal places:")
 					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
-					from: 0
 					id: decPlacesTT
+					from: 0
 					to: 9
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Decimal places for ToolTip. Valid range: 0–9.")
+				}
+
+				// Price divider
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Applet price divider:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				SpinBox {
+					id: priceDivider
+					from: 0
+					to: 999999
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Divider to apply to prices on appplet. Valid range: 0–999999.")
 				}
 
 				// Refresh timer

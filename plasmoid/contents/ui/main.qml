@@ -28,6 +28,8 @@ PlasmoidItem {
 
 	// Global vars from config
 	property bool showStacks: plasmoid.configuration.showStacks
+	property bool showMetals: plasmoid.configuration.showMetals
+	property bool showBTCFee: plasmoid.configuration.showBTCFee
 	property string stackSymbol: plasmoid.configuration.stackSymbol
 	property string curSymbol: plasmoid.configuration.curSymbol
 	property string btcSymbol: plasmoid.configuration.btcSymbol
@@ -43,6 +45,7 @@ PlasmoidItem {
 	property int capGain: plasmoid.configuration.capGain
 	property int decPlaces: plasmoid.configuration.decPlaces
 	property int decPlacesTT: plasmoid.configuration.decPlacesTT
+	property int priceDivider: plasmoid.configuration.priceDivider
 	property int timeRefresh: plasmoid.configuration.timeRefresh
 	property int timeRetry: plasmoid.configuration.timeRetry
 	property int timeRefetch: plasmoid.configuration.timeRefetch
@@ -64,6 +67,7 @@ PlasmoidItem {
 		mainText: "Financial Stats"
 		active: true
 		interactive: true
+		textFormat: Text.RichText
 	}
 
 	MouseArea {
@@ -72,14 +76,14 @@ PlasmoidItem {
 		acceptedButtons: Qt.LeftButton
 		// Refresh the label and reset time on mouse click
 		onClicked: (mouse) => {
-			console.log("finstats::*::clicked-fetch-data");
+			console.log("finstats::*::clicked-refresh-data");
 			// Restore configured refresh interval and attempt counter in case they were affected by datareadyWait
 			refreshTimer.interval = timeRefresh * 60 * 1000
 			dataReadyAttemp = 0
 			fetchData()
 			// Once fetch requests were sent, enable data ready timer
 			datareadyWait.running = true
-			console.log("finstats::*::clicked-timer-reset");
+			console.debug("finstats::*::clicked-timer-reset");
 			refreshTimer.restart()
 		}
 
@@ -102,7 +106,7 @@ PlasmoidItem {
 	}
 
 	Component.onCompleted: {
-		myLabel.text = "..... │ ..."
+		myLabel.text = "... │ ..."
 		fetchData()
 
 		// Resume monitoring data ready
@@ -137,7 +141,7 @@ PlasmoidItem {
 			// Check if all the results marked as fetched and dataready timer still enabled
 			if ( (datareadyWait.running == true) && (metalsReady == btcReady == btcfeeReady == true) &&
 				 // Make sure none of the results are zero
-				 (btcData[0]>0) && (btcfeeData[0]>0) && (metalsData[0]>0) && (metalsData[1]>0)
+				 (btcData[0]>=0) && (btcfeeData[0]>=0) && (metalsData[0]>=0) && (metalsData[1]>=0)
 			   ) {
 				// Once all data fetched, build label
 				console.log("finstats::dataready::status:building-label", dataReadyAttemp, datareadyWait.running, metalsReady, btcReady, btcfeeReady, btcData[0], btcfeeData[0], metalsData[0], metalsData[1])
@@ -168,50 +172,72 @@ PlasmoidItem {
 		console.log("finstats::*::buildData:", isFull)
 
 		// Get the current date and time
-		var today = new Date();
+		var today = new Date()
 		// Format the date and time for display
-		var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm");
-		var myTT_text = "<b>⏱: </b>" + formattedDateTime;
+		var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm")
+		var lineStr = "<b>⏱: </b>" + formattedDateTime
 
 		// Indicate incomplete data fetch
 		if (!isFull) {
-			myTT_text += " ⚠️"
+			lineStr += " ⚠️"
+		}
+		toolTip.subText = lineStr
+
+		// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛·∣│◕)
+		myLabel.text  = (btcData[0]/priceDivider).toFixed(decPlaces) // + "k"
+
+		if (showBTCFee) {
+			//myLabel.text += " │ " + btcfeeData[0] // + "·" + satsSymbol + "/vKb"
 		}
 
-		// Calculate stacks
+		if (showMetals) {
+			myLabel.text += " │ " + (metalsData[0]/priceDivider).toFixed(decPlaces) // + "·" + auSymbol
+			//myLabel.text += " │ " + (metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
+			//myLabel.text += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
+		}
+		console.log("finstats::*::applet-ready:", myLabel.text)
+
+		// Build tooltip text
+		lineStr = "<br><b>" + btcSymbol + "</b>: "  + (btcData[0]).toFixed(decPlacesTT) + '·' + curSymbol
+
+		if (showBTCFee) {
+			lineStr += " │ " + "<b>" + btcfeeSymbol + "</b>: " + btcfeeData[0] + '·' + satsSymbol
+		}
+		toolTip.subText += lineStr
+
+		if (showMetals) {
+			lineStr = "<br>" + "<b>" + auSymbol + "</b>: " + (metalsData[0]).toFixed(decPlacesTT) + '·' + curSymbol
+			lineStr += " │ " + "<b>" + agSymbol + "</b>: " + (metalsData[1]).toFixed(decPlacesTT) + '·' + curSymbol
+			toolTip.subText += lineStr
+
+			lineStr = "<br>" + "<b>" + ratioSymbol + "BTC/Au</b>: " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT)
+			lineStr += " │ " + "<b>" + ratioSymbol + "Au/Ag</b>: " + (metalsData[0]/metalsData[1]).toFixed(decPlacesTT)
+			toolTip.subText += lineStr
+		}
+
 		if (showStacks) {
+			// Calculate stacks
 			var btcTax = (((btcData[0] * btcStack) - (btcCost * btcStack)) / 100 * capGain)
 			var btcNet = ((btcData[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax))
 			var auNet = (metalsData[0] * auStack)
 			var agNet = (metalsData[1] * agStack)
-		}
 
-		// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛·∣│◕)
-		myLabel.text  = (btcData[0]/1000).toFixed(decPlaces) // + "k"
-		//myLabel.text += " │ " + btcfeeData[0] // + "·" + satsSymbol + "/vKb"
-		myLabel.text += " │ " + (metalsData[0]/1000).toFixed(decPlaces) // + "·" + auSymbol
-		//myLabel.text += " │ " + (metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
-		//myLabel.text += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
-		console.log("finstats::*::label-ready:", myLabel.text)
+			console.debug("finstats::*::tooltip-before-stacks:", toolTip.subText)
 
-		// Build tooltip text
-		myTT_text += "<br><b>" + btcSymbol + "</b>: "  + (btcData[0]).toFixed(decPlacesTT) + "·" + curSymbol
-		myTT_text += " │ <b>" + btcfeeSymbol + "</b>: " + btcfeeData[0] + "·" + satsSymbol
-		myTT_text += "<br><b>" + auSymbol + "</b>: " + (metalsData[0]).toFixed(decPlacesTT) + "·" + curSymbol
-		myTT_text += " │ <b>" + agSymbol + "</b>: " + (metalsData[1]).toFixed(decPlacesTT) + "·" + curSymbol
-		myTT_text += "<br><b>" + ratioSymbol + "BTC/Au</b>: " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT);
-		myTT_text += " │ <b>" + ratioSymbol + "Au/Ag</b>: " + (metalsData[0]/metalsData[1]).toFixed(decPlacesTT);
-		if (showStacks) {
-			console.log("finstats::*::tooltip-before-stacks:", myTT_text)
-			myTT_text += "<br><b>" + stackSymbol + "" + auSymbol + "</b>: " + (auNet).toFixed(decPlacesTT) + "·" + curSymbol
-			myTT_text += " │ <b>" + stackSymbol + agSymbol + "</b>: " + (agNet).toFixed(decPlacesTT) + "·" + curSymbol
-			myTT_text += "<br><b>" + stackSymbol + btcSymbol + "</b>: " + (btcNet).toFixed(decPlacesTT) + "·" + curSymbol
-			myTT_text += " │ <b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + "·" + curSymbol
-			//console.log("finstats::*::tooltip-with-stacks:", myTT_text)
+			if (showMetals) {
+				lineStr = "<br>" + "<b>" + stackSymbol + "" + auSymbol + "</b>: " + (auNet).toFixed(decPlacesTT) + '·' + curSymbol
+				lineStr += " │ " + "<b>" + stackSymbol + agSymbol + "</b>: " + (agNet).toFixed(decPlacesTT) + '·' + curSymbol
+				toolTip.subText += lineStr
+			}
+
+			lineStr = "<br>" + "<b>" + stackSymbol + btcSymbol + "</b>: " + (btcNet).toFixed(decPlacesTT) + '·' + curSymbol
+			lineStr += " │ " + "<b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + '·' + curSymbol
+			toolTip.subText += lineStr
+			console.debug("finstats::*::tooltip-with-stacks:", toolTip.subText)
 		} else {
-			console.log("finstats::*::tooltip-without-stacks:", myTT_text)
+			console.debug("finstats::*::tooltip-without-stacks:", toolTip.subText)
 		}
-		toolTip.subText = myTT_text
+		console.log("finstats::*::tooltip-ready:", toolTip.subText)
 	}
 
 	// Initiate fetch requests
@@ -230,26 +256,26 @@ PlasmoidItem {
 						for (var y = 0; y < metalsPaths.length; y++) {
 							var data = JSON.parse(mxhr.responseText)
 							var keys = metalsPaths[y].split(".");
-							console.log("finstats::Metals::PreParsing:", data, y, keys)
+							console.debug("finstats::Metals::PreParsing:", data, y, keys)
 							for (var x = 0; x < keys.length; x++) {
-								console.log("finstats::Metals::Parsing:", x, metalsPaths[y], keys[x])
+								console.debug("finstats::Metals::Parsing:", x, metalsPaths[y], keys[x])
 								data = data[keys[x]];
 							}
-							console.log("finstats::Metals::PostParsing:", y, data)
+							console.debug("finstats::Metals::PostParsing:", y, data)
 							data = parseFloat(data)
 							// Save filtered value
 							metalsData[y] = data
 						}
 					} catch (e) {
-						console.log("finstats::Metals::JSON parsing error:", e)
+						console.error("finstats::Metals::JSON parsing error:", e)
 					}
 				} else {
-					console.log("finstats::Metals::HTTP Error:", mxhr.status)
+					console.error("finstats::Metals::HTTP Error:", mxhr.status)
 				}
 
 				// Signal data is ready
 				metalsReady = true
-				console.log("finstats::Metals::PostFetch:Ready")
+				console.debug("finstats::Metals::PostFetch:Ready")
 			} else {
 				console.log("finstats::Metals::readyStatus:", mxhr.readyState)
 			}
@@ -265,26 +291,26 @@ PlasmoidItem {
 						for (var y = 0; y < btcPaths.length; y++) {
 							var data = JSON.parse(bxhr.responseText)
 							var keys = btcPaths[y].split(".");
-							console.log("finstats::BTC::PreParsing:", data, y, keys)
+							console.debug("finstats::BTC::PreParsing:", data, y, keys)
 							for (var x = 0; x < keys.length; x++) {
-								console.log("finstats::BTC::Parsing:", x, btcPaths[y], keys[x])
+								console.debug("finstats::BTC::Parsing:", x, btcPaths[y], keys[x])
 								data = data[keys[x]];
 							}
-							console.log("finstats::BTC::PostParsing:", y, data)
+							console.debug("finstats::BTC::PostParsing:", y, data)
 							data = parseFloat(data)
 							// Save filtered value
 							btcData[y] = data
 						}
 					} catch (e) {
-						console.log("finstats::BTC::JSON parsing error:", e)
+						console.error("finstats::BTC::JSON parsing error:", e)
 					}
 				} else {
-					console.log("finstats::BTC::HTTP Error:", bxhr.status)
+					console.error("finstats::BTC::HTTP Error:", bxhr.status)
 				}
 
 				// Signal data is ready
 				btcReady = true
-				console.log("finstats::BTC::PostFetch:Ready")
+				console.debug("finstats::BTC::PostFetch:Ready")
 			} else {
 				console.log("finstats::BTC::readyStatus:", bxhr.readyState)
 			}
@@ -300,48 +326,64 @@ PlasmoidItem {
 						for (var y = 0; y < btcfeePaths.length; y++) {
 							var data = JSON.parse(fxhr.responseText)
 							var keys = btcfeePaths[y].split(".");
-							console.log("finstats::BTCFee::PreParsing:", data, y, keys)
+							console.debug("finstats::BTCFee::PreParsing:", data, y, keys)
 							for (var x = 0; x < keys.length; x++) {
-								console.log("finstats::BTCFee::Parsing:", x, btcfeePaths[y], keys[x])
+								console.debug("finstats::BTCFee::Parsing:", x, btcfeePaths[y], keys[x])
 								data = data[keys[x]];
 							}
-							console.log("finstats::BTCFee::PostParsing:", y, data)
+							console.debug("finstats::BTCFee::PostParsing:", y, data)
 							data = parseFloat(data)
 							// Save filtered value
 							btcfeeData[y] = data
 						}
 					} catch (e) {
-						console.log("finstats::BTCFee::JSON parsing error:", e)
+						console.error("finstats::BTCFee::JSON parsing error:", e)
 					}
 				} else {
-					console.log("finstats::BTCFee::HTTP Error:", fxhr.status)
+					console.error("finstats::BTCFee::HTTP Error:", fxhr.status)
 				}
 
 				// Signal data is ready
 				btcfeeReady = true
-				console.log("finstats::BTCFee::PostFetch:Ready")
+				console.debug("finstats::BTCFee::PostFetch:Ready")
 			} else {
 				console.log("finstats::BTCFee::readyStatus:", fxhr.readyState)
 			}
 		}
 
 		// Reset results readiness and que fetch requests
-		metalsReady = false
-		mxhr.open("GET", metalsUrl, true)
-		mxhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0');
-		mxhr.timeout = timeRetry * 1000;
-		mxhr.send()
-
+		if (true) {
 		btcReady = false
 		bxhr.open("GET", btcUrl, true)
 		bxhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0');
 		bxhr.timeout = timeRetry * 1000;
 		bxhr.send()
+		} else {
+			btcReady = true
+			btcData[0] = 0.0
+		}
 
-		btcfeeReady = false
-		fxhr.open("GET", btcfeeUrl, true)
-		fxhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0');
-		fxhr.timeout = timeRetry * 1000;
-		fxhr.send()
+		if (showMetals) {
+			metalsReady = false
+			mxhr.open("GET", metalsUrl, true)
+			mxhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0');
+			mxhr.timeout = timeRetry * 1000;
+			mxhr.send()
+		} else {
+			metalsReady = true
+			metalsData[0] = 0.0
+			metalsData[1] = 0.0
+		}
+
+		if (showBTCFee) {
+			btcfeeReady = false
+			fxhr.open("GET", btcfeeUrl, true)
+			fxhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0');
+			fxhr.timeout = timeRetry * 1000;
+			fxhr.send()
+		} else {
+			btcfeeReady = true
+			btcfeeData[0] = 0.0
+		}
 	}
 }

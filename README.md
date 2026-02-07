@@ -63,6 +63,7 @@ $ plasmoidviewer --applet com.github.eugenesan.finstats
 $ plasmawindowed com.github.eugenesan.finstats
 $ plasmapkg2 -i .
 $ export QML_XHR_DUMP=1
+$ export QT_LOGGING_RULES="*.debug=true; qt.*.debug=false"
 ```
 
 ## License

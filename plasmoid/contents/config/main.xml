@@ -5,6 +5,12 @@
 		<entry name="showStacks" type="Bool">
 			<default>false</default>
 		</entry>
+		<entry name="showMetals" type="Bool">
+			<default>true</default>
+		</entry>
+		<entry name="showBTCFee" type="Bool">
+			<default>true</default>
+		</entry>
 		<entry name="stackSymbol" type="String">
 			<default>∑</default>
 		</entry>
@@ -54,11 +60,14 @@
 		<entry name="decPlacesTT" type="Int">
 			<default>2</default>
 		</entry>
+		<entry name="priceDivider" type="Int">
+			<default>1000</default>
+		</entry>
 		<entry name="timeRefresh" type="Int">
 			<default>30</default>
 		</entry>
 		<entry name="timeRetry" type="Int">
-			<default>5</default>
+			<default>3</default>
 		</entry>
 		<entry name="timeRefetch" type="Int">
 			<default>5</default>
