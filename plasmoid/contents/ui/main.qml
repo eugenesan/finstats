@@ -67,7 +67,7 @@ PlasmoidItem {
 		mainText: "Financial Stats"
 		active: true
 		interactive: true
-		textFormat: Text.RichText
+		textFormat: Text.MarkdownText // RichText StyledText
 	}
 
 	MouseArea {
@@ -171,50 +171,62 @@ PlasmoidItem {
 	function buildData(isFull) {
 		console.log("finstats::*::buildData:", isFull)
 
-		// Get the current date and time
+		// Get current date and time
 		var today = new Date()
-		// Format the date and time for display
-		var formattedDateTime = Qt.formatDateTime(today, "yyyy-MM-dd hh:mm")
-		var lineStr = "<b>⏱: </b>" + formattedDateTime
+		// Format date and time for display
+		var formattedDate = Qt.formatDateTime(today, "yyyy-MM-dd")
+		var formattedTime = Qt.formatDateTime(today, "hh:mm")
+		var lineStr = ""
 
-		// Indicate incomplete data fetch
-		if (!isFull) {
-			lineStr += " ⚠️"
-		}
-		toolTip.subText = lineStr
-
-		// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛·∣│◕)
+		// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕)
 		myLabel.text  = (btcData[0]/priceDivider).toFixed(decPlaces) // + "k"
 
 		if (showBTCFee) {
-			//myLabel.text += " │ " + btcfeeData[0] // + "·" + satsSymbol + "/vKb"
+			//myLabel.text += " │ " + btcfeeData[0] // + "·" + satsSymbol + "/vKb"
 		}
 
 		if (showMetals) {
-			myLabel.text += " │ " + (metalsData[0]/priceDivider).toFixed(decPlaces) // + "·" + auSymbol
-			//myLabel.text += " │ " + (metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
-			//myLabel.text += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
+			myLabel.text += " │ " + (metalsData[0]/priceDivider).toFixed(decPlaces) // + "·" + auSymbol
+			//myLabel.text += " │ " + (metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
+			//myLabel.text += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
 		}
 		console.log("finstats::*::applet-ready:", myLabel.text)
 
-		// Build tooltip text
-		lineStr = "<br><b>" + btcSymbol + "</b>: "  + (btcData[0]).toFixed(decPlacesTT) + '·' + curSymbol
+		// Build tooltip text starting with timestamp
+		lineStr += "| 🗓️ | " + formattedDate + " | ⏱ | " + formattedTime
+		// Indicate incomplete data fetch by warning sign
+		if (!isFull) {
+			lineStr += " ⚠️ |\n"
+		} else {
+			lineStr += " |\n"
+		}
 
+		// Add markdown table
+		lineStr += "| :--- | :---: | :--- | :---: |\n"
+
+		// Add BTC
+		lineStr += "| **" + btcSymbol + "/" + curSymbol + "** | " + (btcData[0]).toFixed(decPlacesTT)
+
+		// Add BTC Fee
 		if (showBTCFee) {
-			lineStr += " │ " + "<b>" + btcfeeSymbol + "</b>: " + btcfeeData[0] + '·' + satsSymbol
+			lineStr += " | **" + btcfeeSymbol + "/" + satsSymbol + "** | " + btcfeeData[0]
+		} else {
+			lineStr += " | |"
 		}
-		toolTip.subText += lineStr
+		lineStr += " |\n"
 
+		// Add metals
 		if (showMetals) {
-			lineStr = "<br>" + "<b>" + auSymbol + "</b>: " + (metalsData[0]).toFixed(decPlacesTT) + '·' + curSymbol
-			lineStr += " │ " + "<b>" + agSymbol + "</b>: " + (metalsData[1]).toFixed(decPlacesTT) + '·' + curSymbol
-			toolTip.subText += lineStr
+			lineStr += "| **" + auSymbol + "/" + curSymbol + "** | " + (metalsData[0]).toFixed(decPlacesTT)
+			lineStr += " | **" + agSymbol + "/" + curSymbol + "** | " + (metalsData[1]).toFixed(decPlacesTT)
+			lineStr += " |\n"
 
-			lineStr = "<br>" + "<b>" + ratioSymbol + "BTC/Au</b>: " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT)
-			lineStr += " │ " + "<b>" + ratioSymbol + "Au/Ag</b>: " + (metalsData[0]/metalsData[1]).toFixed(decPlacesTT)
-			toolTip.subText += lineStr
+			lineStr += "| **" + btcSymbol + "/" + auSymbol + "** | " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT)
+			lineStr += " | **" + auSymbol + "/" + agSymbol + "** | " + (metalsData[0]/metalsData[1]).toFixed(decPlacesTT)
+			lineStr += " |\n"
 		}
 
+		// Add stacks
 		if (showStacks) {
 			// Calculate stacks
 			var btcTax = (((btcData[0] * btcStack) - (btcCost * btcStack)) / 100 * capGain)
@@ -222,21 +234,19 @@ PlasmoidItem {
 			var auNet = (metalsData[0] * auStack)
 			var agNet = (metalsData[1] * agStack)
 
-			console.debug("finstats::*::tooltip-before-stacks:", toolTip.subText)
-
 			if (showMetals) {
-				lineStr = "<br>" + "<b>" + stackSymbol + "" + auSymbol + "</b>: " + (auNet).toFixed(decPlacesTT) + '·' + curSymbol
-				lineStr += " │ " + "<b>" + stackSymbol + agSymbol + "</b>: " + (agNet).toFixed(decPlacesTT) + '·' + curSymbol
-				toolTip.subText += lineStr
+				lineStr += "| **" + stackSymbol + auSymbol + "/" + curSymbol + "** | " + (auNet).toFixed(decPlacesTT)
+				lineStr += " | **" + stackSymbol + agSymbol + "/" + curSymbol + "** | " + (agNet).toFixed(decPlacesTT)
+				lineStr += " |\n"
 			}
 
-			lineStr = "<br>" + "<b>" + stackSymbol + btcSymbol + "</b>: " + (btcNet).toFixed(decPlacesTT) + '·' + curSymbol
-			lineStr += " │ " + "<b>" + stackSymbol + "</b>: " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + '·' + curSymbol
-			toolTip.subText += lineStr
-			console.debug("finstats::*::tooltip-with-stacks:", toolTip.subText)
-		} else {
-			console.debug("finstats::*::tooltip-without-stacks:", toolTip.subText)
+			lineStr += "| **" + stackSymbol + btcSymbol + "/" + curSymbol + "** | " + (btcNet).toFixed(decPlacesTT)
+			lineStr += " | **" + stackSymbol + "/" + curSymbol + "** | " + (btcNet+auNet+agNet).toFixed(decPlacesTT)
+			lineStr += " |\n"
 		}
+
+		// Finalize the tooltip
+		toolTip.subText = lineStr + "\n<sub>click on applet to refresh</sub>\n"
 		console.log("finstats::*::tooltip-ready:", toolTip.subText)
 	}
 

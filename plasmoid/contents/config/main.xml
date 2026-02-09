@@ -26,14 +26,19 @@
 			<alt>≐</alt>
 		</entry>
 		<entry name="btcfeeSymbol" type="String">
-			<default>🫴</default>
+			<default>τ</default>
+			<alt>🫴</alt>
 		</entry>
 		<entry name="auSymbol" type="String">
-			<default>☀</default>
+			<default>Au</default>
+			<alt>☀</alt>
+			<alt>🥇</alt>
 			<alt>🜚</alt>
 		</entry>
 		<entry name="agSymbol" type="String">
-			<default>☾</default>
+			<default>Ag</default>
+			<alt>☾</alt>
+			<alt>🥈</alt>
 			<alt>🜛</alt>
 		</entry>
 		<entry name="ratioSymbol" type="String">
