@@ -33,11 +33,9 @@ PlasmoidItem {
 	property string stackSymbol: plasmoid.configuration.stackSymbol
 	property string curSymbol: plasmoid.configuration.curSymbol
 	property string btcSymbol: plasmoid.configuration.btcSymbol
-	property string btcfeeSymbol: plasmoid.configuration.btcfeeSymbol
 	property string satsSymbol: plasmoid.configuration.satsSymbol
 	property string auSymbol: plasmoid.configuration.auSymbol
 	property string agSymbol: plasmoid.configuration.agSymbol
-	property string ratioSymbol: plasmoid.configuration.ratioSymbol
 	property int btcStack: plasmoid.configuration.btcStack
 	property int auStack: plasmoid.configuration.auStack
 	property int agStack: plasmoid.configuration.agStack
@@ -202,14 +200,14 @@ PlasmoidItem {
 		}
 
 		// Add markdown table
-		lineStr += "| :--- | :---: | :--- | :---: |\n"
+		lineStr += "| :--- | :--- | :--- | :--- |\n"
 
 		// Add BTC
-		lineStr += "| **" + btcSymbol + "/" + curSymbol + "** | " + (btcData[0]).toFixed(decPlacesTT)
+		lineStr += "| **" + btcSymbol + "** | " + (btcData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 
 		// Add BTC Fee
 		if (showBTCFee) {
-			lineStr += " | **" + btcfeeSymbol + "/" + satsSymbol + "** | " + btcfeeData[0]
+			lineStr += " | **" + btcSymbol + "<sub>Fee</sub>" + "** | " + btcfeeData[0] + "<sup>" + satsSymbol + "</sup>"
 		} else {
 			lineStr += " | |"
 		}
@@ -217,8 +215,8 @@ PlasmoidItem {
 
 		// Add metals
 		if (showMetals) {
-			lineStr += "| **" + auSymbol + "/" + curSymbol + "** | " + (metalsData[0]).toFixed(decPlacesTT)
-			lineStr += " | **" + agSymbol + "/" + curSymbol + "** | " + (metalsData[1]).toFixed(decPlacesTT)
+			lineStr += "| **" + auSymbol + "** | " + (metalsData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			lineStr += " | **" + agSymbol + "** | " + (metalsData[1]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 			lineStr += " |\n"
 
 			lineStr += "| **" + btcSymbol + "/" + auSymbol + "** | " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT)
@@ -235,18 +233,18 @@ PlasmoidItem {
 			var agNet = (metalsData[1] * agStack)
 
 			if (showMetals) {
-				lineStr += "| **" + stackSymbol + auSymbol + "/" + curSymbol + "** | " + (auNet).toFixed(decPlacesTT)
-				lineStr += " | **" + stackSymbol + agSymbol + "/" + curSymbol + "** | " + (agNet).toFixed(decPlacesTT)
+				lineStr += "| **" + stackSymbol + auSymbol + "** | " + (auNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+				lineStr += " | **" + stackSymbol + agSymbol + "** | " + (agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 				lineStr += " |\n"
 			}
 
-			lineStr += "| **" + stackSymbol + btcSymbol + "/" + curSymbol + "** | " + (btcNet).toFixed(decPlacesTT)
-			lineStr += " | **" + stackSymbol + "/" + curSymbol + "** | " + (btcNet+auNet+agNet).toFixed(decPlacesTT)
+			lineStr += "| **" + stackSymbol + btcSymbol + "** | " + (btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			lineStr += " | **" + stackSymbol + "** | " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 			lineStr += " |\n"
 		}
 
 		// Finalize the tooltip
-		toolTip.subText = lineStr + "\n<sub>click on applet to refresh</sub>\n"
+		toolTip.subText = lineStr + "\n`click on applet to refresh`\n"
 		console.log("finstats::*::tooltip-ready:", toolTip.subText)
 	}
 

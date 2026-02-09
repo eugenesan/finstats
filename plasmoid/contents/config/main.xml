@@ -25,10 +25,6 @@
 			<default>Ș</default>
 			<alt>≐</alt>
 		</entry>
-		<entry name="btcfeeSymbol" type="String">
-			<default>τ</default>
-			<alt>🫴</alt>
-		</entry>
 		<entry name="auSymbol" type="String">
 			<default>Au</default>
 			<alt>☀</alt>
@@ -40,9 +36,6 @@
 			<alt>☾</alt>
 			<alt>🥈</alt>
 			<alt>🜛</alt>
-		</entry>
-		<entry name="ratioSymbol" type="String">
-			<default>◕</default>
 		</entry>
 		<entry name="btcStack" type="Int">
 			<default>1</default>

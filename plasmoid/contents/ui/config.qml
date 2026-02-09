@@ -19,11 +19,9 @@ Item {
 	property alias cfg_stackSymbol: stackSymbol.text
 	property alias cfg_curSymbol: curSymbol.text
 	property alias cfg_btcSymbol: btcSymbol.text
-	property alias cfg_btcfeeSymbol: btcfeeSymbol.text
 	property alias cfg_satsSymbol: satsSymbol.text
 	property alias cfg_auSymbol: auSymbol.text
 	property alias cfg_agSymbol: agSymbol.text
-	property alias cfg_ratioSymbol: ratioSymbol.text
 	property alias cfg_btcStack: btcStack.value
 	property alias cfg_auStack: auStack.value
 	property alias cfg_agStack: agStack.value
@@ -280,20 +278,6 @@ Item {
 					ToolTip.text: i18n("Which symbol to use to indicate BTC")
 				}
 
-				// BTC fee symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("BTC fee symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: btcfeeSymbol
-					text: "#000000"
-					onTextChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use to indicate BTC fee")
-				}
-
 				// Sats symbol
 				Label {
 					Layout.minimumWidth: root.width / 3
@@ -334,20 +318,6 @@ Item {
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use to indicate Silver")
-				}
-
-				// Ratio symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Ratio symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: ratioSymbol
-					text: "#000000"
-					onTextChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use to indicate ratio")
 				}
 
 				// Show stacks
