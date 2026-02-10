@@ -22,9 +22,9 @@ PlasmoidItem {
 	property int dataReadyAttemp: 0
 
 	// Stores fetched data
-	property variant metalsData: [-0.1,-0.1]
-	property variant btcData: [-0.1]
-	property variant btcfeeData: [-0.1]
+	property variant metalsData: [0.0,0.0]
+	property variant btcData: [0.0]
+	property variant btcfeeData: [0.0]
 
 	// Global vars from config
 	property bool showStacks: plasmoid.configuration.showStacks
@@ -104,7 +104,7 @@ PlasmoidItem {
 	}
 
 	Component.onCompleted: {
-		myLabel.text = "... │ ..."
+		myLabel.text = "... │ ..."
 		fetchData()
 
 		// Resume monitoring data ready
@@ -137,31 +137,34 @@ PlasmoidItem {
 
 		onTriggered: {
 			// Check if all the results marked as fetched and dataready timer still enabled
-			if ( (datareadyWait.running == true) && (metalsReady == btcReady == btcfeeReady == true) &&
-				 // Make sure none of the results are zero
-				 (btcData[0]>=0) && (btcfeeData[0]>=0) && (metalsData[0]>=0) && (metalsData[1]>=0)
-			   ) {
-				// Once all data fetched, build label
-				console.log("finstats::dataready::status:building-label", dataReadyAttemp, datareadyWait.running, metalsReady, btcReady, btcfeeReady, btcData[0], btcfeeData[0], metalsData[0], metalsData[1])
-
+			if ( datareadyWait.running &&
+				(btcReady || (btcData[0] > (1/100000000))) &&
+				(btcfeeReady || (btcfeeData[0] > (1/100000000))) &&
+				(metalsReady || (metalsData[0] > (1/100000000))) &&
+				(metalsReady || (metalsData[1] > (1/100000000))) )
+			{
 				// Disable timer to avoid duplicate calls
 				datareadyWait.running = false
 
-				// Call full build
+				console.debug("finstats::timerTriggered::Build:", dataReadyAttemp, datareadyWait.running, metalsReady, btcReady, btcfeeReady, btcData[0], btcfeeData[0], metalsData[0], metalsData[1])
+
+				// Once all data fetched, build label
 				buildData(true)
 			} else {
 				// Not all data is ready, invalid results or duplicate call
 				dataReadyAttemp++
-				console.log("finstats::dataready::status:skipping-build", dataReadyAttemp, datareadyWait.running, metalsReady, btcReady, btcfeeReady, btcData[0], btcfeeData[0], metalsData[0], metalsData[1])
+				console.debug("finstats::timerTriggered::Attempt:", dataReadyAttemp, datareadyWait.running, metalsReady, btcReady, btcfeeReady, btcData[0], btcfeeData[0], 	metalsData[0], metalsData[1])
+
 			}
 
 			// Retry 3 times and if still failed, set refresh timer as configured
 			if (dataReadyAttemp > 3) {
-				running = false
-				// Call partial build
-				buildData(false)
-				refreshTimer.interval = timeRefetch * 60 * 1000
 				console.log("finstats::dataready::lastattemp", timeRetry, refreshTimer.interval)
+				running = false
+				refreshTimer.interval = timeRefetch * 60 * 1000
+
+				// After max retries, call partial build
+				buildData(false)
 			}
 		}
 	}
@@ -170,12 +173,15 @@ PlasmoidItem {
 		console.log("finstats::*::buildData:", isFull)
 
 		// Get current date and time
-		var today = new Date()
+		var currentTime = new Date()
 		// Format date and time for display
-		var formattedDate = Qt.formatDateTime(today, "yyyy-MM-dd")
-		var formattedTime = Qt.formatDateTime(today, "hh:mm")
-		var lineStr = ""
-		var btcStdFee = ((btcfeeData[0] < 1 ) ? 1 : btcfeeData[0]) * 141 // vBytes for segwit 1 in 2 out Tx
+		var formattedDate = Qt.formatDateTime(currentTime, "yyyy-MM-dd")
+		var formattedTime = Qt.formatDateTime(currentTime, "hh:mm")
+		var refreshTime = new Date(currentTime.getTime() + refreshTimer.interval)
+		var formattedRefresh = Qt.formatDateTime(refreshTime, "hh:mm")
+
+		var ttStr = ""
+		var btcStdFee = (( (btcfeeData[0] < 1) && (btcfeeData[0] > 0) ) ? 1 : btcfeeData[0]) * 141 // vBytes for segwit 1 in 2 out Tx
 		var btcStdFeePrice = btcStdFee / 100000000 * btcData[0]  // price per Tx in currency
 
 		// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕)
@@ -193,38 +199,32 @@ PlasmoidItem {
 		console.log("finstats::*::applet-ready:", myLabel.text)
 
 		// Build tooltip text starting with timestamp
-		lineStr += "| 🗓️ | " + formattedDate + " | ⏱ | " + formattedTime
-		// Indicate incomplete data fetch by warning sign
-		if (!isFull) {
-			lineStr += " ⚠️ |\n"
-		} else {
-			lineStr += " |\n"
-		}
+		ttStr += "| 🗓️ | " + formattedDate + " | ⏱ | " + formattedTime + " |\n"
 
 		// Add markdown table
-		lineStr += "| :--- | :--- | :--- | :--- |\n"
+		ttStr += "| :--- | :--- | :--- | :--- |\n"
 
 		// Add BTC
-		lineStr += "| **" + btcSymbol + "** | " + (btcData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+		ttStr += "| **" + btcSymbol + (btcReady ? "" : "<sup>⚠️</sup>") + "** | " + (btcData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 
 		// Add BTC Fee
 		if (showBTCFee) {
-			lineStr += " | **" + btcSymbol + "<sub>Fee</sub>" + "** | " + btcStdFee + "<sup>" + satsSymbol + "</sup>"
-			lineStr += " / " + btcStdFeePrice.toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			ttStr += " | **" + btcSymbol + "<sub>Fee</sub>" + (btcfeeReady ? "" : "<sup>⚠️</sup>") + "** | " + btcStdFee + "<sup>" + satsSymbol + "</sup>"
+			ttStr += " / " + btcStdFeePrice.toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 		} else {
-			lineStr += " | |"
+			ttStr += " | |"
 		}
-		lineStr += " |\n"
+		ttStr += " |\n"
 
 		// Add metals
 		if (showMetals) {
-			lineStr += "| **" + auSymbol + "** | " + (metalsData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-			lineStr += " | **" + agSymbol + "** | " + (metalsData[1]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-			lineStr += " |\n"
+			ttStr += "| **" + auSymbol + (metalsReady ? "" : "<sup>⚠️</sup>") + "** | " + (metalsData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			ttStr += " | **" + agSymbol + (metalsReady ? "" : "<sup>⚠️</sup>") + "** | " + (metalsData[1]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			ttStr += " |\n"
 
-			lineStr += "| **" + btcSymbol + "/" + auSymbol + "** | " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT)
-			lineStr += " | **" + auSymbol + "/" + agSymbol + "** | " + (metalsData[0]/metalsData[1]).toFixed(decPlacesTT)
-			lineStr += " |\n"
+			ttStr += "| **" + btcSymbol + "/" + auSymbol + "** | " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT)
+			ttStr += " | **" + auSymbol + "/" + agSymbol + "** | " + (metalsData[0]/metalsData[1]).toFixed(decPlacesTT)
+			ttStr += " |\n"
 		}
 
 		// Add stacks
@@ -236,18 +236,21 @@ PlasmoidItem {
 			var agNet = (metalsData[1] * agStack)
 
 			if (showMetals) {
-				lineStr += "| **" + stackSymbol + auSymbol + "** | " + (auNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-				lineStr += " | **" + stackSymbol + agSymbol + "** | " + (agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-				lineStr += " |\n"
+				ttStr += "| **" + stackSymbol + auSymbol + "** | " + (auNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+				ttStr += " | **" + stackSymbol + agSymbol + "** | " + (agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+				ttStr += " |\n"
 			}
 
-			lineStr += "| **" + stackSymbol + btcSymbol + "** | " + (btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-			lineStr += " | **" + stackSymbol + "** | " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-			lineStr += " |\n"
+			ttStr += "| **" + stackSymbol + btcSymbol + "** | " + (btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			ttStr += " |\n"
 		}
 
 		// Finalize the tooltip
-		toolTip.subText = lineStr + "\n`click on applet to refresh`\n"
+		if (!isFull) ttStr += "*⚠️ Error during last update*\n"
+		ttStr += "*Next update at " +  formattedRefresh + " (click for now)*\n"
+
+		toolTip.subText = ttStr
 		console.log("finstats::*::tooltip-ready:", toolTip.subText)
 	}
 
@@ -276,19 +279,20 @@ PlasmoidItem {
 							data = parseFloat(data)
 							// Save filtered value
 							metalsData[y] = data
+
+							// Signal data is ready
+							metalsReady = true
 						}
 					} catch (e) {
-						console.error("finstats::Metals::JSON parsing error:", e)
+						console.error("finstats::Metals::JSONParsingError:", e)
 					}
 				} else {
 					console.error("finstats::Metals::HTTP Error:", mxhr.status)
 				}
 
-				// Signal data is ready
-				metalsReady = true
-				console.debug("finstats::Metals::PostFetch:Ready")
+				console.log("finstats::Metals::PostFetch:", metalsReady)
 			} else {
-				console.log("finstats::Metals::readyStatus:", mxhr.readyState)
+				console.debug("finstats::Metals::readyStatus:", mxhr.readyState)
 			}
 		}
 
@@ -311,6 +315,9 @@ PlasmoidItem {
 							data = parseFloat(data)
 							// Save filtered value
 							btcData[y] = data
+
+							// Signal data is ready
+							btcReady = true
 						}
 					} catch (e) {
 						console.error("finstats::BTC::JSON parsing error:", e)
@@ -319,11 +326,9 @@ PlasmoidItem {
 					console.error("finstats::BTC::HTTP Error:", bxhr.status)
 				}
 
-				// Signal data is ready
-				btcReady = true
-				console.debug("finstats::BTC::PostFetch:Ready")
+				console.log("finstats::BTC::PostFetch:", btcReady)
 			} else {
-				console.log("finstats::BTC::readyStatus:", bxhr.readyState)
+				console.debug("finstats::BTC::readyStatus:", bxhr.readyState)
 			}
 		}
 
@@ -346,6 +351,9 @@ PlasmoidItem {
 							data = parseFloat(data)
 							// Save filtered value
 							btcfeeData[y] = data
+
+							// Signal data is ready
+							btcfeeReady = true
 						}
 					} catch (e) {
 						console.error("finstats::BTCFee::JSON parsing error:", e)
@@ -354,11 +362,9 @@ PlasmoidItem {
 					console.error("finstats::BTCFee::HTTP Error:", fxhr.status)
 				}
 
-				// Signal data is ready
-				btcfeeReady = true
-				console.debug("finstats::BTCFee::PostFetch:Ready")
+				console.log("finstats::BTCFee::PostFetch:", btcfeeReady)
 			} else {
-				console.log("finstats::BTCFee::readyStatus:", fxhr.readyState)
+				console.debug("finstats::BTCFee::readyStatus:", fxhr.readyState)
 			}
 		}
 
