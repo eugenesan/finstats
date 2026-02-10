@@ -175,6 +175,8 @@ PlasmoidItem {
 		var formattedDate = Qt.formatDateTime(today, "yyyy-MM-dd")
 		var formattedTime = Qt.formatDateTime(today, "hh:mm")
 		var lineStr = ""
+		var btcStdFee = ((btcfeeData[0] < 1 ) ? 1 : btcfeeData[0]) * 141 // vBytes for segwit 1 in 2 out Tx
+		var btcStdFeePrice = btcStdFee / 100000000 * btcData[0]  // price per Tx in currency
 
 		// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕)
 		myLabel.text  = (btcData[0]/priceDivider).toFixed(decPlaces) // + "k"
@@ -207,7 +209,8 @@ PlasmoidItem {
 
 		// Add BTC Fee
 		if (showBTCFee) {
-			lineStr += " | **" + btcSymbol + "<sub>Fee</sub>" + "** | " + btcfeeData[0] + "<sup>" + satsSymbol + "</sup>"
+			lineStr += " | **" + btcSymbol + "<sub>Fee</sub>" + "** | " + btcStdFee + "<sup>" + satsSymbol + "</sup>"
+			lineStr += " / " + btcStdFeePrice.toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 		} else {
 			lineStr += " | |"
 		}
