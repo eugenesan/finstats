@@ -13,6 +13,7 @@ Item {
 
 	signal configurationChanged
 
+	property alias cfg_appletFlash: appletFlash.checked
 	property alias cfg_showMetals: showMetals.checked
 	property alias cfg_showBTCFee: showBTCFee.checked
 	property alias cfg_showStack: showStack.checked
@@ -34,6 +35,19 @@ Item {
 			GridLayout {
 				id: gridLayout
 				columns: 2
+
+				// Applet flash feedback
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Flash Applet on change:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				CheckBox {
+					id: appletFlash
+					onCheckedChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Wether to flash applet on chnage.")
+				}
 
 				// Show btcfee
 				Label {

@@ -29,6 +29,7 @@ PlasmoidItem {
 	property variant btcfeeData: [0.0]
 
 	// Global vars from config
+	property bool appletFlash: plasmoid.configuration.appletFlash
 	property bool showStack: plasmoid.configuration.showStack
 	property bool showMetals: plasmoid.configuration.showMetals
 	property bool showBTCFee: plasmoid.configuration.showBTCFee
@@ -77,12 +78,14 @@ PlasmoidItem {
 		// Refresh the label and reset time on mouse click
 		onClicked: (mouse) => {
 			console.log("finstats::*::clicked-refresh-data");
-			myLabel.color = Theme.highlightColor
-			// Restore configured refresh interval and attempt counter in case they were affected by datareadyWait
+
+			// Change applet color if needed
+			if (appletFlash) myLabel.color = Theme.disabledTextColor
+
+			// Send fetch requests, reset attempt counter and reset/enable data ready timer
 			refreshTimer.interval = timeRefresh * 60 * 1000
 			dataReadyAttemp = 0
 			fetchData()
-			// Once fetch requests were sent, enable data ready timer
 			datareadyWait.running = true
 			console.debug("finstats::*::clicked-timer-reset");
 			refreshTimer.restart()
@@ -110,8 +113,8 @@ PlasmoidItem {
 		id: priceFlash
 		target: myLabel
 		property: "color"
-		from: Theme.highlightColor
-		to: (dataReadyFull) ? Theme.textColor : Theme.negativeTextColor
+		from: Theme.disabledTextColor
+		to: (dataReadyFull) ? Theme.textColor : Theme.neutralTextColor
 		duration: 1000
 	}
 
@@ -131,12 +134,14 @@ PlasmoidItem {
 		running: true
 		repeat: true
 		onTriggered: {
-			console.debug("finstats::refreshTimer::triggered:");
-			myLabel.color = Theme.highlightColor
+			// Change applet color if needed
+			if (appletFlash) myLabel.color = Theme.disabledTextColor
+
 			// Restore configured interval in case it was shortened by datareadyWait
 			interval = timeRefresh * 60 * 1000
+
+			// Send fetch requests and enable data ready timer
 			fetchData()
-			// Once fetch requests were sent, enable data ready timer
 			datareadyWait.running = true
 			dataReadyAttemp = 0
 		}
@@ -165,7 +170,7 @@ PlasmoidItem {
 				// Once all data fetched, build label
 				dataReadyFull = true
 				buildData()
-				priceFlash.restart()
+				if (appletFlash) priceFlash.restart()
 			} else {
 				// Not all data is ready, invalid results or duplicate call
 				dataReadyAttemp++
@@ -182,7 +187,7 @@ PlasmoidItem {
 				// After max retries, call partial build
 				dataReadyFull = false
 				buildData()
-				priceFlash.restart()
+				if (appletFlash) priceFlash.restart()
 			}
 		}
 	}
