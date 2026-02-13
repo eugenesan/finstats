@@ -27,7 +27,7 @@ PlasmoidItem {
 	property variant btcfeeData: [0.0]
 
 	// Global vars from config
-	property bool showStacks: plasmoid.configuration.showStacks
+	property bool showStack: plasmoid.configuration.showStack
 	property bool showMetals: plasmoid.configuration.showMetals
 	property bool showBTCFee: plasmoid.configuration.showBTCFee
 	property string stackSymbol: plasmoid.configuration.stackSymbol
@@ -227,9 +227,9 @@ PlasmoidItem {
 			ttStr += " |\n"
 		}
 
-		// Add stacks
-		if (showStacks) {
-			// Calculate stacks
+		// Add stack
+		if (showStack) {
+			// Calculate stack
 			var btcTax = (((btcData[0] * btcStack) - (btcCost * btcStack)) / 100 * capGain)
 			var btcNet = ((btcData[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax))
 			var auNet = (metalsData[0] * auStack)

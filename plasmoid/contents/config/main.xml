@@ -2,14 +2,14 @@
 <kcfg xmlns="http://www.kde.org/standards/kcfg/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
 	<kcfgfile name=""/>
 	<group name="General">
-		<entry name="showStacks" type="Bool">
-			<default>false</default>
-		</entry>
 		<entry name="showMetals" type="Bool">
 			<default>true</default>
 		</entry>
 		<entry name="showBTCFee" type="Bool">
 			<default>true</default>
+		</entry>
+		<entry name="showStack" type="Bool">
+			<default>false</default>
 		</entry>
 		<entry name="stackSymbol" type="String">
 			<default>∑</default>
@@ -37,21 +37,6 @@
 			<alt>🥈</alt>
 			<alt>🜛</alt>
 		</entry>
-		<entry name="btcStack" type="Int">
-			<default>1</default>
-		</entry>
-		<entry name="auStack" type="Int">
-			<default>2</default>
-		</entry>
-		<entry name="agStack" type="Int">
-			<default>3</default>
-		</entry>
-		<entry name="btcCost" type="Int">
-			<default>100000</default>
-		</entry>
-		<entry name="capGain" type="Int">
-			<default>15</default>
-		</entry>
 		<entry name="decPlaces" type="Int">
 			<default>1</default>
 		</entry>
@@ -61,6 +46,8 @@
 		<entry name="priceDivider" type="Int">
 			<default>1000</default>
 		</entry>
+	</group>
+	<group name="Fetch">
 		<entry name="timeRefresh" type="Int">
 			<default>30</default>
 		</entry>
@@ -91,6 +78,23 @@
 		</entry>
 		<entry name="metalsKeyAg" type="String">
 			<default>items.0.xagPrice</default>
+		</entry>
+	</group>
+	<group name="Stack">
+		<entry name="btcStack" type="Int">
+			<default>1</default>
+		</entry>
+		<entry name="auStack" type="Int">
+			<default>2</default>
+		</entry>
+		<entry name="agStack" type="Int">
+			<default>3</default>
+		</entry>
+		<entry name="btcCost" type="Int">
+			<default>100000</default>
+		</entry>
+		<entry name="capGain" type="Int">
+			<default>15</default>
 		</entry>
 	</group>
 </kcfg>
