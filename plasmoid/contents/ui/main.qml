@@ -9,6 +9,7 @@ import QtQuick.Layouts
 import org.kde.plasma.core
 import org.kde.plasma.plasmoid
 import org.kde.plasma.components
+import org.kde.kirigami
 
 PlasmoidItem {
 	id: root
@@ -20,6 +21,7 @@ PlasmoidItem {
 	property bool btcReady: false
 	property bool btcfeeReady: false
 	property int dataReadyAttemp: 0
+	property bool dataReadyFull: false
 
 	// Stores fetched data
 	property variant metalsData: [0.0,0.0]
@@ -75,6 +77,7 @@ PlasmoidItem {
 		// Refresh the label and reset time on mouse click
 		onClicked: (mouse) => {
 			console.log("finstats::*::clicked-refresh-data");
+			myLabel.color = Theme.highlightColor
 			// Restore configured refresh interval and attempt counter in case they were affected by datareadyWait
 			refreshTimer.interval = timeRefresh * 60 * 1000
 			dataReadyAttemp = 0
@@ -103,6 +106,15 @@ PlasmoidItem {
 		}
 	}
 
+	ColorAnimation {
+		id: priceFlash
+		target: myLabel
+		property: "color"
+		from: Theme.highlightColor
+		to: (dataReadyFull) ? Theme.textColor : Theme.negativeTextColor
+		duration: 1000
+	}
+
 	Component.onCompleted: {
 		myLabel.text = "... │ ..."
 		fetchData()
@@ -119,6 +131,8 @@ PlasmoidItem {
 		running: true
 		repeat: true
 		onTriggered: {
+			console.debug("finstats::refreshTimer::triggered:");
+			myLabel.color = Theme.highlightColor
 			// Restore configured interval in case it was shortened by datareadyWait
 			interval = timeRefresh * 60 * 1000
 			fetchData()
@@ -149,7 +163,9 @@ PlasmoidItem {
 				console.debug("finstats::timerTriggered::Build:", dataReadyAttemp, datareadyWait.running, metalsReady, btcReady, btcfeeReady, btcData[0], btcfeeData[0], metalsData[0], metalsData[1])
 
 				// Once all data fetched, build label
-				buildData(true)
+				dataReadyFull = true
+				buildData()
+				priceFlash.restart()
 			} else {
 				// Not all data is ready, invalid results or duplicate call
 				dataReadyAttemp++
@@ -164,13 +180,15 @@ PlasmoidItem {
 				refreshTimer.interval = timeRefetch * 60 * 1000
 
 				// After max retries, call partial build
-				buildData(false)
+				dataReadyFull = false
+				buildData()
+				priceFlash.restart()
 			}
 		}
 	}
 
-	function buildData(isFull) {
-		console.log("finstats::*::buildData:", isFull)
+	function buildData() {
+		console.log("finstats::*::buildData:", dataReadyFull)
 
 		// Get current date and time
 		var currentTime = new Date()
@@ -247,7 +265,7 @@ PlasmoidItem {
 		}
 
 		// Finalize the tooltip
-		if (!isFull) ttStr += "*⚠️ Error during last update*\n"
+		if (!dataReadyFull) ttStr += "*⚠️ Error during last update*\n"
 		ttStr += "*Next update at " +  formattedRefresh + " (click for now)*\n"
 
 		toolTip.subText = ttStr
