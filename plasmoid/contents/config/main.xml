@@ -2,14 +2,26 @@
 <kcfg xmlns="http://www.kde.org/standards/kcfg/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0 http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
 	<kcfgfile name=""/>
 	<group name="General">
-		<entry name="appletFlash" type="Bool">
+		<entry name="appletColor" type="Bool">
 			<default>true</default>
 		</entry>
-		<entry name="showMetals" type="Bool">
+		<entry name="showBTC" type="Bool">
 			<default>true</default>
+		</entry>
+		<entry name="showBTCTT" type="Bool">
+			<default>false</default>
 		</entry>
 		<entry name="showBTCFee" type="Bool">
-			<default>true</default>
+			<default>false</default>
+		</entry>
+		<entry name="showBTCFeeTT" type="Bool">
+			<default>false</default>
+		</entry>
+		<entry name="showMetals" type="Bool">
+			<default>false</default>
+		</entry>
+		<entry name="showMetalsTT" type="Bool">
+			<default>false</default>
 		</entry>
 		<entry name="showStack" type="Bool">
 			<default>false</default>

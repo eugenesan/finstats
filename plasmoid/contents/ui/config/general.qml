@@ -13,9 +13,13 @@ Item {
 
 	signal configurationChanged
 
-	property alias cfg_appletFlash: appletFlash.checked
-	property alias cfg_showMetals: showMetals.checked
+	property alias cfg_appletColor: appletColor.checked
+	property alias cfg_showBTC: showBTC.checked
+	property alias cfg_showBTCTT: showBTCTT.checked
 	property alias cfg_showBTCFee: showBTCFee.checked
+	property alias cfg_showBTCFeeTT: showBTCFeeTT.checked
+	property alias cfg_showMetals: showMetals.checked
+	property alias cfg_showMetalsTT: showMetalsTT.checked
 	property alias cfg_showStack: showStack.checked
 	property alias cfg_stackSymbol: stackSymbol.text
 	property alias cfg_curSymbol: curSymbol.text
@@ -37,17 +41,43 @@ Item {
 				id: gridLayout
 				columns: 2
 
-				// Applet flash feedback
+				// Applet color feedback
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Flash Applet on change:")
+					text: i18n("Color Applet on change:")
 					horizontalAlignment: Label.AlignLeft
 				}
 				CheckBox {
-					id: appletFlash
+					id: appletColor
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to flash applet on chnage.")
+					ToolTip.text: i18n("Wether to color applet on change.")
+				}
+
+				// Show btc
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Show BTC:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				CheckBox {
+					id: showBTC
+					onCheckedChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Wether to display BTC in the Applet")
+				}
+
+				// Show btc tooltip
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Show BTC tootltip:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				CheckBox {
+					id: showBTCTT
+					onCheckedChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Wether to display BTC in ToolTip")
 				}
 
 				// Show btcfee
@@ -60,7 +90,20 @@ Item {
 					id: showBTCFee
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display BTC Fee in the applet and ToolTip.")
+					ToolTip.text: i18n("Wether to display BTC Fee in Applet")
+				}
+
+				// Show btcfee tooltip
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Show BTC Fee tooltip:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				CheckBox {
+					id: showBTCFeeTT
+					onCheckedChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Wether to display BTC Fee in ToolTip")
 				}
 
 				// Show metals
@@ -73,7 +116,20 @@ Item {
 					id: showMetals
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display metals in the applet and ToolTip.")
+					ToolTip.text: i18n("Wether to display metals in Applet ")
+				}
+
+				// Show metals tooltip
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Show Metals tooltip:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				CheckBox {
+					id: showMetalsTT
+					onCheckedChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Wether to display metals in ToolTip")
 				}
 
 				// Show stack

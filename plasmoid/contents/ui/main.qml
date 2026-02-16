@@ -29,9 +29,13 @@ PlasmoidItem {
 	property variant metalsData: [0.0,0.0]
 
 	// Global vars from config
-	property bool appletFlash: plasmoid.configuration.appletFlash
+	property bool appletColor: plasmoid.configuration.appletColor
+	property bool showBTC: plasmoid.configuration.showBTC
+	property bool showBTCTT: plasmoid.configuration.showBTCTT
 	property bool showBTCFee: plasmoid.configuration.showBTCFee
+	property bool showBTCFeeTT: plasmoid.configuration.showBTCFeeTT
 	property bool showMetals: plasmoid.configuration.showMetals
+	property bool showMetalsTT: plasmoid.configuration.showMetalsTT
 	property bool showStack: plasmoid.configuration.showStack
 	property string stackSymbol: plasmoid.configuration.stackSymbol
 	property string curSymbol: plasmoid.configuration.curSymbol
@@ -81,7 +85,7 @@ PlasmoidItem {
 			console.log("finstats::*::clicked-start-refresh-data")
 
 			// Change applet color if needed
-			if (appletFlash) myLabel.color = Theme.disabledTextColor
+			if (appletColor) myLabel.color = Theme.disabledTextColor
 
 			// Send fetch requests, reset attempt counter and reset/enable data ready timer
 			refreshTimer.interval = timeRefresh * 60 * 1000
@@ -105,13 +109,14 @@ PlasmoidItem {
 		// A simple label to display the JSON data
 		Label {
 			id: myLabel
+			textFormat: Text.MarkdownText // RichText StyledText
 			horizontalAlignment: Text.AlignHCenter
 			verticalAlignment: Text.AlignVCenter
 		}
 	}
 
 	ColorAnimation {
-		id: priceFlash
+		id: colorFeedback
 		target: myLabel
 		property: "color"
 		from: Theme.disabledTextColor
@@ -120,7 +125,7 @@ PlasmoidItem {
 	}
 
 	Component.onCompleted: {
-		myLabel.text = "... │ ..."
+		myLabel.text = curSymbol
 		fetchData()
 
 		// Resume monitoring data ready
@@ -136,7 +141,7 @@ PlasmoidItem {
 		repeat: true
 		onTriggered: {
 			// Change applet color if needed
-			if (appletFlash) myLabel.color = Theme.disabledTextColor
+			if (appletColor) myLabel.color = Theme.disabledTextColor
 
 			// Restore configured interval in case it was shortened by datareadyWait
 			interval = timeRefresh * 60 * 1000
@@ -158,15 +163,16 @@ PlasmoidItem {
 		onTriggered: {
 			// Check if all the results marked as fetched and dataready timer still enabled
 			if ( datareadyWait.running &&
-				(  btcReady && (btcData[0] > (1/100000000))) &&
-				( (btcfeeReady && (btcfeeData[0] > (1/100000000))) || !showBTCFee) &&
-				( (metalsReady && (metalsData[0] > (1/100000000))) || !showMetals) &&
-				( (metalsReady && (metalsData[1] > (1/100000000))) || !showMetals) )
+				( (btcReady    && (btcData[0]    > (1/100000000))) || !showBTC || !showBTCTT) &&
+				( (btcfeeReady && (btcfeeData[0] > (1/100000000))) || !showBTCFee || !showBTCFeeTT) &&
+				( (metalsReady && (metalsData[0] > (1/100000000))) || !showMetals || !showMetalsTT) &&
+				( (metalsReady && (metalsData[1] > (1/100000000))) || !showMetals || !showMetalsTT) )
 			{
 				console.debug("finstats::timerTriggered::Build:",
 					"dataReadyAttemp:", dataReadyAttemp, "dataReadyFull:", dataReadyFull,
 					"datareadyWait.running:", datareadyWait.running,
-					"showBTCFee:", showBTCFee, "showMetals:", showMetals,
+					"showBTC:", showBTC, "showBTCFee:", showBTCFee, "showMetals:", showMetals,
+					"showBTCTT:", showBTCTT, "showBTCFeeTT:", showBTCFeeTT, "showMetalsTT:", showMetalsTT,
 					"btcReady:", btcReady, "btcfeeReady:",  btcfeeReady, "metalsReady:", metalsReady,
 					"btcData[0]:", btcData[0], "btcfeeData[0]:", btcfeeData[0],
 					"metalsData[0]:", metalsData[0], "metalsData[1]:", metalsData[1])
@@ -177,12 +183,13 @@ PlasmoidItem {
 				// Once all data fetched, build label
 				dataReadyFull = true
 				buildData()
-				if (appletFlash) priceFlash.restart()
+				if (appletColor) colorFeedback.restart()
 			} else {
 				console.debug("finstats::timerTriggered::Attempt:",
 					"dataReadyAttemp:", dataReadyAttemp, "dataReadyFull:", dataReadyFull,
 					"datareadyWait.running:", datareadyWait.running,
-					"showBTCFee:", showBTCFee, "showMetals:", showMetals,
+					"showBTC:", showBTC, "showBTCFee:", showBTCFee, "showMetals:", showMetals,
+					"showBTCTT:", showBTCTT, "showBTCFeeTT:", showBTCFeeTT, "showMetalsTT:", showMetalsTT,
 					"btcReady:", btcReady, "btcfeeReady:",  btcfeeReady, "metalsReady:", metalsReady,
 					"btcData[0]:", btcData[0], "btcfeeData[0]:", btcfeeData[0],
 					"metalsData[0]:", metalsData[0], "metalsData[1]:", metalsData[1])
@@ -203,7 +210,7 @@ PlasmoidItem {
 				// After max retries, call partial build
 				dataReadyFull = false
 				buildData()
-				if (appletFlash) priceFlash.restart()
+				if (appletColor) colorFeedback.restart()
 			}
 		}
 	}
@@ -219,27 +226,30 @@ PlasmoidItem {
 		var refreshTime = new Date(currentTime.getTime() + refreshTimer.interval)
 		var formattedRefresh = Qt.formatDateTime(refreshTime, "hh:mm")
 
-		var ttStr = ""
-
 		// Calculate BTCFee
-		// vBytes for segwit 1 in 2 out Tx
-		var btcStdFee = (( (btcfeeData[0] < 1) && (btcfeeData[0] > 0) ) ? 1 : btcfeeData[0]) * 141
-		// Price per Tx in currency
-		var btcStdFeePrice = btcStdFee / 100000000 * btcData[0]
+		var btcStdFee = (( (btcfeeData[0] < 1) && (btcfeeData[0] > 0) ) ? 1 : btcfeeData[0]) * 141 // vBytes for segwit 1 in 2 out Tx
+		var btcStdFeePrice = btcStdFee / 100000000 * btcData[0] // Price per Tx in currency
 
+		// Initialize applet and tooltip strings
+		var ttStr = ""
+		var aStr = ""
 
-		// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕)
-		myLabel.text  = (btcData[0]/priceDivider).toFixed(decPlaces) // + "k"
+		// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕ │ )
+		if (showBTC) {
+			aStr = ((btcData[0] > priceDivider) ? (btcData[0] / priceDivider) : btcData[0]).toFixed(decPlaces)
+		}
 
 		if (showBTCFee) {
-			//myLabel.text += " │ " + btcfeeData[0] // + "·" + satsSymbol + "/vKb"
+			aStr += ((aStr.length > 0) ? " │ " : "") + ((btcStdFeePrice < 1) ? (btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT))
 		}
 
 		if (showMetals) {
-			myLabel.text += " │ " + (metalsData[0]/priceDivider).toFixed(decPlaces) // + "·" + auSymbol
-			//myLabel.text += " │ " + (metalsData[1]).toFixed(decPlaces) // + "·" + agSymbol
-			//myLabel.text += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
+			aStr += ((aStr.length > 0) ? " │ " : "") + ((metalsData[0] > priceDivider) ? (metalsData[0] / priceDivider) : metalsData[0]).toFixed(decPlaces)
+			aStr += " │ " + ((metalsData[1] > priceDivider) ? (metalsData[1] / priceDivider) : metalsData[1]).toFixed(decPlaces)
+			//aStr += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
 		}
+
+		myLabel.text = (aStr.length > 0) ? aStr : curSymbol
 		console.log("finstats::*::applet-ready::myLabel.text:", myLabel.text)
 
 		// Build tooltip text starting with timestamp
@@ -249,24 +259,24 @@ PlasmoidItem {
 		ttStr += "| :--- | :--- | :--- | :--- |\n"
 
 		// Add BTC
-		ttStr += "| **" + btcSymbol + (btcReady ? "" : "<sup>⚠️</sup>") + "** | " + (btcData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+		if (showBTCTT) {
+			ttStr += "| **" + btcSymbol + (btcReady ? "" : "<sup>⚠️</sup>") + "** | " + (btcData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+		}
 
 		// Add BTC Fee
-		if (showBTCFee) {
+		if (showBTCFeeTT) {
 			ttStr += " | **" + btcSymbol + "<sub>Fee</sub>" + (btcfeeReady ? "" : "<sup>⚠️</sup>") + "** | " + btcStdFee + "<sup>" + satsSymbol + "</sup>"
-			ttStr += " / " + ((btcStdFeePrice < 1) ? (btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT)) + "<sup>" + ((btcStdFeePrice < 1) ? minorcurSymbol : curSymbol) + "</sup>"
-		} else {
-			ttStr += " | |"
+			ttStr += " / " + ((btcStdFeePrice < 1) ? (btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT)) + "<sup>" + ((btcStdFeePrice < 1) ? minorcurSymbol : curSymbol) + "</sup> |"
 		}
-		ttStr += " |\n"
+		if (showBTCTT || showBTCFeeTT) ttStr += "\n"
 
 		// Add metals
-		if (showMetals) {
+		if (showMetalsTT) {
 			ttStr += "| **" + auSymbol + (metalsReady ? "" : "<sup>⚠️</sup>") + "** | " + (metalsData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 			ttStr += " | **" + agSymbol + (metalsReady ? "" : "<sup>⚠️</sup>") + "** | " + (metalsData[1]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 			ttStr += " |\n"
 
-			ttStr += "| **" + btcSymbol + "/" + auSymbol + "** | " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT)
+			if (showBTC || showBTCTT) ttStr += "| **" + btcSymbol + "/" + auSymbol + "** | " + (btcData[0]/metalsData[0]).toFixed(decPlacesTT)
 			ttStr += " | **" + auSymbol + "/" + agSymbol + "** | " + (metalsData[0]/metalsData[1]).toFixed(decPlacesTT)
 			ttStr += " |\n"
 		}
@@ -279,14 +289,14 @@ PlasmoidItem {
 			var auNet = (metalsData[0] * auStack)
 			var agNet = (metalsData[1] * agStack)
 
-			if (showMetals) {
+			if (showMetalsTT) {
 				ttStr += "| **" + stackSymbol + auSymbol + "** | " + (auNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 				ttStr += " | **" + stackSymbol + agSymbol + "** | " + (agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 				ttStr += " |\n"
 			}
 
-			ttStr += "| **" + stackSymbol + btcSymbol + "** | " + (btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-			ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " + (btcNet+auNet+agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			if (showBTC || showBTCTT) ttStr += "| **" + stackSymbol + btcSymbol + "** | " + (btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " + ( ((showBTC || showBTCTT) ? btcNet : 0) + auNet + agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 			ttStr += " |\n"
 		}
 
@@ -427,7 +437,7 @@ PlasmoidItem {
 		}
 
 		// Reset results readiness and que fetch requests
-		if (true) {
+		if (showBTC || showBTCTT) {
 			btcReady = false
 			btcXhr.open("GET", btcUrl, true)
 			btcXhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0')
@@ -435,7 +445,7 @@ PlasmoidItem {
 			btcXhr.send()
 		}
 
-		if (showBTCFee) {
+		if (showBTCFee || showBTCFeeTT) {
 			btcfeeReady = false
 			btcfeeXhr.open("GET", btcfeeUrl, true)
 			btcfeeXhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0')
@@ -443,7 +453,7 @@ PlasmoidItem {
 			btcfeeXhr.send()
 		}
 
-		if (showMetals) {
+		if (showMetals || showMetalsTT) {
 			metalsReady = false
 			metalsXhr.open("GET", metalsUrl, true)
 			metalsXhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64; rv:147.0) Gecko/20100101 Firefox/147.0')
