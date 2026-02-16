@@ -20,6 +20,9 @@
 		<entry name="curSymbol" type="String">
 			<default>$</default>
 		</entry>
+		<entry name="minorcurSymbol" type="String">
+			<default>¢</default>
+		</entry>
 		<entry name="btcSymbol" type="String">
 			<default>₿</default>
 			<alt>Ⓑ</alt>

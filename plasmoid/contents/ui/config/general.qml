@@ -19,6 +19,7 @@ Item {
 	property alias cfg_showStack: showStack.checked
 	property alias cfg_stackSymbol: stackSymbol.text
 	property alias cfg_curSymbol: curSymbol.text
+	property alias cfg_minorcurSymbol: minorcurSymbol.text
 	property alias cfg_btcSymbol: btcSymbol.text
 	property alias cfg_satsSymbol: satsSymbol.text
 	property alias cfg_auSymbol: auSymbol.text
@@ -114,6 +115,20 @@ Item {
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use to indicate currency")
+				}
+
+				// Minor Currency symbol (cents)
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Minor Currency symbol:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: minorcurSymbol
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which symbol to use to indicate minor currency (cents)")
 				}
 
 				// BTC symbol
