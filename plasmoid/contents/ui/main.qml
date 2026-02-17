@@ -38,6 +38,7 @@ PlasmoidItem {
 	property bool showMetalsTT: plasmoid.configuration.showMetalsTT
 	property bool showStack: plasmoid.configuration.showStack
 	property string stackSymbol: plasmoid.configuration.stackSymbol
+	property string appletSymbol: plasmoid.configuration.appletSymbol
 	property string curSymbol: plasmoid.configuration.curSymbol
 	property string minorcurSymbol: plasmoid.configuration.minorcurSymbol
 	property string btcSymbol: plasmoid.configuration.btcSymbol
@@ -109,7 +110,6 @@ PlasmoidItem {
 		// A simple label to display the JSON data
 		Label {
 			id: myLabel
-			textFormat: Text.MarkdownText // RichText StyledText
 			horizontalAlignment: Text.AlignHCenter
 			verticalAlignment: Text.AlignVCenter
 		}
@@ -125,7 +125,7 @@ PlasmoidItem {
 	}
 
 	Component.onCompleted: {
-		myLabel.text = curSymbol
+		myLabel.text = appletSymbol
 		fetchData()
 
 		// Resume monitoring data ready
@@ -230,47 +230,47 @@ PlasmoidItem {
 		var btcStdFee = (( (btcfeeData[0] < 1) && (btcfeeData[0] > 0) ) ? 1 : btcfeeData[0]) * 141 // vBytes for segwit 1 in 2 out Tx
 		var btcStdFeePrice = btcStdFee / 100000000 * btcData[0] // Price per Tx in currency
 
-		// Initialize applet and tooltip strings
+		// Initialize applet and tooltip strings (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕ │ )
 		var ttStr = ""
 		var aStr = ""
 
-		// Build panel applet text (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕ │ )
+		// Add BTC to applet
 		if (showBTC) {
 			aStr = ((btcData[0] > priceDivider) ? (btcData[0] / priceDivider) : btcData[0]).toFixed(decPlaces)
 		}
 
+		// Add BTC fee to applet
 		if (showBTCFee) {
 			aStr += ((aStr.length > 0) ? " │ " : "") + ((btcStdFeePrice < 1) ? (btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT))
 		}
 
+		// Add metals to applet
 		if (showMetals) {
 			aStr += ((aStr.length > 0) ? " │ " : "") + ((metalsData[0] > priceDivider) ? (metalsData[0] / priceDivider) : metalsData[0]).toFixed(decPlaces)
 			aStr += " │ " + ((metalsData[1] > priceDivider) ? (metalsData[1] / priceDivider) : metalsData[1]).toFixed(decPlaces)
-			//aStr += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
+			aStr += " │ " + (metalsData[0]/metalsData[1]).toFixed(decPlaces)
 		}
 
 		myLabel.text = (aStr.length > 0) ? aStr : curSymbol
 		console.log("finstats::*::applet-ready::myLabel.text:", myLabel.text)
 
-		// Build tooltip text starting with timestamp
+		// Start tooltip with timestamp and markdown table header
 		ttStr += "| 🗓️ | " + formattedDate + " | ⏱ | " + formattedTime + " |\n"
-
-		// Add markdown table
 		ttStr += "| :--- | :--- | :--- | :--- |\n"
 
-		// Add BTC
+		// Add BTC totooltip
 		if (showBTCTT) {
 			ttStr += "| **" + btcSymbol + (btcReady ? "" : "<sup>⚠️</sup>") + "** | " + (btcData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 		}
 
-		// Add BTC Fee
+		// Add BTC Fee to tooltip
 		if (showBTCFeeTT) {
 			ttStr += " | **" + btcSymbol + "<sub>Fee</sub>" + (btcfeeReady ? "" : "<sup>⚠️</sup>") + "** | " + btcStdFee + "<sup>" + satsSymbol + "</sup>"
 			ttStr += " / " + ((btcStdFeePrice < 1) ? (btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT)) + "<sup>" + ((btcStdFeePrice < 1) ? minorcurSymbol : curSymbol) + "</sup> |"
 		}
 		if (showBTCTT || showBTCFeeTT) ttStr += "\n"
 
-		// Add metals
+		// Add metals to tooltip
 		if (showMetalsTT) {
 			ttStr += "| **" + auSymbol + (metalsReady ? "" : "<sup>⚠️</sup>") + "** | " + (metalsData[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 			ttStr += " | **" + agSymbol + (metalsReady ? "" : "<sup>⚠️</sup>") + "** | " + (metalsData[1]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
@@ -281,7 +281,7 @@ PlasmoidItem {
 			ttStr += " |\n"
 		}
 
-		// Add stack
+		// Add stack to tooltip
 		if (showStack) {
 			// Calculate stack
 			var btcTax = (((btcData[0] * btcStack) - (btcCost * btcStack)) / 100 * capGain)

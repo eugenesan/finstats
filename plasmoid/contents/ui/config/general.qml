@@ -22,6 +22,7 @@ Item {
 	property alias cfg_showMetalsTT: showMetalsTT.checked
 	property alias cfg_showStack: showStack.checked
 	property alias cfg_stackSymbol: stackSymbol.text
+	property alias cfg_appletSymbol: appletSymbol.text
 	property alias cfg_curSymbol: curSymbol.text
 	property alias cfg_minorcurSymbol: minorcurSymbol.text
 	property alias cfg_btcSymbol: btcSymbol.text
@@ -44,7 +45,7 @@ Item {
 				// Applet color feedback
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Color Applet on change:")
+					text: i18n("Color fedback on change/errors:")
 					horizontalAlignment: Label.AlignLeft
 				}
 				CheckBox {
@@ -64,7 +65,7 @@ Item {
 					id: showBTC
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display BTC in the Applet")
+					ToolTip.text: i18n("Wether to display BTC on Applet")
 				}
 
 				// Show btc tooltip
@@ -77,7 +78,7 @@ Item {
 					id: showBTCTT
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display BTC in ToolTip")
+					ToolTip.text: i18n("Wether to display BTC on ToolTip")
 				}
 
 				// Show btcfee
@@ -90,7 +91,7 @@ Item {
 					id: showBTCFee
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display BTC Fee in Applet")
+					ToolTip.text: i18n("Wether to display BTC Fee on Applet")
 				}
 
 				// Show btcfee tooltip
@@ -103,7 +104,7 @@ Item {
 					id: showBTCFeeTT
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display BTC Fee in ToolTip")
+					ToolTip.text: i18n("Wether to display BTC Fee on ToolTip")
 				}
 
 				// Show metals
@@ -116,7 +117,7 @@ Item {
 					id: showMetals
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display metals in Applet ")
+					ToolTip.text: i18n("Wether to display metals on Applet ")
 				}
 
 				// Show metals tooltip
@@ -129,7 +130,7 @@ Item {
 					id: showMetalsTT
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display metals in ToolTip")
+					ToolTip.text: i18n("Wether to display metals on ToolTip")
 				}
 
 				// Show stack
@@ -142,7 +143,7 @@ Item {
 					id: showStack
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display stack summary in the ToolTip.")
+					ToolTip.text: i18n("Wether to display Stack on ToolTip")
 				}
 
 				// Stack symbol
@@ -156,7 +157,21 @@ Item {
 					text: "#000000"
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use to indicate stack")
+					ToolTip.text: i18n("Which symbol to for Stack")
+				}
+
+				// Applet symbol
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Applet symbol:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: stackSymbol
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Default symbol for empty Applet")
 				}
 
 				// Currency symbol
@@ -170,7 +185,7 @@ Item {
 					text: "#000000"
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use to indicate currency")
+					ToolTip.text: i18n("Which symbol to use for Currency")
 				}
 
 				// Minor Currency symbol (cents)
@@ -184,7 +199,7 @@ Item {
 					text: "#000000"
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use to indicate minor currency (cents)")
+					ToolTip.text: i18n("Which symbol to use for minor Currency (1/100th)")
 				}
 
 				// BTC symbol
@@ -198,7 +213,7 @@ Item {
 					text: "#000000"
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use to indicate BTC")
+					ToolTip.text: i18n("Which symbol to use for BTC")
 				}
 
 				// Sats symbol
@@ -212,7 +227,7 @@ Item {
 					text: "#000000"
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use to indicate Satoshi")
+					ToolTip.text: i18n("Which symbol to use for Satoshi")
 				}
 
 				// Metals Au symbol
@@ -226,7 +241,7 @@ Item {
 					text: "#000000"
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use to indicate Gold")
+					ToolTip.text: i18n("Which symbol to use for Gold")
 				}
 
 				// Metals Ag symbol
@@ -240,7 +255,7 @@ Item {
 					text: "#000000"
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use to indicate Silver")
+					ToolTip.text: i18n("Which symbol to use for Silver")
 				}
 
 				// Applet decimal places
@@ -255,7 +270,7 @@ Item {
 					to: 9
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Decimal places for applet. Valid range: 0–9.")
+					ToolTip.text: i18n("Decimal places for Applet")
 				}
 
 				// ToolTip decimal places
@@ -270,7 +285,7 @@ Item {
 					to: 9
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Decimal places for ToolTip. Valid range: 0–9.")
+					ToolTip.text: i18n("Decimal places for ToolTip")
 				}
 
 				// Price divider
@@ -282,10 +297,10 @@ Item {
 				SpinBox {
 					id: priceDivider
 					from: 0
-					to: 999999
+					to: 100000
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Divider to apply to prices on appplet. Valid range: 0–999999.")
+					ToolTip.text: i18n("Divider to apply to prices on appplet (applies only to 'greater than' values)")
 				}
 			}  // Closing GridLayout
 		}      // Closing ColumnLayout
