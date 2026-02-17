@@ -4,8 +4,14 @@ import org.kde.plasma.configuration
 ConfigModel {
 	ConfigCategory {
 		name: i18n("General")
-		icon: "preferences-desktop"
+		icon: "applications-system-symbolic"
 		source: "config/general.qml"
+	}
+
+	ConfigCategory {
+		name: i18n("Appearance")
+		icon: "applications-engineering-symbolic"
+		source: "config/appearance.qml"
 	}
 
 	ConfigCategory {
