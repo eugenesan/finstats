@@ -35,11 +35,12 @@ Item {
 
 				// BTC sources
 				Label {
-					text: i18n("Load BTC preset:")
+					text: i18n("Select BTC fetch preset:")
 				}
 				ComboBox {
 					id: loadPresetCombo
 					textRole: "text"
+					currentIndex: -1
 
 					model: [{
 						text: i18n("Bitstamp BTC-USD"),
@@ -68,24 +69,26 @@ Item {
 					}]
 
 					Component.onCompleted: {
+						console.debug("finstats::*::config::fetch::ComboBox::onCompleted::currentIndex:", currentIndex)
 						for (var i = 0, length = model.length; i < length; ++i) {
 							if (model[i].url === cfg_btcUrl) {
 								currentIndex = i
-								console.log("finstats::*::config:current-model:", currentIndex, model[currentIndex].url, model[currentIndex].key);
+								console.debug("finstats::*::config::fetch::ComboBox::onCompleted::seekFound:", currentIndex, model[currentIndex].url, model[currentIndex].key);
 								return
 							}
 						}
+						console.log("finstats::*::config::fetch::ComboBox::onCompleted::seekError:", currentIndex)
 					}
 
 					onCurrentIndexChanged: {
-						console.log("finstats::*::config:comboselect:", currentIndex, model[currentIndex].url, model[currentIndex].key);
+						console.log("finstats::*::config::fetch::ComboBox::onCurrentIndexChanged:", currentIndex, model[currentIndex].url, model[currentIndex].key)
 						// Perform actions based on the new index
 						cfg_btcUrl = model[currentIndex].url
 						cfg_btcKey = model[currentIndex].key
 					}
 
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Load preset for fetching Bitcoin price")
+					ToolTip.text: i18n("Select preset for fetching Bitcoin price")
 				}
 
 				// BTC URL
