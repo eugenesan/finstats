@@ -60,6 +60,16 @@
 			<alt>🥈</alt>
 			<alt>🜛</alt>
 		</entry>
+		<entry name="warnSymbol" type="String">
+			<default>⚠</default>
+			<alt>☝</alt>
+			<alt>!</alt>
+		</entry>
+		<entry name="delimSymbol" type="String">
+			<default>│</default>
+			<alt>·</alt>
+			<alt>!</alt>
+		</entry>
 		<entry name="decPlaces" type="Int">
 			<default>1</default>
 		</entry>

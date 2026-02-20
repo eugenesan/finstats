@@ -22,6 +22,8 @@ Item {
 	property alias cfg_satsSymbol: satsSymbol.text
 	property alias cfg_auSymbol: auSymbol.text
 	property alias cfg_agSymbol: agSymbol.text
+	property alias cfg_warnSymbol: warnSymbol.text
+	property alias cfg_delimSymbol: delimSymbol.text
 	property alias cfg_decPlaces: decPlaces.value
 	property alias cfg_decPlacesTT: decPlacesTT.value
 	property alias cfg_priceDivider: priceDivider.value
@@ -158,6 +160,35 @@ Item {
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use for Silver")
+				}
+
+				// Warning symbol
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Warning symbol:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: warnSymbol
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which symbol to use for Warning")
+				}
+
+
+				// Delimiter symbol
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Delimiter symbol:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: delimSymbol
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which symbol to use as delimiter on applet")
 				}
 
 				// Applet decimal places
