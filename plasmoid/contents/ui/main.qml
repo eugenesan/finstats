@@ -158,7 +158,7 @@ PlasmoidItem {
 	// Wait for data to be fetched and build applet/tooltip text
 	Timer {
 		id: datareadyWait
-		interval: (timeRetry + 1) * 1000
+		interval: (timeRetry / 2) * 1000
 		running: true
 		repeat: true
 
@@ -204,7 +204,7 @@ PlasmoidItem {
 			}
 
 			// Retry 3 times and if still failed, set refresh timer as configured
-			if (dataReadyAttemp > 1) {
+			if (dataReadyAttemp > 2) {
 				console.log("finstats::timerTriggered::LastAttemp::", "timeRetry:", timeRetry, "refreshTimer.interval:" , refreshTimer.interval)
 				running = false
 				refreshTimer.interval = timeRefetch * 60 * 1000
