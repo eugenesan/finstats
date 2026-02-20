@@ -204,7 +204,7 @@ PlasmoidItem {
 			}
 
 			// Retry 3 times and if still failed, set refresh timer as configured
-			if (dataReadyAttemp > 2) {
+			if (dataReadyAttemp > 3) {
 				console.log("finstats::timerTriggered::LastAttemp::", "timeRetry:", timeRetry, "refreshTimer.interval:" , refreshTimer.interval)
 				running = false
 				refreshTimer.interval = timeRefetch * 60 * 1000
@@ -373,9 +373,9 @@ PlasmoidItem {
 						for (var y = 0; y < btcfeePaths.length; y++) {
 							var data = JSON.parse(btcfeeXhr.responseText)
 							var keys = btcfeePaths[y].split(".")
-							console.debug("finstats::BTCFee::PreParsing::data:", data, "y", y, "keys", keys)
+							console.debug("finstats::BTCFee::PreParsing::data:", data, "y:", y, "keys:", keys)
 							for (var x = 0; x < keys.length; x++) {
-								console.debug("finstats::BTCFee::Parsing::x:", x, "btcfeePaths[y]:", btcfeePaths[y], "keys[x]", keys[x], "data[keys[x]]:", data[keys[x]])
+								console.debug("finstats::BTCFee::Parsing::x:", x, "btcfeePaths[y]:", btcfeePaths[y], "keys[x]:", keys[x], "data[keys[x]]:", data[keys[x]])
 								if (typeof data[keys[x]] != 'undefined' ) {
 									// Signal data is ready (first hit is a must)
 									if (x == 0) btcfeeReady = true
@@ -388,7 +388,7 @@ PlasmoidItem {
 								}
 							}
 
-							console.debug("finstats::BTCFee::PostParsing::x:", y, "data:", data)
+							console.debug("finstats::BTCFee::PostParsing::y:", y, "data:", data)
 						}
 					} catch (e) {
 						console.error("finstats::BTCFee::JSON parsing error:", e)
