@@ -75,7 +75,7 @@
 			<default>30</default>
 		</entry>
 		<entry name="timeRetry" type="Int">
-			<default>3</default>
+			<default>5</default>
 		</entry>
 		<entry name="timeRefetch" type="Int">
 			<default>5</default>
@@ -94,13 +94,19 @@
 			<options>fastestFee,halfHourFee,hourFee,economyFee,minimumFee</options>
 		</entry>
 		<entry name="metalsUrl" type="String">
-			<default>https://data-asg.goldprice.org/dbXRates/USD</default>
+			<default>https://api.gold-api.com/price/</default>
+		</entry>
+		<entry name="metalsSuffAu" type="String">
+			<default>XAU</default>
+		</entry>
+		<entry name="metalsSuffAg" type="String">
+			<default>XAG</default>
 		</entry>
 		<entry name="metalsKeyAu" type="String">
-			<default>items.0.xauPrice</default>
+			<default>price</default>
 		</entry>
 		<entry name="metalsKeyAg" type="String">
-			<default>items.0.xagPrice</default>
+			<default>price</default>
 		</entry>
 	</group>
 	<group name="Stack">

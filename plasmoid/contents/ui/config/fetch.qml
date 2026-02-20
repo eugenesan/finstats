@@ -20,6 +20,8 @@ Item {
 	property alias cfg_metalsUrl: metalsUrl.text
 	property alias cfg_metalsKeyAu: metalsKeyAu.text
 	property alias cfg_metalsKeyAg: metalsKeyAg.text
+	property alias cfg_metalsSuffAu: metalsSuffAu.text
+	property alias cfg_metalsSuffAg: metalsSuffAg.text
 	property alias cfg_timeRefresh: timeRefresh.value
 	property alias cfg_timeRetry: timeRetry.value
 	property alias cfg_timeRefetch: timeRefetch.value
@@ -38,7 +40,7 @@ Item {
 					text: i18n("Select BTC fetch preset:")
 				}
 				ComboBox {
-					id: loadPresetCombo
+					id: loadBTCPresetCombo
 					textRole: "text"
 					currentIndex: -1
 
@@ -69,19 +71,19 @@ Item {
 					}]
 
 					Component.onCompleted: {
-						console.debug("finstats::*::config::fetch::ComboBox::onCompleted::currentIndex:", currentIndex)
+						console.debug("finstats::*::config::fetch::BTC::ComboBox::onCompleted::currentIndex:", currentIndex)
 						for (var i = 0, length = model.length; i < length; ++i) {
 							if (model[i].url === cfg_btcUrl) {
 								currentIndex = i
-								console.debug("finstats::*::config::fetch::ComboBox::onCompleted::seekFound:", currentIndex, model[currentIndex].url, model[currentIndex].key);
+								console.debug("finstats::*::config::BTC::fetch::ComboBox::onCompleted::seekFound:", currentIndex, model[currentIndex].url, model[currentIndex].key);
 								return
 							}
 						}
-						console.log("finstats::*::config::fetch::ComboBox::onCompleted::seekError:", currentIndex)
+						console.log("finstats::*::config::fetch::BTC::ComboBox::onCompleted::seekError:", currentIndex)
 					}
 
 					onCurrentIndexChanged: {
-						console.log("finstats::*::config::fetch::ComboBox::onCurrentIndexChanged:", currentIndex, model[currentIndex].url, model[currentIndex].key)
+						console.log("finstats::*::config::fetch::BTC::ComboBox::onCurrentIndexChanged:", currentIndex, model[currentIndex].url, model[currentIndex].key)
 						// Perform actions based on the new index
 						cfg_btcUrl = model[currentIndex].url
 						cfg_btcKey = model[currentIndex].key
@@ -151,6 +153,57 @@ Item {
 					ToolTip.text: i18n("Which JSON key to extract for BTC fee value")
 				}
 
+				// Metals sources
+				Label {
+					text: i18n("Select Metals fetch preset:")
+				}
+				ComboBox {
+					id: loadMetalsPresetCombo
+					textRole: "text"
+					currentIndex: -1
+
+					model: [{
+						text: i18n("Gold Price (goldprice.org)"),
+						url: "https://data-asg.goldprice.org/dbXRates/USD",
+						suffAu: "",
+						suffAg: "",
+						keyAu: "items.0.xauPrice",
+						keyAg: "items.0.xagPrice"
+					}, {
+						text: i18n("Gold API (gold-api.com)"),
+						url: "https://api.gold-api.com/price/",
+						suffAu: "XAU",
+						suffAg: "XAG",
+						keyAu: "price",
+						keyAg: "price"
+					}]
+
+					Component.onCompleted: {
+						console.debug("finstats::*::config::fetch::Metals::ComboBox::onCompleted::currentIndex:", currentIndex)
+						for (var i = 0, length = model.length; i < length; ++i) {
+							if (model[i].url === cfg_metalsUrl) {
+								currentIndex = i
+								console.debug("finstats::*::config::fetch::Metals::ComboBox::onCompleted::seekFound:", currentIndex, model[currentIndex].url, model[currentIndex].keyAu, model[currentIndex].keyAg, model[currentIndex].suffAu, model[currentIndex].suffAg);
+								return
+							}
+						}
+						console.log("finstats::*::config::fetch::Metals::ComboBox::onCompleted::seekError:", currentIndex)
+					}
+
+					onCurrentIndexChanged: {
+						console.log("finstats::*::config::fetch::Metals::ComboBox::onCurrentIndexChanged:", currentIndex, model[currentIndex].keyAu, model[currentIndex].keyAg, model[currentIndex].suffAu, model[currentIndex].suffAg)
+						// Perform actions based on the new index
+						cfg_metalsUrl = model[currentIndex].url
+						cfg_metalsSuffAu = model[currentIndex].suffAu
+						cfg_metalsSuffAg = model[currentIndex].suffAg
+						cfg_metalsKeyAu = model[currentIndex].keyAu
+						cfg_metalsKeyAg = model[currentIndex].keyAg
+					}
+
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Select preset for fetching Metals price")
+				}
+
 				// Metals URL
 				Label {
 					Layout.minimumWidth: root.width / 3
@@ -164,6 +217,36 @@ Item {
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which URL to Metals from")
+				}
+
+				// Metals Au Suffix
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Metals Au URL suffix:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: metalsSuffAu
+					Layout.minimumWidth: root.width * 0.6
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which URL suffix to use for Au value")
+				}
+
+				// Metals Ag Suffix
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Metals Ag URL suffix:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: metalsSuffAg
+					Layout.minimumWidth: root.width * 0.6
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which URL suffix to use for Ag value")
 				}
 
 				// Metals Au Key
