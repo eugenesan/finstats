@@ -238,9 +238,6 @@ PlasmoidItem {
 		var ttStr = ""
 		var aStr = ""
 
-		// Add narrow spaces around delimiter (XML refuses to pull spaces from config)
-		delimSymbol = " " + delimSymbol + " "
-
 		// Add BTC to applet
 		if (showBTC) {
 			aStr = ((fetchState["btc"].data[0] > priceDivider) ? (fetchState["btc"].data[0] / priceDivider) : fetchState["btc"].data[0]).toFixed(decPlaces)
@@ -248,14 +245,14 @@ PlasmoidItem {
 
 		// Add BTC fee to applet
 		if (showBTCFee) {
-			aStr += ((aStr.length > 0) ? delimSymbol : "") + ((btcStdFeePrice < 1) ? (btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT))
+			aStr += ((aStr.length > 0) ? " " + delimSymbol + " " : "") + ((btcStdFeePrice < 1) ? (btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT))
 		}
 
 		// Add metals to applet
 		if (showMetals) {
-			aStr += ((aStr.length > 0) ? delimSymbol : "") + ((fetchState["metals"].data[0] > priceDivider) ? (fetchState["metals"].data[0] / priceDivider) : fetchState["metals"].data[0]).toFixed(decPlaces)
-			aStr += delimSymbol + ((fetchState["metals"].data[1] > priceDivider) ? (fetchState["metals"].data[1] / priceDivider) : fetchState["metals"].data[1]).toFixed(decPlaces)
-			aStr += delimSymbol + (fetchState["metals"].data[2]).toFixed(decPlaces)
+			aStr += ((aStr.length > 0) ? " " + delimSymbol + " " : "") + ((fetchState["metals"].data[0] > priceDivider) ? (fetchState["metals"].data[0] / priceDivider) : fetchState["metals"].data[0]).toFixed(decPlaces)
+			aStr += " " + delimSymbol + " " + ((fetchState["metals"].data[1] > priceDivider) ? (fetchState["metals"].data[1] / priceDivider) : fetchState["metals"].data[1]).toFixed(decPlaces)
+			aStr += " " + delimSymbol + " " + (fetchState["metals"].data[2]).toFixed(decPlaces)
 		}
 
 		myLabel.text = (aStr.length > 0) ? aStr : curSymbol
