@@ -87,7 +87,7 @@ PlasmoidItem {
 		acceptedButtons: Qt.LeftButton
 		// Refresh the label and reset time on mouse click
 		onClicked: (mouse) => {
-			console.log("finstats::*::clicked-start-refresh-data")
+			console.log("finstats::MouseArea::clicked-start-refresh-data")
 
 			// Change applet color if needed
 			if (appletColor) myLabel.color = Theme.disabledTextColor
@@ -97,7 +97,7 @@ PlasmoidItem {
 			dataReadyAttemp = 0
 			fetchData()
 			datareadyWait.running = true
-			console.debug("finstats::*::clicked--stop-timer-restart")
+			console.debug("finstats::MouseArea::clicked::stop-timer-restart")
 			refreshTimer.restart()
 		}
 
@@ -167,17 +167,22 @@ PlasmoidItem {
 		onTriggered: {
 			// Check if all the results marked as fetched and dataready timer still enabled
 			if ( datareadyWait.running &&
-				( (fetchState["btc"].ready    && (fetchState["btc"].data[0]    > (1/100000000))) || (!showBTC && !showBTCTT) ) &&
-				( (fetchState["btcfee"].ready && (fetchState["btcfee"].data[0] > (1/100000000))) || (!showBTCFee && !showBTCFeeTT) ) &&
-				( (fetchState["metals"].ready && (fetchState["metals"].data[0] > (1/100000000))) || (!showMetals && !showMetalsTT) ) &&
-				( (fetchState["metals"].ready && (fetchState["metals"].data[1] > (1/100000000))) || (!showMetals && !showMetalsTT) ) )
+				( (fetchState["btc"].ready &&
+					(fetchState["btc"].data[0] > (1/100000000))) || (!showBTC && !showBTCTT) ) &&
+				( (fetchState["btcfee"].ready &&
+					(fetchState["btcfee"].data[0] > (1/100000000))) || (!showBTCFee && !showBTCFeeTT) ) &&
+				( (fetchState["metals"].ready &&
+					(fetchState["metals"].data[0] > (1/100000000))) || (!showMetals && !showMetalsTT) ) &&
+				( (fetchState["metals"].ready &&
+					(fetchState["metals"].data[1] > (1/100000000))) || (!showMetals && !showMetalsTT) ) )
 			{
-				console.debug("finstats::timerTriggered::Build:",
+				console.debug("finstats::Timer::timerTriggered::Build:",
 					"dataReadyAttemp:", dataReadyAttemp, "dataReadyFull:", dataReadyFull,
 					"datareadyWait.running:", datareadyWait.running,
 					"showBTC:", showBTC, "showBTCFee:", showBTCFee, "showMetals:", showMetals,
 					"showBTCTT:", showBTCTT, "showBTCFeeTT:", showBTCFeeTT, "showMetalsTT:", showMetalsTT,
-					"btcReady:", fetchState["btc"].ready, "btcfeeReady:",  fetchState["btcfee"].ready, "metalsReady:", fetchState["metals"].ready,
+					"btcReady:", fetchState["btc"].ready, "btcfeeReady:", fetchState["btcfee"].ready,
+					"metalsReady:", fetchState["metals"].ready,
 					"btcData:", fetchState["btc"].data[0], "btcfeeData[0]:", fetchState["btcfee"].data[0],
 					"metalsData[0]:", fetchState["metals"].data[0], "metalsData[1]:", fetchState["metals"].data[1])
 
@@ -189,12 +194,13 @@ PlasmoidItem {
 				buildData()
 				if (appletColor) colorFeedback.restart()
 			} else {
-				console.debug("finstats::timerTriggered::Attempt:",
+				console.debug("finstats::Timer::timerTriggered::Attempt:",
 					"dataReadyAttemp:", dataReadyAttemp, "dataReadyFull:", dataReadyFull,
 					"datareadyWait.running:", datareadyWait.running,
 					"showBTC:", showBTC, "showBTCFee:", showBTCFee, "showMetals:", showMetals,
 					"showBTCTT:", showBTCTT, "showBTCFeeTT:", showBTCFeeTT, "showMetalsTT:", showMetalsTT,
-					"btcReady:", fetchState["btc"].ready, "btcfeeReady:",  fetchState["btcfee"].ready, "metalsReady:", fetchState["metals"].ready,
+					"btcReady:", fetchState["btc"].ready, "btcfeeReady:", fetchState["btcfee"].ready,
+					"metalsReady:", fetchState["metals"].ready,
 					"btcData:", fetchState["btc"].data[0], "btcfeeData[0]:", fetchState["btcfee"].data[0],
 					"metalsData[0]:", fetchState["metals"].data[0], "metalsData[1]:", fetchState["metals"].data[1])
 
@@ -207,7 +213,8 @@ PlasmoidItem {
 
 			// Retry 3 times and if still failed, set refresh timer as configured
 			if (dataReadyAttemp > 4) {
-				console.log("finstats::timerTriggered::LastAttemp::", "timeRetry:", timeRetry, "refreshTimer.interval:" , refreshTimer.interval)
+				console.log("finstats::Timer::timerTriggered::LastAttemp::", "timeRetry:", timeRetry,
+							"refreshTimer.interval:" , refreshTimer.interval)
 				running = false
 				refreshTimer.interval = timeRefetch * 60 * 1000
 
@@ -220,7 +227,7 @@ PlasmoidItem {
 	}
 
 	function buildData() {
-		console.log("finstats::*::buildData::dataReadyFull:", dataReadyFull)
+		console.log("finstats::buildData::dataReadyFull:", dataReadyFull)
 
 		// Get current date and time
 		var currentTime = new Date()
@@ -231,8 +238,9 @@ PlasmoidItem {
 		var formattedRefresh = Qt.formatDateTime(refreshTime, "hh:mm")
 
 		// Calculate BTCFee
-		var btcStdFee = (( (fetchState["btcfee"].data[0] < 1) && (fetchState["btcfee"].data[0] > 0) ) ? 1 : fetchState["btcfee"].data[0]) * 141 // vBytes for segwit 1 in 2 out Tx
-		var btcStdFeePrice = btcStdFee / 100000000 * fetchState["btc"].data[0] // Price per Tx in currency
+		var btcStdFee = (( (fetchState["btcfee"].data[0] < 1) &&
+			(fetchState["btcfee"].data[0] > 0) ) ? 1 : fetchState["btcfee"].data[0]) * 141	// vB Segwit 1*in 2*out Tx
+		var btcStdFeePrice = btcStdFee / 100000000 * fetchState["btc"].data[0]				// Price per Tx in currency
 
 		// Initialize applet and tooltip strings (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕ │ )
 		var ttStr = ""
@@ -240,23 +248,29 @@ PlasmoidItem {
 
 		// Add BTC to applet
 		if (showBTC) {
-			aStr = ((fetchState["btc"].data[0] > priceDivider) ? (fetchState["btc"].data[0] / priceDivider) : fetchState["btc"].data[0]).toFixed(decPlaces)
+			aStr = ((fetchState["btc"].data[0] > priceDivider) ?
+				(fetchState["btc"].data[0] / priceDivider) : fetchState["btc"].data[0]).toFixed(decPlaces)
 		}
 
 		// Add BTC fee to applet
 		if (showBTCFee) {
-			aStr += ((aStr.length > 0) ? " " + delimSymbol + " " : "") + ((btcStdFeePrice < 1) ? (btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT))
+			aStr += ((aStr.length > 0) ? " " + delimSymbol + " " : "") + ((btcStdFeePrice < 1) ?
+				(btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT))
 		}
 
 		// Add metals to applet
 		if (showMetals) {
-			aStr += ((aStr.length > 0) ? " " + delimSymbol + " " : "") + ((fetchState["metals"].data[0] > priceDivider) ? (fetchState["metals"].data[0] / priceDivider) : fetchState["metals"].data[0]).toFixed(decPlaces)
-			aStr += " " + delimSymbol + " " + ((fetchState["metals"].data[1] > priceDivider) ? (fetchState["metals"].data[1] / priceDivider) : fetchState["metals"].data[1]).toFixed(decPlaces)
+			aStr += ((aStr.length > 0) ? " " + delimSymbol + " " : "") +
+				((fetchState["metals"].data[0] > priceDivider) ?
+					(fetchState["metals"].data[0] / priceDivider) : fetchState["metals"].data[0]).toFixed(decPlaces)
+			aStr += " " + delimSymbol + " " +
+				((fetchState["metals"].data[1] > priceDivider) ?
+					(fetchState["metals"].data[1] / priceDivider) : fetchState["metals"].data[1]).toFixed(decPlaces)
 			aStr += " " + delimSymbol + " " + (fetchState["metals"].data[2]).toFixed(decPlaces)
 		}
 
 		myLabel.text = (aStr.length > 0) ? aStr : curSymbol
-		console.log("finstats::*::applet-ready::myLabel.text:", myLabel.text)
+		console.log("finstats::buildData::applet-ready::myLabel.text:", myLabel.text)
 
 		// Start tooltip with timestamp and markdown table header
 		ttStr += "| 🗓 |" + formattedDate + " | ⏱ | " + formattedTime + " |\n"
@@ -264,24 +278,36 @@ PlasmoidItem {
 
 		// Add BTC totooltip
 		if (showBTCTT) {
-			ttStr += "| **" + btcSymbol + (fetchState["btc"].ready ? "" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["btc"].data[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			ttStr += "| **" + btcSymbol + (fetchState["btc"].ready ?
+				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["btc"].data[0]).toFixed(decPlacesTT) +
+					"<sup>" + curSymbol + "</sup>"
 		}
 
 		// Add BTC Fee to tooltip
 		if (showBTCFeeTT) {
-			ttStr += " | **" + btcSymbol + "<sub>Fee</sub>" + (fetchState["btcfee"].ready ? "" : "<sup>" + warnSymbol + "</sup>") + "** | " + btcStdFee + "<sup>" + satsSymbol + "</sup>"
-			ttStr += " / " + ((btcStdFeePrice < 1) ? (btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT)) + "<sup>" + ((btcStdFeePrice < 1) ? minorcurSymbol : curSymbol) + "</sup> |"
+			ttStr += " | **" + btcSymbol + "<sub>Fee</sub>" + (fetchState["btcfee"].ready ?
+				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + btcStdFee + "<sup>" + satsSymbol + "</sup>"
+			ttStr += " / " + ((btcStdFeePrice < 1) ?
+				(btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT)) + "<sup>" +
+					((btcStdFeePrice < 1) ? minorcurSymbol : curSymbol) + "</sup> |"
 		}
 		if (showBTCTT || showBTCFeeTT) ttStr += "\n"
 
 		// Add metals to tooltip
 		if (showMetalsTT) {
-			ttStr += "| **" + auSymbol + (fetchState["metals"].ready ? "" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].data[0]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-			ttStr += " | **" + agSymbol + (fetchState["metals"].ready ? "" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].data[1]).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			ttStr += "| **" + auSymbol + (fetchState["metals"].ready ?
+				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].data[0]).toFixed(decPlacesTT) +
+					"<sup>" + curSymbol + "</sup>"
+			ttStr += " | **" + agSymbol + (fetchState["metals"].ready ?
+				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].data[1]).toFixed(decPlacesTT) +
+					"<sup>" + curSymbol + "</sup>"
 			ttStr += " |\n"
 
-			if (showBTC || showBTCTT) ttStr += "| **" + btcSymbol + "/" + auSymbol + "** | " + ( ((fetchState["btc"].data[0] > 0) && (fetchState["metals"].data[0] > 0) ) ? fetchState["btc"].data[0]/fetchState["metals"].data[0] : 0).toFixed(decPlacesTT)
-			ttStr += " | **" + auSymbol + "/" + agSymbol + "** | " + (fetchState["metals"].data[2]).toFixed(decPlacesTT)
+			if (showBTC || showBTCTT) ttStr += "| **" + btcSymbol + "/" + auSymbol + "** | " +
+				( ((fetchState["btc"].data[0] > 0) && (fetchState["metals"].data[0] > 0) ) ?
+					fetchState["btc"].data[0]/fetchState["metals"].data[0] : 0).toFixed(decPlacesTT)
+			ttStr += " | **" + auSymbol + "/" + agSymbol + "** | " +
+				(fetchState["metals"].data[2]).toFixed(decPlacesTT)
 			ttStr += " |\n"
 		}
 
@@ -294,13 +320,18 @@ PlasmoidItem {
 			var agNet = (fetchState["metals"].data[1] * agStack)
 
 			if (showMetalsTT) {
-				ttStr += "| **" + stackSymbol + auSymbol + "** | " + (auNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-				ttStr += " | **" + stackSymbol + agSymbol + "** | " + (agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+				ttStr += "| **" + stackSymbol + auSymbol + "** | " + (auNet).toFixed(decPlacesTT) +
+					"<sup>" + curSymbol + "</sup>"
+				ttStr += " | **" + stackSymbol + agSymbol + "** | " + (agNet).toFixed(decPlacesTT) +
+					"<sup>" + curSymbol + "</sup>"
 				ttStr += " |\n"
 			}
 
-			if (showBTC || showBTCTT) ttStr += "| **" + stackSymbol + btcSymbol + "** | " + (btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-			ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " + ( ((showBTC || showBTCTT) ? btcNet : 0) + auNet + agNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			if (showBTC || showBTCTT) ttStr += "| **" + stackSymbol + btcSymbol + "** | " +
+					(btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+			ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " +
+				( ((showBTC || showBTCTT) ? btcNet : 0) + auNet + agNet).toFixed(decPlacesTT) +
+					"<sup>" + curSymbol + "</sup>"
 			ttStr += " |\n"
 		}
 
@@ -309,7 +340,7 @@ PlasmoidItem {
 		ttStr += "*Next update at " +  formattedRefresh + " (click for now)*\n"
 
 		toolTip.subText = ttStr
-		console.log("finstats::*::tooltip-ready::toolTip.subText:", toolTip.subText)
+		console.log("finstats::buildData::tooltip-ready::toolTip.subText:", toolTip.subText)
 	}
 
 	// Initiate fetch requests
@@ -330,7 +361,8 @@ PlasmoidItem {
 		//var metalsSuffs = []
 		if (metalsSuffAu.length > 0) Suffs["metals"].push(metalsSuffAu)
 		if ((metalsSuffAg.length > 0) && (metalsSuffAu != metalsSuffAg)) Suffs["metals"].push(metalsSuffAg)
-		console.debug("finstats::fetchdata:", "btcPaths:", Paths["btc"], "btcfeePaths", Paths["btcfee"], "metalsPaths", Paths["metals"], "metalsSuffs", Suffs["metals"])
+		console.debug("finstats::fetchData:", "btcPaths:", Paths["btc"], "btcfeePaths", Paths["btcfee"],
+					  "metalsPaths", Paths["metals"], "metalsSuffs", Suffs["metals"])
 
 		function parseData (xhdr, idx) {
 			// Parse data from XML response
@@ -339,49 +371,76 @@ PlasmoidItem {
 					try {
 						// Parse response
 						for (var y = 0; y < Paths[idx].length; y++) {
+							// Parse response
 							var data = JSON.parse(xhdr.responseText)
+							// Save original response for later
+							var data_orig = data
+							// Explode keys for "dive search"
 							var keys = Paths[idx][y].split(".")
-							console.debug("finstats::PreParsing::idx:", idx, "data:", data, "y:", y, "keys:", keys)
+
+							// Start "dive search" in JSON tree and derive which data index to use based on suffix
+							console.debug("finstats::fetchData::parseData::PreParsing::idx:", idx, "data:",
+										  data, "y:", y, "keys:", keys)
 							for (var x = 0; x < keys.length; x++) {
-								console.debug("finstats::Parsing::idx:", idx, "x:", x, "Paths[y]:", Paths[idx][y], "keys[x]:", keys[x], "data[keys[x]]:", data[keys[x]])
+								console.debug("finstats::fetchData::parseData::Parsing::idx:", idx, "x:", x,
+											  "Paths[y]:", Paths[idx][y], "keys[x]:", keys[x],
+											  "data[keys[x]]:", data[keys[x]])
 								if (typeof data[keys[x]] != 'undefined' ) {
+									// Strip one level from data
+									data = data[keys[x]]
+
 									// Signal data is ready (first hit is a must)
 									if (x == 0) fetchState[idx].ready = true
+
+									// Make sure suffixes are not enabled before we check
 									var suffUsed = false
 
-									// Check if data contains suffix symbol
+									// Check if data contains suffix symbol and use corresponding data index
 									for (var z = 0; z < Suffs[idx].length; z++) {
-										if ( (typeof data["symbol"] != 'undefined' ) && (data["symbol"] == Suffs[idx][z]) ){
-											console.debug("finstats::Parsing::z::idx:", idx, "z:", z, "data[\"symbol\"]", data["symbol"], "metalsSuffs[z]:", Suffs[idx][z], "keys[x]:", keys[x], "data[keys[x]]:", data[keys[x]])											// Indicate suffix used and save filtered value
-											fetchState[idx].data[z] = parseFloat(data[keys[x]])
+										if ( (typeof data_orig["symbol"] != 'undefined' ) &&
+											(data_orig["symbol"] == Suffs[idx][z]) ) {
+											console.debug("finstats::fetchData::parseData::Parsing::z::idx:", idx,
+														  "z:", z, "data_orig[symbol]", data_orig["symbol"],
+														  "metalsSuffs[z]:", Suffs[idx][z], "keys[x]:", keys[x],
+														  "data[keys[x]]:", data[keys[x]])
+
+											// Indicate suffix used and save filtered value
+											fetchState[idx].data[z] = parseFloat(data)
 											suffUsed = true
 										} else {
-											console.debug("finstats::Parsing::z::skip::idx:", idx, "z:", z, "metalsSuffs[z]:", Suffs[idx][z], "keys[x]:", keys[x], "data[keys[x]]:", data[keys[x]])
+											console.debug("finstats::fetchData::parseData::Parsing::z::skip::idx:", idx,
+														  "z:", z, "metalsSuffs[z]:", Suffs[idx][z],
+														  "keys[x]:", keys[x], "data[keys[x]]:", data[keys[x]])
 										}
 									}
 
 									// Save filtered value if suffix not used above
-									if (!suffUsed) fetchState[idx].data[y] = parseFloat(data[keys[x]])
+									if (!suffUsed) fetchState[idx].data[y] = parseFloat(data)
 								} else {
-									console.debug("finstats::Parsing::undefined:idx:", idx)
-									// Fail parsing
+									console.debug("finstats::fetchData::parseData::Parsing::undefined:idx:", idx)
+									// Fail parsing for now
 									fetchState[idx].ready = false
 								}
 							}
 							// Add metals ratio if possible
-							fetchState[idx].data[2] = (((fetchState[idx].data[0] > 0) && (fetchState[idx].data[1] > 0)) ? (fetchState[idx].data[0]/fetchState[idx].data[1]) : 0)
-							console.debug("finstats::PostParsing:idx:", idx, "y:", y, "data:", data)
+							if (idx == "metals") {
+								fetchState[idx].data[2] = (((fetchState[idx].data[0] > 0) &&
+								(fetchState[idx].data[1] > 0)) ? (fetchState[idx].data[0]/fetchState[idx].data[1]) : 0)
+							}
+							console.debug("finstats::fetchData::parseData::PostParsing:idx:", idx, "y:", y,
+										  "data:", data)
 						}
 					} catch (e) {
-						console.error("finstats::JSONParsingError::idx:", idx, "error:", e)
+						console.error("finstats::fetchData::parseData::JSONParsingError::idx:", idx, "error:", e)
 					}
 				} else {
-					console.error("finstats::HTTP Error::idx:", idx, "error:", xhdr.status)
+					console.error("finstats::fetchData::parseData::HTTP Error::idx:", idx, "error:", xhdr.status)
 				}
 
-				console.log("finstats::PostFetch::Ready::idx:", idx, "ready:", fetchState[idx].ready)
+				console.log("finstats::fetchData::parseData::PostFetch::Ready::idx:", idx, "ready:",
+							fetchState[idx].ready)
 			} else {
-				console.debug("finstats::readyStatus::idx:", idx, "state:", xhdr.readyState)
+				console.debug("finstats::fetchData::parseData::readyStatus::idx:", idx, "state:", xhdr.readyState)
 			}
 		}
 
@@ -390,6 +449,7 @@ PlasmoidItem {
 			btcXhr.onreadystatechange = function() {
 				parseData(btcXhr, "btc")
 			}
+			console.debug("finstats::fetchData::BTC::send::single::")
 			fetchState["btc"].ready = false
 			btcXhr.open("GET", btcUrl, true)
 			btcXhr.setRequestHeader('User-Agent', userAgent)
@@ -402,6 +462,7 @@ PlasmoidItem {
 			btcfeeXhr.onreadystatechange = function() {
 				parseData(btcfeeXhr, "btcfee")
 			}
+			console.debug("finstats::fetchData::BTCFee::send::single::")
 			fetchState["btcfee"].ready = false
 			btcfeeXhr.open("GET", btcfeeUrl, true)
 			btcfeeXhr.setRequestHeader('User-Agent', userAgent)
@@ -416,7 +477,7 @@ PlasmoidItem {
 				metalsXhr1.onreadystatechange = function() {
 					parseData(metalsXhr1, "metals")
 				}
-				console.debug("finstats::Metals::send::multi::Au:", metalsSuffAu)
+				console.debug("finstats::fetchData::Metals::send::multi::Au:", metalsSuffAu)
 				metalsXhr1.timeout = timeRetry * 1000
 				metalsXhr1.open("GET", metalsUrl + metalsSuffAu, true)
 				metalsXhr1.setRequestHeader('User-Agent', userAgent)
@@ -426,7 +487,7 @@ PlasmoidItem {
 				metalsXhr2.onreadystatechange = function() {
 					parseData(metalsXhr2, "metals")
 				}
-				console.debug("finstats::Metals::send::multi::Ag:", metalsSuffAg)
+				console.debug("finstats::fetchData::Metals::send::multi::Ag:", metalsSuffAg)
 				metalsXhr2.timeout = timeRetry * 1000
 				metalsXhr2.open("GET", metalsUrl + metalsSuffAg, true)
 				metalsXhr2.setRequestHeader('User-Agent', userAgent)
@@ -436,7 +497,7 @@ PlasmoidItem {
 				metalsXhr1.onreadystatechange = function() {
 					parseData(metalsXhr1, "metals")
 				}
-				console.debug("finstats::Metals::send::single::")
+				console.debug("finstats::fetchData::Metals::send::single::")
 				metalsXhr1.timeout = timeRetry * 1000
 				metalsXhr1.open("GET", metalsUrl, true)
 				metalsXhr1.setRequestHeader('User-Agent', userAgent)
