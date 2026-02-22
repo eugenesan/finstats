@@ -12,7 +12,7 @@
 		"Id": "com.github.eugenesan.finstats",
 		"License": "GPL",
 		"Name": "Financial Stats",
-		"Version": "0.8",
+		"Version": "0.9.1",
 		"Website": "https://github.com/eugenesan/finstats",
 		"Icon": "bitcoin128",
 		"EnabledByDefault": false
