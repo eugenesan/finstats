@@ -35,6 +35,7 @@ PlasmoidItem {
 	property bool showBTCFee: plasmoid.configuration.showBTCFee
 	property bool showBTCFeeTT: plasmoid.configuration.showBTCFeeTT
 	property bool showMetals: plasmoid.configuration.showMetals
+	property bool showMetalsRatio: plasmoid.configuration.showMetalsRatio
 	property bool showMetalsTT: plasmoid.configuration.showMetalsTT
 	property bool showStack: plasmoid.configuration.showStack
 	property string stackSymbol: plasmoid.configuration.stackSymbol
@@ -47,10 +48,10 @@ PlasmoidItem {
 	property string agSymbol: plasmoid.configuration.agSymbol
 	property string warnSymbol: plasmoid.configuration.warnSymbol
 	property string delimSymbol: plasmoid.configuration.delimSymbol
-	property int btcStack: plasmoid.configuration.btcStack
+	property real btcStack: plasmoid.configuration.btcStack
+	property int btcCost: plasmoid.configuration.btcCost
 	property int auStack: plasmoid.configuration.auStack
 	property int agStack: plasmoid.configuration.agStack
-	property int btcCost: plasmoid.configuration.btcCost
 	property int capGain: plasmoid.configuration.capGain
 	property int decPlaces: plasmoid.configuration.decPlaces
 	property int decPlacesTT: plasmoid.configuration.decPlacesTT
@@ -243,6 +244,12 @@ PlasmoidItem {
 		// Price per Tx in currency
 		var btcStdFeePrice = btcStdFee / 100000000 * fetchState["btc"].data[0]
 
+		// Initialize stack values
+		var btcTax = 0
+		var btcNet = 0
+		var auNet = 0
+		var agNet = 0
+
 		// Initialize applet and tooltip strings (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕ │ )
 		var ttStr = ""
 		var aStr = ""
@@ -267,7 +274,8 @@ PlasmoidItem {
 			aStr += " " + delimSymbol + " " +
 				((fetchState["metals"].data[1] > priceDivider) ?
 					(fetchState["metals"].data[1] / priceDivider) : fetchState["metals"].data[1]).toFixed(decPlaces)
-			aStr += " " + delimSymbol + " " + (fetchState["metals"].data[2]).toFixed(decPlaces)
+			if (showMetalsRatio)
+					aStr += " " + delimSymbol + " " + (fetchState["metals"].data[2]).toFixed(decPlaces)
 		}
 
 		myLabel.text = (aStr.length > 0) ? aStr : curSymbol
@@ -314,13 +322,10 @@ PlasmoidItem {
 
 		// Add stack to tooltip
 		if (showStack) {
-			// Calculate stack
-			var btcTax = (((fetchState["btc"].data[0] * btcStack) - (btcCost * btcStack)) / 100 * capGain)
-			var btcNet = ((fetchState["btc"].data[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax))
-			var auNet = (fetchState["metals"].data[0] * auStack)
-			var agNet = (fetchState["metals"].data[1] * agStack)
-
 			if (showMetalsTT) {
+				// Calculate Metals related stack
+				auNet = (fetchState["metals"].data[0] * auStack)
+				agNet = (fetchState["metals"].data[1] * agStack)
 				ttStr += "| **" + stackSymbol + auSymbol + "** | " + (auNet).toFixed(decPlacesTT) +
 					"<sup>" + curSymbol + "</sup>"
 				ttStr += " | **" + stackSymbol + agSymbol + "** | " + (agNet).toFixed(decPlacesTT) +
@@ -328,12 +333,17 @@ PlasmoidItem {
 				ttStr += " |\n"
 			}
 
-			if (showBTC || showBTCTT) ttStr += "| **" + stackSymbol + btcSymbol + "** | " +
+			if (showBTC || showBTCTT) {
+				// Calculate BTC related stack
+				btcTax = (((fetchState["btc"].data[0] * btcStack) - (btcCost * btcStack)) / 100 * capGain)
+				btcNet = ((fetchState["btc"].data[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax))
+				ttStr += "| **" + stackSymbol + btcSymbol + "** | " +
 					(btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
-			ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " +
+				ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " +
 				( ((showBTC || showBTCTT) ? btcNet : 0) + auNet + agNet).toFixed(decPlacesTT) +
 					"<sup>" + curSymbol + "</sup>"
-			ttStr += " |\n"
+				ttStr += " |\n"
+			}
 		}
 
 		// Finalize the tooltip

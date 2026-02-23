@@ -18,6 +18,7 @@ Item {
 	property alias cfg_showBTCFee: showBTCFee.checked
 	property alias cfg_showBTCFeeTT: showBTCFeeTT.checked
 	property alias cfg_showMetals: showMetals.checked
+	property alias cfg_showMetalsRatio: showMetalsRatio.checked
 	property alias cfg_showMetalsTT: showMetalsTT.checked
 	property alias cfg_showStack: showStack.checked
 
@@ -93,6 +94,19 @@ Item {
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Wether to display metals on Applet ")
+				}
+
+				// Show metals ratio on applet
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Show Metals ratio:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				CheckBox {
+					id: showMetalsRatio
+					onCheckedChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Wether to display metals ratio on applet")
 				}
 
 				// Show metals tooltip

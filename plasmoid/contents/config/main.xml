@@ -20,6 +20,9 @@
 		<entry name="showMetals" type="Bool">
 			<default>false</default>
 		</entry>
+		<entry name="showMetalsRatio" type="Bool">
+			<default>false</default>
+		</entry>
 		<entry name="showMetalsTT" type="Bool">
 			<default>true</default>
 		</entry>
@@ -91,7 +94,7 @@
 			<default>15</default>
 		</entry>
 		<entry name="btcUrl" type="String">
-			<default>https://www.bitstamp.net/api/ticker/</default>
+			<default>https://api.gemini.com/v1/pubticker/btcusd</default>
 		</entry>
 		<entry name="btcKey" type="String">
 			<default>last</default>
@@ -120,17 +123,17 @@
 		</entry>
 	</group>
 	<group name="Stack">
-		<entry name="btcStack" type="Int">
-			<default>1</default>
+		<entry name="btcStack" type="String">
+			<default>1.234567</default>
+		</entry>
+		<entry name="btcCost" type="String">
+			<default>100000.123456</default>
 		</entry>
 		<entry name="auStack" type="Int">
 			<default>2</default>
 		</entry>
 		<entry name="agStack" type="Int">
 			<default>3</default>
-		</entry>
-		<entry name="btcCost" type="Int">
-			<default>100000</default>
 		</entry>
 		<entry name="capGain" type="Int">
 			<default>15</default>

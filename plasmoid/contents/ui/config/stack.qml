@@ -13,10 +13,10 @@ Item {
 
 	signal configurationChanged
 
-	property alias cfg_btcStack: btcStack.value
+	property alias cfg_btcStack: btcStack.text
+	property alias cfg_btcCost: btcCost.text
 	property alias cfg_auStack: auStack.value
 	property alias cfg_agStack: agStack.value
-	property alias cfg_btcCost: btcCost.value
 	property alias cfg_capGain: capGain.value
 
 	ScrollView {
@@ -34,13 +34,34 @@ Item {
 					text: i18n("BTC stack size:")
 					horizontalAlignment: Label.AlignLeft
 				}
-				SpinBox {
+				TextField {
 					id: btcStack
-					from: 0
-					to: 999
-					onValueChanged: configurationChanged()
+					text: "0.0"
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Count of Bitcoin in the stack. Valid range: 0–999.")
+					ToolTip.text: i18n("Count of Bitcoin in the stack (0–999)")
+					validator: DoubleValidator {
+						bottom: 0.0
+						top: 1000.0
+						decimals: 6
+					}
+				}
+
+				// BTC stack cost basis
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("BTC cost basis:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: btcCost
+					text: "0.0"
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Bitcoin cost basis (0–1000000)")
+					validator: DoubleValidator {
+						bottom: 0.0
+						top: 1000.0
+						decimals: 6
+					}
 				}
 
 				// Metals Au stack size
@@ -55,7 +76,7 @@ Item {
 					to: 999
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Count of Silver in the stack. Valid range: 0–999.")
+					ToolTip.text: i18n("Count of Silver in the stack (0–999)")
 				}
 
 				// Metals Ag stack size
@@ -70,22 +91,7 @@ Item {
 					to: 999
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Count of Silver in the stack. Valid range: 0–999.")
-				}
-
-				// BTC stack cost basis
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("BTC cost basis:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				SpinBox {
-					id: btcCost
-					from: 0
-					to: 999999
-					onValueChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Bitcoin cost basis. Valid range: 0–999999.")
+					ToolTip.text: i18n("Count of Silver in the stack (0–999)")
 				}
 
 				// Capital gains tax
@@ -100,7 +106,7 @@ Item {
 					to: 99
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Capital gains tax ammount. Valid range: 0–99.")
+					ToolTip.text: i18n("Capital gains tax ammount (0–99)")
 				}
 			}  // Closing GridLayout
 		}      // Closing ColumnLayout
