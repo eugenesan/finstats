@@ -38,8 +38,8 @@ PlasmoidItem {
 	property bool showMetalsRatio: plasmoid.configuration.showMetalsRatio
 	property bool showMetalsTT: plasmoid.configuration.showMetalsTT
 	property bool showStack: plasmoid.configuration.showStack
-	property string stackSymbol: plasmoid.configuration.stackSymbol
 	property string appletSymbol: plasmoid.configuration.appletSymbol
+	property string stackSymbol: plasmoid.configuration.stackSymbol
 	property string curSymbol: plasmoid.configuration.curSymbol
 	property string minorcurSymbol: plasmoid.configuration.minorcurSymbol
 	property string btcSymbol: plasmoid.configuration.btcSymbol

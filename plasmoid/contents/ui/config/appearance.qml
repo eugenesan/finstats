@@ -14,8 +14,8 @@ Item {
 	signal configurationChanged
 
 	property alias cfg_appletColor: appletColor.checked
-	property alias cfg_stackSymbol: stackSymbol.text
 	property alias cfg_appletSymbol: appletSymbol.text
+	property alias cfg_stackSymbol: stackSymbol.text
 	property alias cfg_curSymbol: curSymbol.text
 	property alias cfg_minorcurSymbol: minorcurSymbol.text
 	property alias cfg_btcSymbol: btcSymbol.text
@@ -50,20 +50,6 @@ Item {
 					ToolTip.text: i18n("Wether to color applet on change.")
 				}
 
-				// Stack symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Stack symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: stackSymbol
-					text: "#000000"
-					onTextChanged: configurationChanged()
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to for Stack")
-				}
-
 				// Applet symbol
 				Label {
 					Layout.minimumWidth: root.width / 3
@@ -76,6 +62,20 @@ Item {
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Default symbol for empty Applet")
+				}
+
+				// Stack symbol
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Stack symbol:")
+					horizontalAlignment: Label.AlignLeft
+				}
+				TextField {
+					id: stackSymbol
+					text: "#000000"
+					onTextChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Which symbol to for Stack")
 				}
 
 				// Currency symbol
