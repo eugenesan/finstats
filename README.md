@@ -6,12 +6,14 @@
 ## Description
 
 KDE Plasma widget that displays financial stats.
-Currently it displays Bitcoin (BTC), Gold (Au), Silver (Ag) and ratios between them.
-Optionally it can display value of user's stack after taxes.
+It supports Bitcoin (BTC), Gold (Au), Silver (Ag) and ratios between them.
+Optionally it can display value of user's "stack" after taxes.
 <img src="docs/finstats_widget_w_popup.webp" />
 
-URLs and stack values are configurable.
-<img src="docs/finstats_desktop_w_popup_w_config.webp" />
+Many features are configurable:
+<img src="docs/finstats_desktop_w_popup_w_config_general.webp" />
+
+More screenshots are in: [docs](docs)
 
 ## Goal
 
@@ -22,12 +24,12 @@ The widget is intented to provide quick glance values (panel widget) and detaile
 ### From shell:
 * Update
 ```
-wget https://github.com/eugenesan/finstats/releases/latest/download/finstats.plasmoid -O ${TMPDIR:-/tmp}/finstats.plasmoid && kpackagetool6 -t Plasma/Applet -u ${TMPDIR:-/tmp}/finstat.plasmoid && systemctl --user restart plasma-plasmashell.service
+wget https://github.com/eugenesan/finstats/releases/latest/download/finstats-v0.9.x.plasmoid -O ${TMPDIR:-/tmp}/finstats.plasmoid && kpackagetool6 -t Plasma/Applet -u ${TMPDIR:-/tmp}/finstats.plasmoid && systemctl --user restart plasma-plasmashell.service
 ```
 
 * Install
 ```
-wget https://github.com/eugenesan/finstats/releases/latest/download/finstats.plasmoid -O ${TMPDIR:-/tmp}/finstats.plasmoid && kpackagetool6 -t Plasma/Applet -i ${TMPDIR:-/tmp}/finstat.plasmoid && systemctl --user restart plasma-plasmashell.service
+wget https://github.com/eugenesan/finstats/releases/latest/download/finstats-v0.9.x.plasmoid -O ${TMPDIR:-/tmp}/finstats.plasmoid && kpackagetool6 -t Plasma/Applet -i ${TMPDIR:-/tmp}/finstats.plasmoid && systemctl --user restart plasma-plasmashell.service
 ```
 
 ### Manual with Plasma UI:
