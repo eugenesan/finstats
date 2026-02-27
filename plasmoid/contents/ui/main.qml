@@ -23,9 +23,9 @@ PlasmoidItem {
 	// Status and data of individual fetches
 	property variant fetchState:
 	{
-		"btc":    {ready: false, data: [0.0]},
-		"btcfee": {ready: false, data: [0.0]},
-		"metals": {ready: false, data: [0.0,0.0,0.0]}
+		"btc":    {ready: false, data: [0.0], xhr: []},
+		"btcfee": {ready: false, data: [0.0], xhr: []},
+		"metals": {ready: false, data: [0.0,0.0,0.0], xhr: [,]}
 	}
 
 	// Global vars from config
@@ -214,13 +214,21 @@ PlasmoidItem {
 
 			// Retry 3 times and if still failed, set refresh timer as configured
 			if (dataReadyAttemp > 4) {
-				console.log("finstats::Timer::timerTriggered::LastAttemp::", "timeRetry:", timeRetry,
-							"refreshTimer.interval:" , refreshTimer.interval)
+				console.log("finstats::Timer::timerTriggered::LastAttemp::AbortingFetches:", "timeRetry:", timeRetry,
+							"refreshTimer.interval:", refreshTimer.interval)
+
+				// Stop all fetch requests
+				if (typeof fetchState["btc"].xhr[0] != 'undefined') fetchState["btc"].xhr[0].abort()
+				if (typeof fetchState["btcfee"].xhr[0] != 'undefined') fetchState["btcfee"].xhr[0].abort()
+				if (typeof fetchState["metals"].xhr[0] != 'undefined') fetchState["metals"].xhr[0].abort()
+				if (typeof fetchState["metals"].xhr[1] != 'undefined') fetchState["metals"].xhr[1].abort()
+
+				// Reset ready/running states and set refetch timer
 				running = false
+				dataReadyFull = false
 				refreshTimer.interval = timeRefetch * 60 * 1000
 
 				// After max retries, call partial build
-				dataReadyFull = false
 				buildData()
 				if (appletColor) colorFeedback.restart()
 			}
@@ -454,45 +462,41 @@ PlasmoidItem {
 		// Initialize and send BTC fetch request
 		if (showBTC || showBTCTT) {
 			fetchState["btc"].ready = false
-			var btcXhr = new XMLHttpRequest()
-			btcXhr.onreadystatechange = function() { parseData(btcXhr, "btc") }
-			btcXhr.open("GET", btcUrl, true)
-			btcXhr.setRequestHeader('User-Agent', userAgent)
-			btcXhr.timeout = timeRetry * 1000
-			btcXhr.send()
+			fetchState["btc"].xhr[0] = new XMLHttpRequest()
+			fetchState["btc"].xhr[0].onreadystatechange = function() { parseData(fetchState["btc"].xhr[0], "btc") }
+			fetchState["btc"].xhr[0].open("GET", btcUrl, true)
+			fetchState["btc"].xhr[0].setRequestHeader('User-Agent', userAgent)
+			fetchState["btc"].xhr[0].send()
 			console.debug("finstats::fetchData::BTC::send::URL:", btcUrl)
 		}
 
 		// Initialize and send BTCfee fetch request
 		if (showBTCFee || showBTCFeeTT) {
 			fetchState["btcfee"].ready = false
-			var btcfeeXhr = new XMLHttpRequest()
-			btcfeeXhr.onreadystatechange = function() { parseData(btcfeeXhr, "btcfee") }
-			btcfeeXhr.open("GET", btcfeeUrl, true)
-			btcfeeXhr.setRequestHeader('User-Agent', userAgent)
-			btcfeeXhr.timeout = timeRetry * 1000
-			btcfeeXhr.send()
+			fetchState["btcfee"].xhr[0] = new XMLHttpRequest()
+			fetchState["btcfee"].xhr[0].onreadystatechange = function() { parseData(fetchState["btcfee"].xhr[0], "btcfee") }
+			fetchState["btcfee"].xhr[0].open("GET", btcfeeUrl, true)
+			fetchState["btcfee"].xhr[0].setRequestHeader('User-Agent', userAgent)
+			fetchState["btcfee"].xhr[0].send()
 			console.debug("finstats::fetchData::BTCfee::send::URL:", btcfeeUrl)
 		}
 
-		// Initialize and send Metals fetch request (2 if 2nd suffixe is provided)
+		// Initialize and send Metals fetch request (2 if 2nd suffix is provided)
 		if (showMetals || showMetalsTT) {
 			fetchState["metals"].ready = false
-			var metalsXhr1 = new XMLHttpRequest()
-			metalsXhr1.onreadystatechange = function() { parseData(metalsXhr1, "metals") }
-			metalsXhr1.open("GET", metalsUrl + metalsSuffAu, true)
-			metalsXhr1.setRequestHeader('User-Agent', userAgent)
-			metalsXhr1.timeout = timeRetry * 1000
-			metalsXhr1.send()
+			fetchState["metals"].xhr[0] = new XMLHttpRequest()
+			fetchState["metals"].xhr[0].onreadystatechange = function() { parseData(fetchState["metals"].xhr[0], "metals") }
+			fetchState["metals"].xhr[0].open("GET", metalsUrl + metalsSuffAu, true)
+			fetchState["metals"].xhr[0].setRequestHeader('User-Agent', userAgent)
+			fetchState["metals"].xhr[0].send()
 			console.debug("finstats::fetchData::Metals1::send::URL:", metalsUrl, "suffix1:", metalsSuffAu)
 
 			if ( (metalsSuffAg.length > 0) && (metalsSuffAg != metalsSuffAu) ) {
-				var metalsXhr2 = new XMLHttpRequest()
-				metalsXhr2.onreadystatechange = function() { parseData(metalsXhr2, "metals") }
-				metalsXhr2.open("GET", metalsUrl + metalsSuffAg, true)
-				metalsXhr2.setRequestHeader('User-Agent', userAgent)
-				metalsXhr2.timeout = timeRetry * 1000
-				metalsXhr2.send()
+				fetchState["metals"].xhr[1] = new XMLHttpRequest()
+				fetchState["metals"].xhr[1].onreadystatechange = function() { parseData(fetchState["metals"].xhr[1], "metals") }
+				fetchState["metals"].xhr[1].open("GET", metalsUrl + metalsSuffAg, true)
+				fetchState["metals"].xhr[1].setRequestHeader('User-Agent', userAgent)
+				fetchState["metals"].xhr[1].send()
 				console.debug("finstats::fetchData::Metals2::send::URL:", metalsUrl, "suffix2:", metalsSuffAg)
 			}
 		}
