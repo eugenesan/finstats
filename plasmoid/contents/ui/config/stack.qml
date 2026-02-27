@@ -15,9 +15,11 @@ Item {
 
 	property alias cfg_btcStack: btcStack.text
 	property alias cfg_btcCost: btcCost.text
+	property alias cfg_capGainBTC: capGainBTC.value
 	property alias cfg_auStack: auStack.value
+	property alias cfg_auSlip: auSlip.value
 	property alias cfg_agStack: agStack.value
-	property alias cfg_capGain: capGain.value
+	property alias cfg_agSlip: agSlip.value
 
 	ScrollView {
 		width: parent.width
@@ -64,6 +66,21 @@ Item {
 					}
 				}
 
+				// BTC capital gains tax
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("BTC Capital gains tax (%):")
+					horizontalAlignment: Label.AlignLeft
+				}
+				SpinBox {
+					id: capGainBTC
+					from: 0
+					to: 99
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("BTC capital gains tax ammount (0–99)")
+				}
+
 				// Metals Au stack size
 				Label {
 					Layout.minimumWidth: root.width / 3
@@ -77,6 +94,21 @@ Item {
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Count of Silver in the stack (0–999)")
+				}
+
+				// Metals Au slippage
+				Label {
+					Layout.minimumWidth: root.width / 3
+					text: i18n("Au slippage (%):")
+					horizontalAlignment: Label.AlignLeft
+				}
+				SpinBox {
+					id: auSlip
+					from: 0
+					to: 99
+					onValueChanged: configurationChanged()
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Au slippage (0–99)")
 				}
 
 				// Metals Ag stack size
@@ -94,19 +126,19 @@ Item {
 					ToolTip.text: i18n("Count of Silver in the stack (0–999)")
 				}
 
-				// Capital gains tax
+				// Metals Ag slippage
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Capital gains tax (%):")
+					text: i18n("Ag slippage (%):")
 					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
-					id: capGain
+					id: agSlip
 					from: 0
 					to: 99
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Capital gains tax ammount (0–99)")
+					ToolTip.text: i18n("Ag slippage (0–99)")
 				}
 			}  // Closing GridLayout
 		}      // Closing ColumnLayout

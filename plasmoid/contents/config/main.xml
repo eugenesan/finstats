@@ -129,14 +129,20 @@
 		<entry name="btcCost" type="String">
 			<default>100000.123456</default>
 		</entry>
+		<entry name="capGainBTC" type="Int">
+			<default>15</default>
+		</entry>
 		<entry name="auStack" type="Int">
 			<default>2</default>
+		</entry>
+		<entry name="auSlip" type="Int">
+			<default>4</default>
 		</entry>
 		<entry name="agStack" type="Int">
 			<default>3</default>
 		</entry>
-		<entry name="capGain" type="Int">
-			<default>15</default>
+		<entry name="agSlip" type="Int">
+			<default>8</default>
 		</entry>
 	</group>
 </kcfg>

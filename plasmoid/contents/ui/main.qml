@@ -50,9 +50,11 @@ PlasmoidItem {
 	property string delimSymbol: plasmoid.configuration.delimSymbol
 	property real btcStack: plasmoid.configuration.btcStack
 	property int btcCost: plasmoid.configuration.btcCost
+	property int capGainBTC: plasmoid.configuration.capGainBTC
 	property int auStack: plasmoid.configuration.auStack
+	property int auSlip: plasmoid.configuration.auSlip
 	property int agStack: plasmoid.configuration.agStack
-	property int capGain: plasmoid.configuration.capGain
+	property int agSlip: plasmoid.configuration.agSlip
 	property int decPlaces: plasmoid.configuration.decPlaces
 	property int decPlacesTT: plasmoid.configuration.decPlacesTT
 	property int priceDivider: plasmoid.configuration.priceDivider
@@ -332,19 +334,19 @@ PlasmoidItem {
 		if (showStack) {
 			if (showMetalsTT) {
 				// Calculate Metals related stack
-				auNet = (fetchState["metals"].data[0] * auStack)
-				agNet = (fetchState["metals"].data[1] * agStack)
-				ttStr += "| **" + stackSymbol + auSymbol + "** | " + (auNet).toFixed(decPlacesTT) +
+				auNet = fetchState["metals"].data[0] * auStack * (1 - (1 / 100 * auSlip))
+				agNet = fetchState["metals"].data[1] * agStack * (1 - (1 / 100 * agSlip))
+				ttStr += "| **" + stackSymbol + auSymbol + "** | " + auNet.toFixed(decPlacesTT) +
 					"<sup>" + curSymbol + "</sup>"
-				ttStr += " | **" + stackSymbol + agSymbol + "** | " + (agNet).toFixed(decPlacesTT) +
+				ttStr += " | **" + stackSymbol + agSymbol + "** | " + agNet.toFixed(decPlacesTT) +
 					"<sup>" + curSymbol + "</sup>"
 				ttStr += " |\n"
 			}
 
 			if (showBTC || showBTCTT) {
 				// Calculate BTC related stack
-				btcTax = (((fetchState["btc"].data[0] * btcStack) - (btcCost * btcStack)) / 100 * capGain)
-				btcNet = ((fetchState["btc"].data[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax))
+				btcTax = ((fetchState["btc"].data[0] * btcStack) - (btcCost * btcStack)) / 100 * capGainBTC
+				btcNet = (fetchState["btc"].data[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax)
 				ttStr += "| **" + stackSymbol + btcSymbol + "** | " +
 					(btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 				ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " +
