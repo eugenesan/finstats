@@ -6,7 +6,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import org.kde.kirigami as Kirigami
 
 Item {
 	id: root
@@ -47,7 +46,7 @@ Item {
 					id: appletColor
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to color applet on change.")
+					ToolTip.text: i18n("Wether to color applet on change")
 				}
 
 				// Applet symbol
@@ -75,7 +74,7 @@ Item {
 					text: "#000000"
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to for Stack")
+					ToolTip.text: i18n("Which symbol to use for Stack")
 				}
 
 				// Currency symbol

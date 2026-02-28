@@ -6,7 +6,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import org.kde.kirigami as Kirigami
 
 Item {
 	id: root
@@ -93,7 +92,7 @@ Item {
 					id: showMetals
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display metals on Applet ")
+					ToolTip.text: i18n("Wether to display metals on Applet")
 				}
 
 				// Show metals ratio on applet
@@ -106,7 +105,7 @@ Item {
 					id: showMetalsRatio
 					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display metals ratio on applet")
+					ToolTip.text: i18n("Wether to display metals ratio on Applet")
 				}
 
 				// Show metals tooltip

@@ -6,7 +6,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import org.kde.kirigami as Kirigami
 
 Item {
 	id: root
@@ -71,19 +70,23 @@ Item {
 					}]
 
 					Component.onCompleted: {
-						console.debug("finstats::*::config::fetch::BTC::ComboBox::onCompleted::currentIndex:", currentIndex)
+						console.debug("finstats::*::config::fetch::BTC::ComboBox::onCompleted::currentIndex:",
+									  currentIndex)
 						for (var i = 0, length = model.length; i < length; ++i) {
 							if (model[i].url === cfg_btcUrl) {
 								currentIndex = i
-								console.debug("finstats::*::config::BTC::fetch::ComboBox::onCompleted::seekFound:", currentIndex, model[currentIndex].url, model[currentIndex].key);
+								console.debug("finstats::*::config::BTC::fetch::ComboBox::onCompleted::seekFound:",
+											  currentIndex, model[currentIndex].url, model[currentIndex].key);
 								return
 							}
 						}
-						console.log("finstats::*::config::fetch::BTC::ComboBox::onCompleted::seekError:", currentIndex)
+						console.log("finstats::*::config::fetch::BTC::ComboBox::onCompleted::seekError:",
+									currentIndex)
 					}
 
 					onCurrentIndexChanged: {
-						console.log("finstats::*::config::fetch::BTC::ComboBox::onCurrentIndexChanged:", currentIndex, model[currentIndex].url, model[currentIndex].key)
+						console.log("finstats::*::config::fetch::BTC::ComboBox::onCurrentIndexChanged:",
+									currentIndex, model[currentIndex].url, model[currentIndex].key)
 						// Perform actions based on the new index
 						cfg_btcUrl = model[currentIndex].url
 						cfg_btcKey = model[currentIndex].key
@@ -179,19 +182,26 @@ Item {
 					}]
 
 					Component.onCompleted: {
-						console.debug("finstats::*::config::fetch::Metals::ComboBox::onCompleted::currentIndex:", currentIndex)
+						console.debug("finstats::*::config::fetch::Metals::ComboBox::onCompleted::currentIndex:",
+									  currentIndex)
 						for (var i = 0, length = model.length; i < length; ++i) {
 							if (model[i].url === cfg_metalsUrl) {
 								currentIndex = i
-								console.debug("finstats::*::config::fetch::Metals::ComboBox::onCompleted::seekFound:", currentIndex, model[currentIndex].url, model[currentIndex].keyAu, model[currentIndex].keyAg, model[currentIndex].suffAu, model[currentIndex].suffAg);
+								console.debug("finstats::*::config::fetch::Metals::ComboBox::onCompleted::seekFound:",
+											  currentIndex, model[currentIndex].url,
+											  model[currentIndex].keyAu, model[currentIndex].keyAg,
+											  model[currentIndex].suffAu, model[currentIndex].suffAg)
 								return
 							}
 						}
-						console.log("finstats::*::config::fetch::Metals::ComboBox::onCompleted::seekError:", currentIndex)
+						console.log("finstats::*::config::fetch::Metals::ComboBox::onCompleted::seekError:",
+									currentIndex)
 					}
 
 					onCurrentIndexChanged: {
-						console.log("finstats::*::config::fetch::Metals::ComboBox::onCurrentIndexChanged:", currentIndex, model[currentIndex].keyAu, model[currentIndex].keyAg, model[currentIndex].suffAu, model[currentIndex].suffAg)
+						console.log("finstats::*::config::fetch::Metals::ComboBox::onCurrentIndexChanged:",
+									currentIndex, model[currentIndex].keyAu, model[currentIndex].keyAg,
+									model[currentIndex].suffAu, model[currentIndex].suffAg)
 						// Perform actions based on the new index
 						cfg_metalsUrl = model[currentIndex].url
 						cfg_metalsSuffAu = model[currentIndex].suffAu
@@ -292,7 +302,7 @@ Item {
 					stepSize: 1
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Minutes to refresh the values. Valid range: 1–60.")
+					ToolTip.text: i18n("Minutes to refresh the values (1–60)")
 				}
 
 				// Retry parse timer
@@ -308,7 +318,7 @@ Item {
 					stepSize: 1
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Seconds to retry parsing the values. Valid range: 1–60.")
+					ToolTip.text: i18n("Seconds to retry parsing the values (1–60)")
 				}
 
 				// Retry fetch timer
@@ -324,7 +334,7 @@ Item {
 					stepSize: 1
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Minutes to retry fetching the values. Valid range: 1–60.")
+					ToolTip.text: i18n("Minutes to retry fetching the values (1–60)")
 				}
 			}  // Closing GridLayout
 		}      // Closing ColumnLayout

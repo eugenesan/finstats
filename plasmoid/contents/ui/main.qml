@@ -23,12 +23,12 @@ PlasmoidItem {
 	// Status and data of individual fetches
 	property variant fetchState:
 	{
-		"btc":    {ready: false, data: [0.0], xhr: []},
-		"btcfee": {ready: false, data: [0.0], xhr: []},
-		"metals": {ready: false, data: [0.0,0.0,0.0], xhr: [,]}
+		"btc":    {ready: false, price: [0.0], xhr: []},
+		"btcfee": {ready: false, price: [0.0], xhr: []},
+		"metals": {ready: false, price: [0.0,0.0,0.0], xhr: [,]} // 3rd price is for metals ratio
 	}
 
-	// Global vars from config
+	// General config vars
 	property bool appletColor: plasmoid.configuration.appletColor
 	property bool showBTC: plasmoid.configuration.showBTC
 	property bool showBTCTT: plasmoid.configuration.showBTCTT
@@ -38,6 +38,8 @@ PlasmoidItem {
 	property bool showMetalsRatio: plasmoid.configuration.showMetalsRatio
 	property bool showMetalsTT: plasmoid.configuration.showMetalsTT
 	property bool showStack: plasmoid.configuration.showStack
+
+	// Appearance config vars
 	property string appletSymbol: plasmoid.configuration.appletSymbol
 	property string stackSymbol: plasmoid.configuration.stackSymbol
 	property string curSymbol: plasmoid.configuration.curSymbol
@@ -48,6 +50,8 @@ PlasmoidItem {
 	property string agSymbol: plasmoid.configuration.agSymbol
 	property string warnSymbol: plasmoid.configuration.warnSymbol
 	property string delimSymbol: plasmoid.configuration.delimSymbol
+
+	// Stack config vars
 	property real btcStack: plasmoid.configuration.btcStack
 	property int btcCost: plasmoid.configuration.btcCost
 	property int capGainBTC: plasmoid.configuration.capGainBTC
@@ -58,9 +62,6 @@ PlasmoidItem {
 	property int decPlaces: plasmoid.configuration.decPlaces
 	property int decPlacesTT: plasmoid.configuration.decPlacesTT
 	property int priceDivider: plasmoid.configuration.priceDivider
-	property int timeRefresh: plasmoid.configuration.timeRefresh
-	property int timeRetry: plasmoid.configuration.timeRetry
-	property int timeRefetch: plasmoid.configuration.timeRefetch
 
 	// Fetch paramaters from config
 	property string btcUrl: plasmoid.configuration.btcUrl
@@ -72,6 +73,9 @@ PlasmoidItem {
 	property string metalsSuffAg: plasmoid.configuration.metalsSuffAg
 	property string metalsKeyAu: plasmoid.configuration.metalsKeyAu
 	property string metalsKeyAg: plasmoid.configuration.metalsKeyAg
+	property int timeRefresh: plasmoid.configuration.timeRefresh
+	property int timeRetry: plasmoid.configuration.timeRetry
+	property int timeRefetch: plasmoid.configuration.timeRefetch
 
 	ToolTipArea {
 		id: toolTip
@@ -171,13 +175,13 @@ PlasmoidItem {
 			// Check if all the results marked as fetched and dataready timer still enabled
 			if ( datareadyWait.running &&
 				( (fetchState["btc"].ready &&
-					(fetchState["btc"].data[0] > (1/100000000))) || (!showBTC && !showBTCTT) ) &&
+					(fetchState["btc"].price[0] > (1/100000000))) || (!showBTC && !showBTCTT) ) &&
 				( (fetchState["btcfee"].ready &&
-					(fetchState["btcfee"].data[0] > (1/100000000))) || (!showBTCFee && !showBTCFeeTT) ) &&
+					(fetchState["btcfee"].price[0] > (1/100000000))) || (!showBTCFee && !showBTCFeeTT) ) &&
 				( (fetchState["metals"].ready &&
-					(fetchState["metals"].data[0] > (1/100000000))) || (!showMetals && !showMetalsTT) ) &&
+					(fetchState["metals"].price[0] > (1/100000000))) || (!showMetals && !showMetalsTT) ) &&
 				( (fetchState["metals"].ready &&
-					(fetchState["metals"].data[1] > (1/100000000))) || (!showMetals && !showMetalsTT) ) )
+					(fetchState["metals"].price[1] > (1/100000000))) || (!showMetals && !showMetalsTT) ) )
 			{
 				console.debug("finstats::Timer::timerTriggered::Build::Ready::interval:", interval,
 					"dataReadyAttemp:", dataReadyAttemp, "dataReadyFull:", dataReadyFull,
@@ -186,8 +190,8 @@ PlasmoidItem {
 					"showBTCTT:", showBTCTT, "showBTCFeeTT:", showBTCFeeTT, "showMetalsTT:", showMetalsTT,
 					"btcReady:", fetchState["btc"].ready, "btcfeeReady:", fetchState["btcfee"].ready,
 					"metalsReady:", fetchState["metals"].ready,
-					"btcData:", fetchState["btc"].data[0], "btcfeeData[0]:", fetchState["btcfee"].data[0],
-					"metalsData[0]:", fetchState["metals"].data[0], "metalsData[1]:", fetchState["metals"].data[1])
+					"btcData:", fetchState["btc"].price[0], "btcfeeData[0]:", fetchState["btcfee"].price[0],
+					"metalsData[0]:", fetchState["metals"].price[0], "metalsData[1]:", fetchState["metals"].price[1])
 
 				// Disable timer to avoid duplicate calls
 				datareadyWait.running = false
@@ -204,8 +208,8 @@ PlasmoidItem {
 					"showBTCTT:", showBTCTT, "showBTCFeeTT:", showBTCFeeTT, "showMetalsTT:", showMetalsTT,
 					"btcReady:", fetchState["btc"].ready, "btcfeeReady:", fetchState["btcfee"].ready,
 					"metalsReady:", fetchState["metals"].ready,
-					"btcData:", fetchState["btc"].data[0], "btcfeeData[0]:", fetchState["btcfee"].data[0],
-					"metalsData[0]:", fetchState["metals"].data[0], "metalsData[1]:", fetchState["metals"].data[1])
+					"btcData:", fetchState["btc"].price[0], "btcfeeData[0]:", fetchState["btcfee"].price[0],
+					"metalsData[0]:", fetchState["metals"].price[0], "metalsData[1]:", fetchState["metals"].price[1])
 
 				// Disable full readiness until result are ready
 				dataReadyFull = false
@@ -249,10 +253,10 @@ PlasmoidItem {
 		var formattedRefresh = Qt.formatDateTime(refreshTime, "hh:mm")
 
 		// Calculate BTCFee (141Stas/vB is for Segwit 1*in 2*out Tx)
-		var btcStdFee = (( (fetchState["btcfee"].data[0] < 1) &&
-			(fetchState["btcfee"].data[0] > 0) ) ? 1 : fetchState["btcfee"].data[0]) * 141
+		var btcStdFee = (( (fetchState["btcfee"].price[0] < 1) &&
+			(fetchState["btcfee"].price[0] > 0) ) ? 1 : fetchState["btcfee"].price[0]) * 141
 		// Price per Tx in currency
-		var btcStdFeePrice = btcStdFee / 100000000 * fetchState["btc"].data[0]
+		var btcStdFeePrice = btcStdFee / 100000000 * fetchState["btc"].price[0]
 
 		// Initialize stack values
 		var btcTax = 0
@@ -266,8 +270,8 @@ PlasmoidItem {
 
 		// Add BTC to applet
 		if (showBTC) {
-			aStr = ((fetchState["btc"].data[0] > priceDivider) ?
-				(fetchState["btc"].data[0] / priceDivider) : fetchState["btc"].data[0]).toFixed(decPlaces)
+			aStr = ((fetchState["btc"].price[0] > priceDivider) ?
+				(fetchState["btc"].price[0] / priceDivider) : fetchState["btc"].price[0]).toFixed(decPlaces)
 		}
 
 		// Add BTC fee to applet
@@ -279,13 +283,13 @@ PlasmoidItem {
 		// Add metals to applet
 		if (showMetals) {
 			aStr += ((aStr.length > 0) ? " " + delimSymbol + " " : "") +
-				((fetchState["metals"].data[0] > priceDivider) ?
-					(fetchState["metals"].data[0] / priceDivider) : fetchState["metals"].data[0]).toFixed(decPlaces)
+				((fetchState["metals"].price[0] > priceDivider) ?
+					(fetchState["metals"].price[0] / priceDivider) : fetchState["metals"].price[0]).toFixed(decPlaces)
 			aStr += " " + delimSymbol + " " +
-				((fetchState["metals"].data[1] > priceDivider) ?
-					(fetchState["metals"].data[1] / priceDivider) : fetchState["metals"].data[1]).toFixed(decPlaces)
+				((fetchState["metals"].price[1] > priceDivider) ?
+					(fetchState["metals"].price[1] / priceDivider) : fetchState["metals"].price[1]).toFixed(decPlaces)
 			if (showMetalsRatio)
-					aStr += " " + delimSymbol + " " + (fetchState["metals"].data[2]).toFixed(decPlaces)
+					aStr += " " + delimSymbol + " " + (fetchState["metals"].price[2]).toFixed(decPlaces)
 		}
 
 		myLabel.text = (aStr.length > 0) ? aStr : curSymbol
@@ -298,7 +302,7 @@ PlasmoidItem {
 		// Add BTC totooltip
 		if (showBTCTT) {
 			ttStr += "| **" + btcSymbol + (fetchState["btc"].ready ?
-				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["btc"].data[0]).toFixed(decPlacesTT) +
+				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["btc"].price[0]).toFixed(decPlacesTT) +
 					"<sup>" + curSymbol + "</sup>"
 		}
 
@@ -315,18 +319,18 @@ PlasmoidItem {
 		// Add metals to tooltip
 		if (showMetalsTT) {
 			ttStr += "| **" + auSymbol + (fetchState["metals"].ready ?
-				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].data[0]).toFixed(decPlacesTT) +
+				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].price[0]).toFixed(decPlacesTT) +
 					"<sup>" + curSymbol + "</sup>"
 			ttStr += " | **" + agSymbol + (fetchState["metals"].ready ?
-				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].data[1]).toFixed(decPlacesTT) +
+				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].price[1]).toFixed(decPlacesTT) +
 					"<sup>" + curSymbol + "</sup>"
 			ttStr += " |\n"
 
 			if (showBTC || showBTCTT) ttStr += "| **" + btcSymbol + "/" + auSymbol + "** | " +
-				( ((fetchState["btc"].data[0] > 0) && (fetchState["metals"].data[0] > 0) ) ?
-					fetchState["btc"].data[0]/fetchState["metals"].data[0] : 0).toFixed(decPlacesTT)
+				( ((fetchState["btc"].price[0] > 0) && (fetchState["metals"].price[0] > 0) ) ?
+					fetchState["btc"].price[0]/fetchState["metals"].price[0] : 0).toFixed(decPlacesTT)
 			ttStr += " | **" + auSymbol + "/" + agSymbol + "** | " +
-				(fetchState["metals"].data[2]).toFixed(decPlacesTT)
+				(fetchState["metals"].price[2]).toFixed(decPlacesTT)
 			ttStr += " |\n"
 		}
 
@@ -334,8 +338,8 @@ PlasmoidItem {
 		if (showStack) {
 			if (showMetalsTT) {
 				// Calculate Metals related stack
-				auNet = fetchState["metals"].data[0] * auStack * (1 - (1 / 100 * auSlip))
-				agNet = fetchState["metals"].data[1] * agStack * (1 - (1 / 100 * agSlip))
+				auNet = fetchState["metals"].price[0] * auStack * (1 - (1 / 100 * auSlip))
+				agNet = fetchState["metals"].price[1] * agStack * (1 - (1 / 100 * agSlip))
 				ttStr += "| **" + stackSymbol + auSymbol + "** | " + auNet.toFixed(decPlacesTT) +
 					"<sup>" + curSymbol + "</sup>"
 				ttStr += " | **" + stackSymbol + agSymbol + "** | " + agNet.toFixed(decPlacesTT) +
@@ -345,8 +349,8 @@ PlasmoidItem {
 
 			if (showBTC || showBTCTT) {
 				// Calculate BTC related stack
-				btcTax = ((fetchState["btc"].data[0] * btcStack) - (btcCost * btcStack)) / 100 * capGainBTC
-				btcNet = (fetchState["btc"].data[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax)
+				btcTax = ((fetchState["btc"].price[0] * btcStack) - (btcCost * btcStack)) / 100 * capGainBTC
+				btcNet = (fetchState["btc"].price[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax)
 				ttStr += "| **" + stackSymbol + btcSymbol + "** | " +
 					(btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
 				ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " +
@@ -422,7 +426,7 @@ PlasmoidItem {
 														  "data[keys[x]]:", data[keys[x]])
 
 											// Indicate suffix used and save filtered value
-											fetchState[idx].data[z] = parseFloat(data)
+											fetchState[idx].price[z] = parseFloat(data)
 											suffUsed = true
 										} else {
 											console.debug("finstats::fetchData::parseData::Parsing::z::skip::idx:", idx,
@@ -432,7 +436,7 @@ PlasmoidItem {
 									}
 
 									// Save filtered value if suffix not used above
-									if (!suffUsed) fetchState[idx].data[y] = parseFloat(data)
+									if (!suffUsed) fetchState[idx].price[y] = parseFloat(data)
 								} else {
 									console.debug("finstats::fetchData::parseData::Parsing::undefined:idx:", idx)
 									// Fail parsing for now
@@ -441,8 +445,9 @@ PlasmoidItem {
 							}
 							// Add metals ratio if possible
 							if (idx == "metals") {
-								fetchState[idx].data[2] = (((fetchState[idx].data[0] > 0) &&
-								(fetchState[idx].data[1] > 0)) ? (fetchState[idx].data[0]/fetchState[idx].data[1]) : 0)
+								fetchState[idx].price[2] =
+									((fetchState[idx].price[0] > 0) && (fetchState[idx].price[1] > 0)) ?
+										(fetchState[idx].price[0] / fetchState[idx].price[1]) : 0
 							}
 							console.debug("finstats::fetchData::parseData::PostParsing:idx:", idx, "y:", y,
 										  "data:", data)
@@ -465,7 +470,8 @@ PlasmoidItem {
 		if (showBTC || showBTCTT) {
 			fetchState["btc"].ready = false
 			fetchState["btc"].xhr[0] = new XMLHttpRequest()
-			fetchState["btc"].xhr[0].onreadystatechange = function() { parseData(fetchState["btc"].xhr[0], "btc") }
+			fetchState["btc"].xhr[0].onreadystatechange = function() {
+				parseData(fetchState["btc"].xhr[0], "btc") }
 			fetchState["btc"].xhr[0].open("GET", btcUrl, true)
 			fetchState["btc"].xhr[0].setRequestHeader('User-Agent', userAgent)
 			fetchState["btc"].xhr[0].send()
@@ -476,7 +482,8 @@ PlasmoidItem {
 		if (showBTCFee || showBTCFeeTT) {
 			fetchState["btcfee"].ready = false
 			fetchState["btcfee"].xhr[0] = new XMLHttpRequest()
-			fetchState["btcfee"].xhr[0].onreadystatechange = function() { parseData(fetchState["btcfee"].xhr[0], "btcfee") }
+			fetchState["btcfee"].xhr[0].onreadystatechange = function() {
+				parseData(fetchState["btcfee"].xhr[0], "btcfee") }
 			fetchState["btcfee"].xhr[0].open("GET", btcfeeUrl, true)
 			fetchState["btcfee"].xhr[0].setRequestHeader('User-Agent', userAgent)
 			fetchState["btcfee"].xhr[0].send()
@@ -487,7 +494,8 @@ PlasmoidItem {
 		if (showMetals || showMetalsTT) {
 			fetchState["metals"].ready = false
 			fetchState["metals"].xhr[0] = new XMLHttpRequest()
-			fetchState["metals"].xhr[0].onreadystatechange = function() { parseData(fetchState["metals"].xhr[0], "metals") }
+			fetchState["metals"].xhr[0].onreadystatechange = function() {
+				parseData(fetchState["metals"].xhr[0], "metals") }
 			fetchState["metals"].xhr[0].open("GET", metalsUrl + metalsSuffAu, true)
 			fetchState["metals"].xhr[0].setRequestHeader('User-Agent', userAgent)
 			fetchState["metals"].xhr[0].send()
@@ -495,7 +503,8 @@ PlasmoidItem {
 
 			if ( (metalsSuffAg.length > 0) && (metalsSuffAg != metalsSuffAu) ) {
 				fetchState["metals"].xhr[1] = new XMLHttpRequest()
-				fetchState["metals"].xhr[1].onreadystatechange = function() { parseData(fetchState["metals"].xhr[1], "metals") }
+				fetchState["metals"].xhr[1].onreadystatechange = function() {
+					parseData(fetchState["metals"].xhr[1], "metals") }
 				fetchState["metals"].xhr[1].open("GET", metalsUrl + metalsSuffAg, true)
 				fetchState["metals"].xhr[1].setRequestHeader('User-Agent', userAgent)
 				fetchState["metals"].xhr[1].send()
