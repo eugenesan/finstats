@@ -44,6 +44,10 @@ Item {
 					currentIndex: -1
 
 					model: [{
+						text: i18n("Coinstats BTC-USD"),
+						url: "https://openapiv1.coinstats.app/coins/bitcoin",
+						key: "price"
+					}, {
 						text: i18n("Bitstamp BTC-USD"),
 						url: "https://www.bitstamp.net/api/ticker/",
 						key: "last"
@@ -52,8 +56,12 @@ Item {
 						url: "https://api.coinbase.com/v2/prices/BTC-USD/spot",
 						key: "data.amount"
 					}, {
-						text: i18n("Mempool BTC-USD"),
+						text: i18n("Mempool.space BTC-USD"),
 						url: "https://mempool.space/api/v1/prices",
+						key: "USD"
+					}, {
+						text: i18n("Mempool.guide BTC-USD"),
+						url: "https://mempool.guide/api/v1/prices",
 						key: "USD"
 					}, {
 						text: i18n("Bitfinex BTC-USD"),
@@ -124,6 +132,52 @@ Item {
 					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which JSON key to extract for BTC value")
+				}
+
+				// BTC Fee sources
+				Label {
+					text: i18n("Select BTC fee fetch preset:")
+				}
+				ComboBox {
+					id: loadBTCfeePresetCombo
+					textRole: "text"
+					currentIndex: -1
+
+					model: [{
+						text: i18n("Mempool.space BTC-USD"),
+						url: "https://mempool.space/api/v1/fees/precise",
+						key: "economyFee"
+					}, {
+						text: i18n("Mempool.guide BTC-USD"),
+						url: "https://mempool.guide/api/v1/fees/recommended",
+						key: "economyFee"
+					}]
+
+					Component.onCompleted: {
+						console.debug("finstats::*::config::fetch::BTCfee::ComboBox::onCompleted::currentIndex:",
+									  currentIndex)
+						for (var i = 0, length = model.length; i < length; ++i) {
+							if (model[i].url === cfg_btcfeeUrl) {
+								currentIndex = i
+								console.debug("finstats::*::config::BTCfee::fetch::ComboBox::onCompleted::seekFound:",
+											  currentIndex, model[currentIndex].url, model[currentIndex].key);
+								return
+							}
+						}
+						console.log("finstats::*::config::fetch::BTCfee::ComboBox::onCompleted::seekError:",
+									currentIndex)
+					}
+
+					onCurrentIndexChanged: {
+						console.log("finstats::*::config::fetch::BTCfee::ComboBox::onCurrentIndexChanged:",
+									currentIndex, model[currentIndex].url, model[currentIndex].key)
+						// Perform actions based on the new index
+						cfg_btcfeeUrl = model[currentIndex].url
+						cfg_btcfeeKey = model[currentIndex].key
+					}
+
+					ToolTip.visible: hovered
+					ToolTip.text: i18n("Select preset for fetching Bitcoin fee price")
 				}
 
 				// BTC fee URL
