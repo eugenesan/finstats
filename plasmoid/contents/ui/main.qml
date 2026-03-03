@@ -302,16 +302,16 @@ PlasmoidItem {
 		// Add BTC totooltip
 		if (showBTCTT) {
 			ttStr += "| **" + btcSymbol + (fetchState["btc"].ready ?
-				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["btc"].price[0]).toFixed(decPlacesTT) +
-					"<sup>" + curSymbol + "</sup>"
+				"" : " <sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["btc"].price[0]).toFixed(decPlacesTT) +
+					" <sup>" + curSymbol + "</sup>"
 		}
 
 		// Add BTC Fee to tooltip
 		if (showBTCFeeTT) {
 			ttStr += " | **" + btcSymbol + "<sub>Fee</sub>" + (fetchState["btcfee"].ready ?
-				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + btcStdFee + "<sup>" + satsSymbol + "</sup>"
+				"" : " <sup>" + warnSymbol + "</sup>") + "** | " + btcStdFee + " <sup>" + satsSymbol + "</sup>"
 			ttStr += " / " + ((btcStdFeePrice < 1) ?
-				(btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT)) + "<sup>" +
+				(btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT)) + " <sup>" +
 					((btcStdFeePrice < 1) ? minorcurSymbol : curSymbol) + "</sup> |"
 		}
 		if (showBTCTT || showBTCFeeTT) ttStr += "\n"
@@ -319,11 +319,11 @@ PlasmoidItem {
 		// Add metals to tooltip
 		if (showMetalsTT) {
 			ttStr += "| **" + auSymbol + (fetchState["metals"].ready ?
-				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].price[0]).toFixed(decPlacesTT) +
-					"<sup>" + curSymbol + "</sup>"
+				"" : " <sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].price[0]).toFixed(decPlacesTT) +
+					" <sup>" + curSymbol + "</sup>"
 			ttStr += " | **" + agSymbol + (fetchState["metals"].ready ?
-				"" : "<sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].price[1]).toFixed(decPlacesTT) +
-					"<sup>" + curSymbol + "</sup>"
+				"" : " <sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].price[1]).toFixed(decPlacesTT) +
+					" <sup>" + curSymbol + "</sup>"
 			ttStr += " |\n"
 
 			if (showBTC || showBTCTT) ttStr += "| **" + btcSymbol + "/" + auSymbol + "** | " +
@@ -341,9 +341,9 @@ PlasmoidItem {
 				auNet = fetchState["metals"].price[0] * auStack * (1 - (1 / 100 * auSlip))
 				agNet = fetchState["metals"].price[1] * agStack * (1 - (1 / 100 * agSlip))
 				ttStr += "| **" + stackSymbol + auSymbol + "** | " + auNet.toFixed(decPlacesTT) +
-					"<sup>" + curSymbol + "</sup>"
+					" <sup>" + curSymbol + "</sup>"
 				ttStr += " | **" + stackSymbol + agSymbol + "** | " + agNet.toFixed(decPlacesTT) +
-					"<sup>" + curSymbol + "</sup>"
+					" <sup>" + curSymbol + "</sup>"
 				ttStr += " |\n"
 			}
 
@@ -352,10 +352,10 @@ PlasmoidItem {
 				btcTax = ((fetchState["btc"].price[0] * btcStack) - (btcCost * btcStack)) / 100 * capGainBTC
 				btcNet = (fetchState["btc"].price[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax)
 				ttStr += "| **" + stackSymbol + btcSymbol + "** | " +
-					(btcNet).toFixed(decPlacesTT) + "<sup>" + curSymbol + "</sup>"
+					(btcNet).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
 				ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " +
 				( ((showBTC || showBTCTT) ? btcNet : 0) + auNet + agNet).toFixed(decPlacesTT) +
-					"<sup>" + curSymbol + "</sup>"
+					" <sup>" + curSymbol + "</sup>"
 				ttStr += " |\n"
 			}
 		}
