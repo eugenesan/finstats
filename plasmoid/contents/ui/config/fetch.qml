@@ -10,8 +10,6 @@ import QtQuick.Layouts
 Item {
 	id: root
 
-	signal configurationChanged
-
 	property alias cfg_btcUrl: btcUrl.text
 	property alias cfg_btcKey: btcKey.text
 	property alias cfg_btcfeeUrl: btcfeeUrl.text
@@ -83,7 +81,7 @@ Item {
 						for (var i = 0, length = model.length; i < length; ++i) {
 							if (model[i].url === cfg_btcUrl) {
 								currentIndex = i
-								console.debug("finstats::*::config::BTC::fetch::ComboBox::onCompleted::seekFound:",
+								console.debug("finstats::*::config::fetch::BTC::ComboBox::onCompleted::seekFound:",
 											  currentIndex, model[currentIndex].url, model[currentIndex].key);
 								return
 							}
@@ -114,7 +112,6 @@ Item {
 					id: btcUrl
 					Layout.minimumWidth: root.width * 0.6
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which URL to fetch BTC from")
 				}
@@ -129,7 +126,6 @@ Item {
 					id: btcKey
 					Layout.minimumWidth: root.width * 0.6
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which JSON key to extract for BTC value")
 				}
@@ -159,7 +155,7 @@ Item {
 						for (var i = 0, length = model.length; i < length; ++i) {
 							if (model[i].url === cfg_btcfeeUrl) {
 								currentIndex = i
-								console.debug("finstats::*::config::BTCfee::fetch::ComboBox::onCompleted::seekFound:",
+								console.debug("finstats::*::config::fetch::BTCfee::ComboBox::onCompleted::seekFound:",
 											  currentIndex, model[currentIndex].url, model[currentIndex].key);
 								return
 							}
@@ -190,7 +186,6 @@ Item {
 					id: btcfeeUrl
 					Layout.minimumWidth: root.width * 0.6
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which URL to fetch BTC fee from")
 				}
@@ -205,7 +200,6 @@ Item {
 					id: btcfeeKey
 					Layout.minimumWidth: root.width * 0.6
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which JSON key to extract for BTC fee value")
 				}
@@ -278,7 +272,6 @@ Item {
 					id: metalsUrl
 					Layout.minimumWidth: root.width * 0.6
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which URL to Metals from")
 				}
@@ -293,7 +286,6 @@ Item {
 					id: metalsSuffAu
 					Layout.minimumWidth: root.width * 0.6
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which URL suffix to use for Au value")
 				}
@@ -308,7 +300,6 @@ Item {
 					id: metalsSuffAg
 					Layout.minimumWidth: root.width * 0.6
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which URL suffix to use for Ag value")
 				}
@@ -323,7 +314,6 @@ Item {
 					id: metalsKeyAu
 					Layout.minimumWidth: root.width * 0.6
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which JSON key to extract for Au value")
 				}
@@ -338,7 +328,6 @@ Item {
 					id: metalsKeyAg
 					Layout.minimumWidth: root.width * 0.6
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which JSON key to extract for Ag value")
 				}
@@ -354,9 +343,8 @@ Item {
 					from: 1
 					to: 60
 					stepSize: 1
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Minutes to refresh the values (1–60)")
+					ToolTip.text: i18n("How often to refresh the data (1–60)")
 				}
 
 				// Data ready timer
@@ -370,7 +358,6 @@ Item {
 					from: 1
 					to: 60
 					stepSize: 1
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("How long to wait for data to become ready (1–60)")
 				}
@@ -386,9 +373,8 @@ Item {
 					from: 1
 					to: 60
 					stepSize: 1
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Minutes to retry fetching the values (1–60)")
+					ToolTip.text: i18n("How long to wait to re-fetch data after error (1–60)")
 				}
 			}  // Closing GridLayout
 		}      // Closing ColumnLayout

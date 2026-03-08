@@ -10,8 +10,6 @@ import QtQuick.Layouts
 Item {
 	id: root
 
-	signal configurationChanged
-
 	property alias cfg_appletColor: appletColor.checked
 	property alias cfg_appletSymbol: appletSymbol.text
 	property alias cfg_stackSymbol: stackSymbol.text
@@ -44,7 +42,6 @@ Item {
 				}
 				CheckBox {
 					id: appletColor
-					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Wether to color applet on change")
 				}
@@ -58,7 +55,6 @@ Item {
 				TextField {
 					id: appletSymbol
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Default symbol for empty Applet")
 				}
@@ -72,7 +68,6 @@ Item {
 				TextField {
 					id: stackSymbol
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use for Stack")
 				}
@@ -86,7 +81,6 @@ Item {
 				TextField {
 					id: curSymbol
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use for Currency")
 				}
@@ -100,7 +94,6 @@ Item {
 				TextField {
 					id: minorcurSymbol
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use for minor Currency (1/100th)")
 				}
@@ -114,7 +107,6 @@ Item {
 				TextField {
 					id: btcSymbol
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use for BTC")
 				}
@@ -128,7 +120,6 @@ Item {
 				TextField {
 					id: satsSymbol
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use for Satoshi")
 				}
@@ -142,7 +133,6 @@ Item {
 				TextField {
 					id: auSymbol
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use for Gold")
 				}
@@ -156,7 +146,6 @@ Item {
 				TextField {
 					id: agSymbol
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use for Silver")
 				}
@@ -170,7 +159,6 @@ Item {
 				TextField {
 					id: warnSymbol
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use for Warning")
 				}
@@ -185,7 +173,6 @@ Item {
 				TextField {
 					id: delimSymbol
 					text: "#000000"
-					onTextChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Which symbol to use as delimiter on applet")
 				}
@@ -200,7 +187,6 @@ Item {
 					id: decPlaces
 					from: 0
 					to: 9
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Decimal places for Applet")
 				}
@@ -215,7 +201,6 @@ Item {
 					id: decPlacesTT
 					from: 0
 					to: 9
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Decimal places for ToolTip")
 				}
@@ -230,7 +215,6 @@ Item {
 					id: priceDivider
 					from: 0
 					to: 100000
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Divider to apply to prices on appplet (applies only to 'greater than' values)")
 				}

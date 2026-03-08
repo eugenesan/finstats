@@ -10,8 +10,6 @@ import QtQuick.Layouts
 Item {
 	id: root
 
-	signal configurationChanged
-
 	property alias cfg_btcStack: btcStack.text
 	property alias cfg_btcCost: btcCost.text
 	property alias cfg_capGainBTC: capGainBTC.value
@@ -75,7 +73,6 @@ Item {
 					id: capGainBTC
 					from: 0
 					to: 99
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("BTC capital gains tax ammount (0–99)")
 				}
@@ -90,7 +87,6 @@ Item {
 					id: auStack
 					from: 0
 					to: 999
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Count of Silver in the stack (0–999)")
 				}
@@ -105,7 +101,6 @@ Item {
 					id: auSlip
 					from: 0
 					to: 99
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Au slippage (0–99)")
 				}
@@ -120,7 +115,6 @@ Item {
 					id: agStack
 					from: 0
 					to: 999
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Count of Silver in the stack (0–999)")
 				}
@@ -135,7 +129,6 @@ Item {
 					id: agSlip
 					from: 0
 					to: 99
-					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Ag slippage (0–99)")
 				}

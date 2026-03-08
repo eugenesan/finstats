@@ -10,8 +10,6 @@ import QtQuick.Layouts
 Item {
 	id: root
 
-	signal configurationChanged
-
 	property alias cfg_showBTC: showBTC.checked
 	property alias cfg_showBTCTT: showBTCTT.checked
 	property alias cfg_showBTCFee: showBTCFee.checked
@@ -38,7 +36,6 @@ Item {
 				}
 				CheckBox {
 					id: showBTC
-					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Wether to display BTC on Applet")
 				}
@@ -51,7 +48,6 @@ Item {
 				}
 				CheckBox {
 					id: showBTCTT
-					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Wether to display BTC on ToolTip")
 				}
@@ -64,7 +60,6 @@ Item {
 				}
 				CheckBox {
 					id: showBTCFee
-					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Wether to display BTC Fee on Applet")
 				}
@@ -77,7 +72,6 @@ Item {
 				}
 				CheckBox {
 					id: showBTCFeeTT
-					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Wether to display BTC Fee on ToolTip")
 				}
@@ -90,7 +84,6 @@ Item {
 				}
 				CheckBox {
 					id: showMetals
-					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Wether to display metals on Applet")
 				}
@@ -103,7 +96,6 @@ Item {
 				}
 				CheckBox {
 					id: showMetalsRatio
-					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Wether to display metals ratio on Applet")
 				}
@@ -116,7 +108,6 @@ Item {
 				}
 				CheckBox {
 					id: showMetalsTT
-					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Wether to display metals on ToolTip")
 				}
@@ -129,7 +120,6 @@ Item {
 				}
 				CheckBox {
 					id: showStack
-					onCheckedChanged: configurationChanged()
 					ToolTip.visible: hovered
 					ToolTip.text: i18n("Wether to display Stack on ToolTip")
 				}
