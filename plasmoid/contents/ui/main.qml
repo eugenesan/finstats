@@ -271,8 +271,10 @@ PlasmoidItem {
 		var agNet = 0
 
 		// Initialize applet and tooltip strings (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕ │ )
-		var ttStr = ""
 		var aStr = ""
+		var ttMain = ""
+		var ttStack = ""
+		var ttFooter = ""
 
 		// Add BTC to applet
 		if (showBTC) {
@@ -302,41 +304,41 @@ PlasmoidItem {
 		console.log("finstats::buildData::applet-ready::myLabel.text:", myLabel.text)
 
 		// Start tooltip with timestamp and markdown table header
-		ttStr += "| 🗓 |" + formattedDate + " | ⏱ | " + formattedTime + " |\n"
-		ttStr += "| :--- | :--- | :--- | :--- |\n"
+		ttMain += "| 🗓 |" + formattedDate + " | ⏱ | " + formattedTime + " |\n"
+		ttMain += "| :--- | :--- | :--- | :--- |\n"
 
 		// Add BTC totooltip
 		if (showBTCTT) {
-			ttStr += "| **" + btcSymbol + (fetchState["btc"].ready ? "" : " <sup>" + warnSymbol + "</sup>") +
+			ttMain += "| **" + btcSymbol + (fetchState["btc"].ready ? "" : " <sup>" + warnSymbol + "</sup>") +
 					 "** | " + (fetchState["btc"].price[0]).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
 		}
 
 		// Add BTC Fee to tooltip
 		if (showBTCFeeTT) {
-			ttStr += " | **" + btcSymbol + "<sub>Fee</sub>" + (fetchState["btcfee"].ready ?
+			ttMain += " | **" + btcSymbol + "<sub>Fee</sub>" + (fetchState["btcfee"].ready ?
 					 "" : " <sup>" + warnSymbol + "</sup>") + "** | " + btcStdFee + " <sup>" + satsSymbol + "</sup>"
-			ttStr += " / " + ((btcStdFeePrice < 1) ?
+			ttMain += " / " + ((btcStdFeePrice < 1) ?
 				(btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT)) + " <sup>" +
 					((btcStdFeePrice < 1) ? minorcurSymbol : curSymbol) + "</sup> |"
 		}
-		if (showBTCTT || showBTCFeeTT) ttStr += "\n"
+		if (showBTCTT || showBTCFeeTT) ttMain += "\n"
 
 		// Add metals to tooltip
 		if (showMetalsTT) {
-			ttStr += "| **" + auSymbol + (fetchState["metals"].ready ?
+			ttMain += "| **" + auSymbol + (fetchState["metals"].ready ?
 					 "" : " <sup>" + warnSymbol + "</sup>") + "** | " +
 					 (fetchState["metals"].price[0]).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
-			ttStr += " | **" + agSymbol + (fetchState["metals"].ready ?
+			ttMain += " | **" + agSymbol + (fetchState["metals"].ready ?
 					 "" : " <sup>" + warnSymbol + "</sup>") + "** | " +
 					 (fetchState["metals"].price[1]).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
-			ttStr += " |\n"
+			ttMain += " |\n"
 
-			if (showBTC || showBTCTT) ttStr += "| **" + btcSymbol + "/" + auSymbol + "** | " +
+			if (showBTC || showBTCTT) ttMain += "| **" + btcSymbol + "/" + auSymbol + "** | " +
 				( ((fetchState["btc"].price[0] > 0) && (fetchState["metals"].price[0] > 0) ) ?
 					fetchState["btc"].price[0]/fetchState["metals"].price[0] : 0).toFixed(decPlacesTT)
-			ttStr += " | **" + auSymbol + "/" + agSymbol + "** | " +
+			ttMain += " | **" + auSymbol + "/" + agSymbol + "** | " +
 					 (fetchState["metals"].price[2]).toFixed(decPlacesTT)
-			ttStr += " |\n"
+			ttMain += " |\n"
 		}
 
 		// Add stack to tooltip
@@ -345,32 +347,33 @@ PlasmoidItem {
 				// Calculate Metals related stack
 				auNet = fetchState["metals"].price[0] * auStack * (1 - (1 / 100 * auSlip))
 				agNet = fetchState["metals"].price[1] * agStack * (1 - (1 / 100 * agSlip))
-				ttStr += "| **" + stackSymbol + auSymbol + "** | " + auNet.toFixed(decPlacesTT) +
+				ttStack += "| **" + stackSymbol + auSymbol + "** | " + auNet.toFixed(decPlacesTT) +
 					" <sup>" + curSymbol + "</sup>"
-				ttStr += " | **" + stackSymbol + agSymbol + "** | " + agNet.toFixed(decPlacesTT) +
+				ttStack += " | **" + stackSymbol + agSymbol + "** | " + agNet.toFixed(decPlacesTT) +
 					" <sup>" + curSymbol + "</sup>"
-				ttStr += " |\n"
+				ttStack += " |\n"
 			}
 
 			if (showBTC || showBTCTT) {
 				// Calculate BTC related stack
 				btcTax = ((fetchState["btc"].price[0] * btcStack) - (btcCost * btcStack)) / 100 * capGainBTC
 				btcNet = (fetchState["btc"].price[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax)
-				ttStr += "| **" + stackSymbol + btcSymbol + "** | " +
+				ttStack += "| **" + stackSymbol + btcSymbol + "** | " +
 					(btcNet).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
-				ttStr += " | **" + stackSymbol + "<sub>Total</sub>** | " +
+				ttStack += " | **" + stackSymbol + "<sub>Total</sub>** | " +
 				( ((showBTC || showBTCTT) ? btcNet : 0) + auNet + agNet).toFixed(decPlacesTT) +
 					" <sup>" + curSymbol + "</sup>"
-				ttStr += " |\n"
+				ttStack += " |\n"
 			}
 		}
 
-		// Finalize the tooltip
-		if (!dataReadyFull) ttStr += "*" + warnSymbol + " Error during last update*\n"
-		ttStr += "*Next update at " +  formattedRefresh + " (click for now)*\n"
+		// Add footer to tooltip
+		if (!dataReadyFull) ttFooter += "*" + warnSymbol + " Error during last update*\n"
+		ttFooter += "*Next update at " +  formattedRefresh + " (click for now)*\n"
 
-		toolTip.subText = ttStr
-		console.log("finstats::buildData::tooltip-ready::toolTip.subText:", toolTip.subText)
+		// Finalize the tooltip (skip stack in logs)
+		toolTip.subText = ttMain + ttStack + ttFooter
+		console.log("finstats::buildData::tooltip-ready::toolTip.subTextSanitized:", ttMain + ttFooter)
 	}
 
 	// Initiate fetch requests
