@@ -104,8 +104,12 @@ PlasmoidItem {
 				// Stop refreshTimer
 				refreshTimer.stop()
 
-				// Change applet color if needed
-				if (appletColor) myLabel.color = Theme.highlightColor
+				// Change applet color to highlight if needed
+				if (appletColor) {
+					colorFeedback.from = myLabel.color
+					colorFeedback.to = Theme.highlightColor
+					colorFeedback.start()
+				}
 
 				// Send fetch requests and start monitoring data readiness
 				fetchData()
@@ -137,8 +141,6 @@ PlasmoidItem {
 		id: colorFeedback
 		target: myLabel
 		property: "color"
-		from: Theme.highlightColor
-		to: (dataReadyFull) ? Theme.textColor : Theme.disabledTextColor
 		duration: 1000
 	}
 
@@ -162,8 +164,12 @@ PlasmoidItem {
 		onTriggered: {
 			console.log("finstats::refreshTimer::timerTriggered")
 
-			// Change applet color if needed
-			if (appletColor) myLabel.color = Theme.disabledTextColor
+			// Change applet color to highlight needed
+			if (appletColor) {
+				colorFeedback.from = myLabel.color
+				colorFeedback.to = Theme.highlightColor
+				colorFeedback.restart()
+			}
 
 			// Send fetch requests and start monitoring data readiness
 			fetchData()
@@ -206,8 +212,12 @@ PlasmoidItem {
 				refreshTimer.interval = timeRefresh * 60 * 1000
 				buildData()
 
-				// Restore applet color
-				if (appletColor) colorFeedback.restart()
+				// Change applet color to normal if needed
+				if (appletColor) {
+					colorFeedback.from = myLabel.color
+					colorFeedback.to = Theme.textColor
+					colorFeedback.restart()
+				}
 
 				// Restart refreshTimer
 				refreshTimer.restart()
@@ -229,8 +239,12 @@ PlasmoidItem {
 					refreshTimer.interval = timeRefetch * 60 * 1000
 					buildData()
 
-					// Restore applet color
-					if (appletColor) colorFeedback.restart()
+					// Change applet color to disabled if needed
+					if (appletColor) {
+						colorFeedback.from = myLabel.color
+						colorFeedback.to = Theme.disabledTextColor
+						colorFeedback.start()
+					}
 
 					// Restart refreshTimer
 					refreshTimer.restart()
