@@ -307,15 +307,14 @@ PlasmoidItem {
 
 		// Add BTC totooltip
 		if (showBTCTT) {
-			ttStr += "| **" + btcSymbol + (fetchState["btc"].ready ?
-				"" : " <sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["btc"].price[0]).toFixed(decPlacesTT) +
-					" <sup>" + curSymbol + "</sup>"
+			ttStr += "| **" + btcSymbol + (fetchState["btc"].ready ? "" : " <sup>" + warnSymbol + "</sup>") +
+					 "** | " + (fetchState["btc"].price[0]).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
 		}
 
 		// Add BTC Fee to tooltip
 		if (showBTCFeeTT) {
 			ttStr += " | **" + btcSymbol + "<sub>Fee</sub>" + (fetchState["btcfee"].ready ?
-				"" : " <sup>" + warnSymbol + "</sup>") + "** | " + btcStdFee + " <sup>" + satsSymbol + "</sup>"
+					 "" : " <sup>" + warnSymbol + "</sup>") + "** | " + btcStdFee + " <sup>" + satsSymbol + "</sup>"
 			ttStr += " / " + ((btcStdFeePrice < 1) ?
 				(btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT)) + " <sup>" +
 					((btcStdFeePrice < 1) ? minorcurSymbol : curSymbol) + "</sup> |"
@@ -325,18 +324,18 @@ PlasmoidItem {
 		// Add metals to tooltip
 		if (showMetalsTT) {
 			ttStr += "| **" + auSymbol + (fetchState["metals"].ready ?
-				"" : " <sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].price[0]).toFixed(decPlacesTT) +
-					" <sup>" + curSymbol + "</sup>"
+					 "" : " <sup>" + warnSymbol + "</sup>") + "** | " +
+					 (fetchState["metals"].price[0]).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
 			ttStr += " | **" + agSymbol + (fetchState["metals"].ready ?
-				"" : " <sup>" + warnSymbol + "</sup>") + "** | " + (fetchState["metals"].price[1]).toFixed(decPlacesTT) +
-					" <sup>" + curSymbol + "</sup>"
+					 "" : " <sup>" + warnSymbol + "</sup>") + "** | " +
+					 (fetchState["metals"].price[1]).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
 			ttStr += " |\n"
 
 			if (showBTC || showBTCTT) ttStr += "| **" + btcSymbol + "/" + auSymbol + "** | " +
 				( ((fetchState["btc"].price[0] > 0) && (fetchState["metals"].price[0] > 0) ) ?
 					fetchState["btc"].price[0]/fetchState["metals"].price[0] : 0).toFixed(decPlacesTT)
 			ttStr += " | **" + auSymbol + "/" + agSymbol + "** | " +
-				(fetchState["metals"].price[2]).toFixed(decPlacesTT)
+					 (fetchState["metals"].price[2]).toFixed(decPlacesTT)
 			ttStr += " |\n"
 		}
 
