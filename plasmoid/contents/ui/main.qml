@@ -137,8 +137,8 @@ PlasmoidItem {
 		id: colorFeedback
 		target: myLabel
 		property: "color"
-		from: Theme.disabledTextColor
-		to: (dataReadyFull) ? Theme.textColor : Theme.neutralTextColor
+		from: Theme.highlightColor
+		to: (dataReadyFull) ? Theme.textColor : Theme.disabledTextColor
 		duration: 1000
 	}
 
