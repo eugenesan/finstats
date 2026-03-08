@@ -74,7 +74,7 @@ PlasmoidItem {
 	property string metalsKeyAu: plasmoid.configuration.metalsKeyAu
 	property string metalsKeyAg: plasmoid.configuration.metalsKeyAg
 	property int timeRefresh: plasmoid.configuration.timeRefresh
-	property int timeRetry: plasmoid.configuration.timeRetry
+	property int timeDataReady: plasmoid.configuration.timeDataReady
 	property int timeRefetch: plasmoid.configuration.timeRefetch
 
 	ToolTipArea {
@@ -94,18 +94,25 @@ PlasmoidItem {
 		acceptedButtons: Qt.LeftButton
 		// Refresh the label and reset time on mouse click
 		onClicked: (mouse) => {
-			console.log("finstats::MouseArea::clicked-start-refresh-data")
+			if (datareadyTimer.running) {
+				// Skip forced refresh if already monitoring data readiness
+				console.log("finstats::MouseArea::clicked::skip-refresh-data")
+			} else {
+				// Forced refresh if not monitoring data readiness
+				console.log("finstats::MouseArea::clicked::start-refresh-data")
 
-			// Change applet color if needed
-			if (appletColor) myLabel.color = Theme.disabledTextColor
+				// Stop refreshTimer
+				refreshTimer.stop()
 
-			// Send fetch requests, reset attempt counter and reset/enable data ready timer
-			refreshTimer.interval = timeRefresh * 60 * 1000
-			dataReadyAttemp = 0
-			fetchData()
-			datareadyWait.running = true
-			console.debug("finstats::MouseArea::clicked::stop-timer-restart")
-			refreshTimer.restart()
+				// Change applet color if needed
+				if (appletColor) myLabel.color = Theme.highlightColor
+
+				// Send fetch requests and start monitoring data readiness
+				fetchData()
+				dataReadyAttemp = 0
+				datareadyTimer.restart()
+				console.debug("finstats::MouseArea::clicked::stop-timer-restart")
+			}
 		}
 
 		hoverEnabled: true
@@ -135,46 +142,55 @@ PlasmoidItem {
 		duration: 1000
 	}
 
+	// Initialize and fetch on start
 	Component.onCompleted: {
+		// Set default applet content as a symbol
 		myLabel.text = appletSymbol
-		fetchData()
 
-		// Resume monitoring data ready
-		datareadyWait.running = true
+		// Send fetch requests and start monitoring data readiness
+		fetchData()
 		dataReadyAttemp = 0
+		datareadyTimer.start()
 	}
 
-	// Refresh applet every 15 minutes
+	// Refresh data according to timeRefresh
 	Timer {
 		id: refreshTimer
 		interval: timeRefresh * 60 * 1000
-		running: true
-		repeat: true
+		running: false
+		repeat: false
 		onTriggered: {
+			console.log("finstats::refreshTimer::timerTriggered")
+
 			// Change applet color if needed
 			if (appletColor) myLabel.color = Theme.disabledTextColor
 
-			// Restore configured interval in case it was shortened by datareadyWait
-			interval = timeRefresh * 60 * 1000
-
-			// Send fetch requests and enable data ready timer
+			// Send fetch requests and start monitoring data readiness
 			fetchData()
-			datareadyWait.running = true
 			dataReadyAttemp = 0
+			datareadyTimer.restart()
 		}
 	}
 
 	// Wait for data to be fetched and build applet/tooltip text
 	Timer {
-		id: datareadyWait
-		interval: (timeRetry / 2) * 1000
-		running: true
-		repeat: true
+		id: datareadyTimer
+		interval: (timeDataReady / 3) * 1000
+		running: false
+		repeat: false
 
 		onTriggered: {
+			console.debug("finstats::datareadyTimer::Triggered::interval:", datareadyTimer.interval,
+				"dataReadyAttemp:", dataReadyAttemp, "dataReadyFull:", dataReadyFull, "timeDataReady:", timeDataReady,
+				"showBTC:", showBTC, "showBTCFee:", showBTCFee, "showMetals:", showMetals,
+				"showBTCTT:", showBTCTT, "showBTCFeeTT:", showBTCFeeTT, "showMetalsTT:", showMetalsTT,
+				"btcReady:", fetchState["btc"].ready, "btcfeeReady:", fetchState["btcfee"].ready,
+				"metalsReady:", fetchState["metals"].ready,
+				"btcData:", fetchState["btc"].price[0], "btcfeeData[0]:", fetchState["btcfee"].price[0],
+				"metalsData[0]:", fetchState["metals"].price[0], "metalsData[1]:", fetchState["metals"].price[1])
+
 			// Check if all the results marked as fetched and dataready timer still enabled
-			if ( datareadyWait.running &&
-				( (fetchState["btc"].ready &&
+			if (( (fetchState["btc"].ready &&
 					(fetchState["btc"].price[0] > (1/100000000))) || (!showBTC && !showBTCTT) ) &&
 				( (fetchState["btcfee"].ready &&
 					(fetchState["btcfee"].price[0] > (1/100000000))) || (!showBTCFee && !showBTCFeeTT) ) &&
@@ -183,60 +199,50 @@ PlasmoidItem {
 				( (fetchState["metals"].ready &&
 					(fetchState["metals"].price[1] > (1/100000000))) || (!showMetals && !showMetalsTT) ) )
 			{
-				console.debug("finstats::Timer::timerTriggered::Build::Ready::interval:", interval,
-					"dataReadyAttemp:", dataReadyAttemp, "dataReadyFull:", dataReadyFull,
-					"datareadyWait.running:", datareadyWait.running,
-					"showBTC:", showBTC, "showBTCFee:", showBTCFee, "showMetals:", showMetals,
-					"showBTCTT:", showBTCTT, "showBTCFeeTT:", showBTCFeeTT, "showMetalsTT:", showMetalsTT,
-					"btcReady:", fetchState["btc"].ready, "btcfeeReady:", fetchState["btcfee"].ready,
-					"metalsReady:", fetchState["metals"].ready,
-					"btcData:", fetchState["btc"].price[0], "btcfeeData[0]:", fetchState["btcfee"].price[0],
-					"metalsData[0]:", fetchState["metals"].price[0], "metalsData[1]:", fetchState["metals"].price[1])
+				console.log("finstats::datareadyTimer::Triggered::Ready")
 
-				// Disable timer to avoid duplicate calls
-				datareadyWait.running = false
-
-				// Once all data fetched, build label
+				// Once all data fetched, restore normal interval and build label
 				dataReadyFull = true
+				refreshTimer.interval = timeRefresh * 60 * 1000
 				buildData()
+
+				// Restore applet color
 				if (appletColor) colorFeedback.restart()
+
+				// Restart refreshTimer
+				refreshTimer.restart()
 			} else {
-				console.debug("finstats::Timer::timerTriggered::Attempt::interval:", interval,
-					"dataReadyAttemp:", dataReadyAttemp, "dataReadyFull:", dataReadyFull,
-					"datareadyWait.running:", datareadyWait.running,
-					"showBTC:", showBTC, "showBTCFee:", showBTCFee, "showMetals:", showMetals,
-					"showBTCTT:", showBTCTT, "showBTCFeeTT:", showBTCFeeTT, "showMetalsTT:", showMetalsTT,
-					"btcReady:", fetchState["btc"].ready, "btcfeeReady:", fetchState["btcfee"].ready,
-					"metalsReady:", fetchState["metals"].ready,
-					"btcData:", fetchState["btc"].price[0], "btcfeeData[0]:", fetchState["btcfee"].price[0],
-					"metalsData[0]:", fetchState["metals"].price[0], "metalsData[1]:", fetchState["metals"].price[1])
-
-				// Disable full readiness until result are ready
+				// Reset dataready state
 				dataReadyFull = false
 
-				// Not all data is ready, invalid results or duplicate call
-				dataReadyAttemp++
-			}
+				if (dataReadyAttemp > 2) {
+					// Give up after 3 attempts
+					console.log("finstats::datareadyTimer::Triggered::Abort")
 
-			// Retry 3 times and if still failed, set refresh timer as configured
-			if (dataReadyAttemp > 4) {
-				console.log("finstats::Timer::timerTriggered::LastAttemp::AbortingFetches:", "timeRetry:", timeRetry,
-							"refreshTimer.interval:", refreshTimer.interval)
+					// Stop all fetch requests
+					if (typeof fetchState["btc"].xhr[0] != 'undefined') fetchState["btc"].xhr[0].abort()
+					if (typeof fetchState["btcfee"].xhr[0] != 'undefined') fetchState["btcfee"].xhr[0].abort()
+					if (typeof fetchState["metals"].xhr[0] != 'undefined') fetchState["metals"].xhr[0].abort()
+					if (typeof fetchState["metals"].xhr[1] != 'undefined') fetchState["metals"].xhr[1].abort()
 
-				// Stop all fetch requests
-				if (typeof fetchState["btc"].xhr[0] != 'undefined') fetchState["btc"].xhr[0].abort()
-				if (typeof fetchState["btcfee"].xhr[0] != 'undefined') fetchState["btcfee"].xhr[0].abort()
-				if (typeof fetchState["metals"].xhr[0] != 'undefined') fetchState["metals"].xhr[0].abort()
-				if (typeof fetchState["metals"].xhr[1] != 'undefined') fetchState["metals"].xhr[1].abort()
+					// After giving up, set interval to refetch time and call partial build
+					refreshTimer.interval = timeRefetch * 60 * 1000
+					buildData()
 
-				// Reset ready/running states and set refetch timer
-				running = false
-				dataReadyFull = false
-				refreshTimer.interval = timeRefetch * 60 * 1000
+					// Restore applet color
+					if (appletColor) colorFeedback.restart()
 
-				// After max retries, call partial build
-				buildData()
-				if (appletColor) colorFeedback.restart()
+					// Restart refreshTimer
+					refreshTimer.restart()
+				} else {
+					console.log("finstats::datareadyTimer::Triggered::Retry")
+
+					// Not all data is ready, invalid results or duplicate call
+					dataReadyAttemp++
+
+					// Repeat timer to continue monitoring data readiness
+					datareadyTimer.restart()
+				}
 			}
 		}
 	}

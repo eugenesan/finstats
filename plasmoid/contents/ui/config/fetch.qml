@@ -22,7 +22,7 @@ Item {
 	property alias cfg_metalsSuffAu: metalsSuffAu.text
 	property alias cfg_metalsSuffAg: metalsSuffAg.text
 	property alias cfg_timeRefresh: timeRefresh.value
-	property alias cfg_timeRetry: timeRetry.value
+	property alias cfg_timeDataReady: timeDataReady.value
 	property alias cfg_timeRefetch: timeRefetch.value
 
 	ScrollView {
@@ -359,20 +359,20 @@ Item {
 					ToolTip.text: i18n("Minutes to refresh the values (1–60)")
 				}
 
-				// Retry parse timer
+				// Data ready timer
 				Label {
 					Layout.minimumWidth: root.width / 3
-					text: i18n("Retry parse timer (seconds):")
+					text: i18n("Data ready timer (seconds):")
 					horizontalAlignment: Label.AlignLeft
 				}
 				SpinBox {
-					id: timeRetry
+					id: timeDataReady
 					from: 1
 					to: 60
 					stepSize: 1
 					onValueChanged: configurationChanged()
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("Seconds to retry parsing the values (1–60)")
+					ToolTip.text: i18n("How long to wait for data to become ready (1–60)")
 				}
 
 				// Retry fetch timer

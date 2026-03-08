@@ -87,7 +87,7 @@
 		<entry name="timeRefresh" type="Int">
 			<default>30</default>
 		</entry>
-		<entry name="timeRetry" type="Int">
+		<entry name="timeDataReady" type="Int">
 			<default>10</default>
 		</entry>
 		<entry name="timeRefetch" type="Int">
