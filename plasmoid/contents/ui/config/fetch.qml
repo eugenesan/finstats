@@ -144,6 +144,10 @@ Item {
 						url: "https://mempool.space/api/v1/fees/precise",
 						key: "economyFee"
 					}, {
+						text: i18n("Satoshi API BTC Fee"),
+						url: "https://bitcoinsapi.com/api/v1/compat/mempool/fees/precise?min=1",
+						key: "economyFee"
+					}, {
 						text: i18n("Mempool.guide BTC-USD"),
 						url: "https://mempool.guide/api/v1/fees/recommended",
 						key: "economyFee"
