@@ -62,6 +62,10 @@ Item {
 						url: "https://mempool.guide/api/v1/prices",
 						key: "USD"
 					}, {
+						text: i18n("Kilombino.com BTC-USD"),
+						url: "https://mempool.kilombino.com/api/v1/prices",
+						key: "USD"
+					}, {
 						text: i18n("Bitfinex BTC-USD"),
 						url: "https://api.bitfinex.com/v1/pubticker/BTCUSD",
 						key: "last_price"
@@ -146,6 +150,10 @@ Item {
 					}, {
 						text: i18n("Mempool.guide BTC-USD"),
 						url: "https://mempool.guide/api/v1/fees/recommended",
+						key: "economyFee"
+					}, {
+						text: i18n("Kilombino.com BTC-USD"),
+						url: "https://mempool.kilombino.com/api/v1/fees/recommended",
 						key: "economyFee"
 					}]
 
