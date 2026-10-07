@@ -349,10 +349,10 @@ Item {
 				SpinBox {
 					id: timeRefresh
 					from: 1
-					to: 60
+					to: 999
 					stepSize: 1
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("How often to refresh the data (1–60)")
+					ToolTip.text: i18n("How often to refresh the data (1–999)")
 				}
 
 				// Data ready timer
@@ -364,10 +364,10 @@ Item {
 				SpinBox {
 					id: timeDataReady
 					from: 1
-					to: 60
+					to: 99
 					stepSize: 1
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("How long to wait for data to become ready (1–60)")
+					ToolTip.text: i18n("How long to wait for data to become ready (1–99)")
 				}
 
 				// Retry fetch timer
@@ -379,10 +379,10 @@ Item {
 				SpinBox {
 					id: timeRefetch
 					from: 1
-					to: 60
+					to: 99
 					stepSize: 1
 					ToolTip.visible: hovered
-					ToolTip.text: i18n("How long to wait to re-fetch data after error (1–60)")
+					ToolTip.text: i18n("How long to wait to re-fetch data after error (1–99)")
 				}
 			}  // Closing GridLayout
 		}      // Closing ColumnLayout

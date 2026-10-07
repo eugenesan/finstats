@@ -52,6 +52,7 @@
 		<entry name="satsSymbol" type="String">
 			<default>Ș</default>
 			<alt>≐</alt>
+			<alt>丰</alt>
 		</entry>
 		<entry name="auSymbol" type="String">
 			<default>Au</default>
@@ -87,13 +88,13 @@
 	</group>
 	<group name="Fetch">
 		<entry name="timeRefresh" type="Int">
-			<default>30</default>
+			<default>60</default>
 		</entry>
 		<entry name="timeDataReady" type="Int">
 			<default>10</default>
 		</entry>
 		<entry name="timeRefetch" type="Int">
-			<default>15</default>
+			<default>30</default>
 		</entry>
 		<entry name="btcUrl" type="String">
 			<default>https://api.gemini.com/v1/pubticker/btcusd</default>

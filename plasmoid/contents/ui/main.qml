@@ -19,6 +19,7 @@ PlasmoidItem {
 	// Global status of fetch process
 	property bool dataReadyFull: false
 	property int dataReadyAttemp: 0
+	property string dataReadyError: ""
 
 	// Status and data of individual fetches
 	property variant fetchState:
@@ -114,6 +115,7 @@ PlasmoidItem {
 				// Send fetch requests and start monitoring data readiness
 				fetchData()
 				dataReadyAttemp = 0
+				dataReadyError = ""
 				datareadyTimer.restart()
 				console.debug("finstats::MouseArea::clicked::stop-timer-restart")
 			}
@@ -174,6 +176,7 @@ PlasmoidItem {
 			// Send fetch requests and start monitoring data readiness
 			fetchData()
 			dataReadyAttemp = 0
+			dataReadyError = ""
 			datareadyTimer.restart()
 		}
 	}
@@ -382,7 +385,11 @@ PlasmoidItem {
 		}
 
 		// Add footer to tooltip
-		if (!dataReadyFull) ttFooter += "*" + warnSymbol + " Error during last update*\n"
+		if (!dataReadyFull) {
+			ttFooter += "*" + warnSymbol + " Error during last update*\n"
+			console.log("finstats::buildData::dataReadyError:", dataReadyError)
+			//ttFooter += "*(" + dataReadyError + ")*\n"
+		}
 		ttFooter += "*Next update at " +  formattedRefresh + " (click for now)*\n"
 
 		// Finalize the tooltip (skip stack in logs)
@@ -476,9 +483,11 @@ PlasmoidItem {
 						}
 					} catch (e) {
 						console.error("finstats::fetchData::parseData::JSONParsingError::idx:", idx, "error:", e)
+						dataReadyError += ((dataReadyError === "") ? "" : ",") + idx + ":" + xhr.responseURL + ":" + ":parse:" + e
 					}
 				} else {
 					console.error("finstats::fetchData::parseData::HTTP Error::idx:", idx, "error:", xhr.status)
+					dataReadyError += ((dataReadyError === "") ? "" : ",") + idx  + ":" + xhr.responseURL + ":" + ":http:" + ((xhr.status == 0) ? "timeout" : xhr.status)
 				}
 
 				console.log("finstats::fetchData::parseData::PostFetch::Ready::idx:", idx, "ready:",
