@@ -53,7 +53,9 @@ Rectangle {
                 Layout.columnSpan: modelData.span
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                implicitWidth: modelData.span > 1 ? 1 : label.implicitWidth + Kirigami.Units.largeSpacing * 2
+                // A spanning value cell must report its real width, otherwise the columns it spans stay empty and
+                // a tooltip (sized from the implicit width) squeezes it. Only long error texts stay "elastic".
+                implicitWidth: (modelData.span > 1 && modelData.error) ? 1 : label.implicitWidth + Kirigami.Units.largeSpacing * 2
                 implicitHeight: label.implicitHeight + Kirigami.Units.smallSpacing * 2
                 color: modelData.shade ? Qt.alpha(Kirigami.Theme.textColor, 0.12) : "transparent"
 
