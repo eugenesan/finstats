@@ -35,9 +35,9 @@ PlasmoidItem {
     property var jobs: []
     property var batch: ({ prices: {}, errors: {} })
 
-    readonly property bool wantBTC: cfg.showBTC || cfg.showBTCTT
-    readonly property bool wantFee: cfg.showBTCFee || cfg.showBTCFeeTT
-    readonly property bool wantMetals: cfg.showMetals || cfg.showMetalsTT
+    readonly property bool wantBTC: cfg.showBTC || cfg.showBTCTT || cfg.showBTCTip
+    readonly property bool wantFee: cfg.showBTCFee || cfg.showBTCFeeTT || cfg.showBTCFeeTip
+    readonly property bool wantMetals: cfg.showMetals || cfg.showMetalsTT || cfg.showMetalsTip
     readonly property bool hasErrors: { revision; return Object.keys(errors).length > 0 }
 
     // Everything the display code needs, read here so bindings notice any change
@@ -67,17 +67,27 @@ PlasmoidItem {
         : Kirigami.Theme.textColor
 
     // ------------------------------------------------------------ table models
-    readonly property var popupCells: {
-        revision;
+    // The tooltip has its own on/off switches; the table builder reads the popup (TT) flags, so map them
+    readonly property var tipCfg: Object.assign({}, viewCfg, {
+        showBTC: cfg.showBTCTip, showBTCTT: cfg.showBTCTip,
+        showBTCFee: false, showBTCFeeTT: cfg.showBTCFeeTip,
+        showMetals: false, showMetalsTT: cfg.showMetalsTip,
+        showStack: cfg.showStackTip
+    })
+
+    function statCells(c) {
         var cells = [];
-        Logic.popupRows(prices, viewCfg, calc, okState).forEach(function (row) {
-            row.forEach(function (pair, i) {
+        Logic.popupRows(prices, c, calc, okState).forEach(function (row) {
+            row.forEach(function (pair) {
                 cells.push({ text: pair.label, bold: true, shade: true });
                 cells.push({ text: pair.value, span: row.length === 1 ? 3 : 1 });
             });
         });
         return cells;
     }
+
+    readonly property var popupCells: { revision; return statCells(viewCfg) }
+    readonly property var tipStatCells: { revision; return statCells(tipCfg) }
 
     readonly property var statusCells: {
         revision;
@@ -127,6 +137,11 @@ PlasmoidItem {
             PlasmaExtras.Heading {
                 level: 4
                 text: i18n("Financial Stats")
+            }
+            StatsTable {
+                visible: root.tipStatCells.length > 0
+                columns: 4
+                cells: root.tipStatCells
             }
             StatsTable {
                 columns: 2
@@ -182,6 +197,14 @@ PlasmoidItem {
         contentItem: ColumnLayout {
             spacing: Kirigami.Units.largeSpacing
 
+            // last check / next update (with errors), same table as in the tooltip
+            StatsTable {
+                Layout.fillWidth: true
+                Layout.margins: Kirigami.Units.smallSpacing
+                columns: 2
+                cells: root.statusCells
+            }
+
             StatsTable {
                 Layout.fillWidth: true
                 Layout.margins: Kirigami.Units.smallSpacing
@@ -195,13 +218,6 @@ PlasmoidItem {
                 visible: root.popupCells.length === 0
                 text: root.hasData ? i18n("Nothing to show") : i18n("Waiting for data…")
                 explanation: i18n("Choose what to display in the popup in the widget settings.")
-            }
-
-            StatsTable {
-                Layout.fillWidth: true
-                Layout.margins: Kirigami.Units.smallSpacing
-                columns: 2
-                cells: root.statusCells
             }
 
             Item { Layout.fillHeight: true }

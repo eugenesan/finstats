@@ -61,5 +61,30 @@ CfgPage {
             checked: page.cfg_showStack
             onToggled: page.cfg_showStack = checked
         }
+
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18n("Shown in the tooltip (in addition to last check and next update)")
+        }
+        QQC2.CheckBox {
+            text: i18n("Bitcoin price")
+            checked: page.cfg_showBTCTip
+            onToggled: page.cfg_showBTCTip = checked
+        }
+        QQC2.CheckBox {
+            text: i18n("Bitcoin transaction fee")
+            checked: page.cfg_showBTCFeeTip
+            onToggled: page.cfg_showBTCFeeTip = checked
+        }
+        QQC2.CheckBox {
+            text: i18n("Gold and silver prices and ratios")
+            checked: page.cfg_showMetalsTip
+            onToggled: page.cfg_showMetalsTip = checked
+        }
+        QQC2.CheckBox {
+            text: i18n("Stack value (configured on the Stack page)")
+            checked: page.cfg_showStackTip
+            onToggled: page.cfg_showStackTip = checked
+        }
     }
 }

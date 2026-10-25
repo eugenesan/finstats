@@ -26,6 +26,18 @@
 		<entry name="showStack" type="Bool">
 			<default>false</default>
 		</entry>
+        <entry name="showBTCTip" type="Bool">
+            <default>false</default>
+        </entry>
+        <entry name="showBTCFeeTip" type="Bool">
+            <default>false</default>
+        </entry>
+        <entry name="showMetalsTip" type="Bool">
+            <default>false</default>
+        </entry>
+        <entry name="showStackTip" type="Bool">
+            <default>false</default>
+        </entry>
 	</group>
 	<group name="Appearance">
 		<entry name="appletColor" type="Bool">

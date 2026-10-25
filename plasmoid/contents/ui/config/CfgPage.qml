@@ -26,6 +26,14 @@ KCM.SimpleKCM {
     property bool cfg_showMetalsTTDefault
     property bool cfg_showStack
     property bool cfg_showStackDefault
+    property bool cfg_showBTCTip
+    property bool cfg_showBTCTipDefault
+    property bool cfg_showBTCFeeTip
+    property bool cfg_showBTCFeeTipDefault
+    property bool cfg_showMetalsTip
+    property bool cfg_showMetalsTipDefault
+    property bool cfg_showStackTip
+    property bool cfg_showStackTipDefault
     property bool cfg_appletColor
     property bool cfg_appletColorDefault
     property string cfg_appletSymbol
