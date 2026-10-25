@@ -4,221 +4,117 @@
  * SPDX-SnippetComment: Financial Stats Applet for Plasma 6
  */
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick.Controls as QQC2
+import org.kde.kirigami as Kirigami
 
-Item {
-	id: root
+CfgPage {
+    id: page
 
-	property alias cfg_appletColor: appletColor.checked
-	property alias cfg_appletSymbol: appletSymbol.text
-	property alias cfg_stackSymbol: stackSymbol.text
-	property alias cfg_curSymbol: curSymbol.text
-	property alias cfg_minorcurSymbol: minorcurSymbol.text
-	property alias cfg_btcSymbol: btcSymbol.text
-	property alias cfg_satsSymbol: satsSymbol.text
-	property alias cfg_auSymbol: auSymbol.text
-	property alias cfg_agSymbol: agSymbol.text
-	property alias cfg_warnSymbol: warnSymbol.text
-	property alias cfg_delimSymbol: delimSymbol.text
-	property alias cfg_decPlaces: decPlaces.value
-	property alias cfg_decPlacesTT: decPlacesTT.value
-	property alias cfg_priceDivider: priceDivider.value
+    Kirigami.FormLayout {
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18n("Panel")
+        }
+        QQC2.CheckBox {
+            Kirigami.FormData.label: i18n("Color feedback:")
+            text: i18n("Highlight while updating, dim after errors")
+            checked: page.cfg_appletColor
+            onToggled: page.cfg_appletColor = checked
+        }
+        SymbolField {
+            Kirigami.FormData.label: i18n("Placeholder symbol:")
+            presets: ["💰", "🪙", "💲"]
+            value: page.cfg_appletSymbol
+            onEdited: text => page.cfg_appletSymbol = text
+        }
+        SymbolField {
+            Kirigami.FormData.label: i18n("Delimiter:")
+            presets: ["│", "∣", "¦", "·", "•", "!"]
+            value: page.cfg_delimSymbol
+            onEdited: text => page.cfg_delimSymbol = text
+        }
+        QQC2.SpinBox {
+            Kirigami.FormData.label: i18n("Decimal places:")
+            from: 0
+            to: 9
+            value: page.cfg_decPlaces
+            onValueModified: page.cfg_decPlaces = value
+        }
+        QQC2.SpinBox {
+            Kirigami.FormData.label: i18n("Divide prices above:")
+            from: 0
+            to: 100000
+            stepSize: 100
+            editable: true
+            value: page.cfg_priceDivider
+            onValueModified: page.cfg_priceDivider = value
+            QQC2.ToolTip.text: i18n("Prices greater than this are divided by it (67123 → 67.1). 0 disables dividing.")
+            QQC2.ToolTip.visible: hovered
+        }
 
-	ScrollView {
-		width: parent.width
-		height: parent.height
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18n("Popup and tooltip")
+        }
+        QQC2.SpinBox {
+            Kirigami.FormData.label: i18n("Decimal places:")
+            from: 0
+            to: 9
+            value: page.cfg_decPlacesTT
+            onValueModified: page.cfg_decPlacesTT = value
+        }
+        SymbolField {
+            Kirigami.FormData.label: i18n("Warning:")
+            presets: ["⚠", "☝", "!"]
+            value: page.cfg_warnSymbol
+            onEdited: text => page.cfg_warnSymbol = text
+        }
 
-		ColumnLayout {
-			GridLayout {
-				id: gridLayout
-				columns: 2
-
-				// Applet color feedback
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Color fedback on change/errors:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				CheckBox {
-					id: appletColor
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to color applet on change")
-				}
-
-				// Applet symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Applet symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: appletSymbol
-					text: "#000000"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Default symbol for empty Applet")
-				}
-
-				// Stack symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Stack symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: stackSymbol
-					text: "#000000"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use for Stack")
-				}
-
-				// Currency symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Currency symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: curSymbol
-					text: "#000000"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use for Currency")
-				}
-
-				// Minor Currency symbol (cents)
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Minor Currency symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: minorcurSymbol
-					text: "#000000"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use for minor Currency (1/100th)")
-				}
-
-				// BTC symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("BTC symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: btcSymbol
-					text: "#000000"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use for BTC")
-				}
-
-				// Sats symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Sats symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: satsSymbol
-					text: "#000000"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use for Satoshi")
-				}
-
-				// Metals Au symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Metals Au symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: auSymbol
-					text: "#000000"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use for Gold")
-				}
-
-				// Metals Ag symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Metals Ag symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: agSymbol
-					text: "#000000"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use for Silver")
-				}
-
-				// Warning symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Warning symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: warnSymbol
-					text: "#000000"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use for Warning")
-				}
-
-
-				// Delimiter symbol
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Delimiter symbol:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: delimSymbol
-					text: "#000000"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Which symbol to use as delimiter on applet")
-				}
-
-				// Applet decimal places
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Applet decimal places:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				SpinBox {
-					id: decPlaces
-					from: 0
-					to: 9
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Decimal places for Applet")
-				}
-
-				// ToolTip decimal places
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("ToolTip decimal places:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				SpinBox {
-					id: decPlacesTT
-					from: 0
-					to: 9
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Decimal places for ToolTip")
-				}
-
-				// Price divider
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Applet price divider:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				SpinBox {
-					id: priceDivider
-					from: 0
-					to: 100000
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Divider to apply to prices on appplet (applies only to 'greater than' values)")
-				}
-			}  // Closing GridLayout
-		}      // Closing ColumnLayout
-	}          // Closing ScrollView
-}              // Closing Item
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18n("Symbols")
+        }
+        SymbolField {
+            Kirigami.FormData.label: i18n("Currency:")
+            presets: ["$", "US$", "USD"]
+            value: page.cfg_curSymbol
+            onEdited: text => page.cfg_curSymbol = text
+        }
+        SymbolField {
+            Kirigami.FormData.label: i18n("Minor currency (1/100):")
+            presets: ["¢", "c"]
+            value: page.cfg_minorcurSymbol
+            onEdited: text => page.cfg_minorcurSymbol = text
+        }
+        SymbolField {
+            Kirigami.FormData.label: i18n("Bitcoin:")
+            presets: ["₿", "Ⓑ", "BTC"]
+            value: page.cfg_btcSymbol
+            onEdited: text => page.cfg_btcSymbol = text
+        }
+        SymbolField {
+            Kirigami.FormData.label: i18n("Satoshi:")
+            presets: ["Ș", "≐", "丰", "sats"]
+            value: page.cfg_satsSymbol
+            onEdited: text => page.cfg_satsSymbol = text
+        }
+        SymbolField {
+            Kirigami.FormData.label: i18n("Gold:")
+            presets: ["Au", "☀", "🥇", "🜚"]
+            value: page.cfg_auSymbol
+            onEdited: text => page.cfg_auSymbol = text
+        }
+        SymbolField {
+            Kirigami.FormData.label: i18n("Silver:")
+            presets: ["Ag", "☾", "🥈", "🜛"]
+            value: page.cfg_agSymbol
+            onEdited: text => page.cfg_agSymbol = text
+        }
+        SymbolField {
+            Kirigami.FormData.label: i18n("Stack:")
+            presets: ["∑", "Σ", "Ʃ"]
+            value: page.cfg_stackSymbol
+            onEdited: text => page.cfg_stackSymbol = text
+        }
+    }
+}

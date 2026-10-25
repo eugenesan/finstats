@@ -4,135 +4,90 @@
  * SPDX-SnippetComment: Financial Stats Applet for Plasma 6
  */
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick.Controls as QQC2
+import org.kde.kirigami as Kirigami
 
-Item {
-	id: root
+CfgPage {
+    id: page
 
-	property alias cfg_btcStack: btcStack.text
-	property alias cfg_btcCost: btcCost.text
-	property alias cfg_capGainBTC: capGainBTC.value
-	property alias cfg_auStack: auStack.value
-	property alias cfg_auSlip: auSlip.value
-	property alias cfg_agStack: agStack.value
-	property alias cfg_agSlip: agSlip.value
+    // Dot-decimal numbers only, independent of the system locale
+    readonly property var numberValidator: RegularExpressionValidator { regularExpression: /^\d{0,9}(\.\d{0,8})?$/ }
 
-	ScrollView {
-		width: parent.width
-		height: parent.height
+    Kirigami.FormLayout {
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18n("Bitcoin")
+        }
+        QQC2.TextField {
+            Kirigami.FormData.label: i18n("Amount held:")
+            text: page.cfg_btcStack
+            validator: page.numberValidator
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
+            onTextEdited: page.cfg_btcStack = text
+            QQC2.ToolTip.text: i18n("Number of bitcoins in the stack, e.g. 1.234567")
+            QQC2.ToolTip.visible: hovered
+        }
+        QQC2.TextField {
+            Kirigami.FormData.label: i18n("Cost basis per BTC:")
+            text: page.cfg_btcCost
+            validator: page.numberValidator
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
+            onTextEdited: page.cfg_btcCost = text
+            QQC2.ToolTip.text: i18n("Average purchase price of one bitcoin, in your currency")
+            QQC2.ToolTip.visible: hovered
+        }
+        QQC2.SpinBox {
+            Kirigami.FormData.label: i18n("Capital gains tax (%):")
+            from: 0
+            to: 99
+            value: page.cfg_capGainBTC
+            onValueModified: page.cfg_capGainBTC = value
+        }
 
-		ColumnLayout {
-			GridLayout {
-				id: gridLayout
-				columns: 2
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18n("Gold")
+        }
+        QQC2.SpinBox {
+            Kirigami.FormData.label: i18n("Amount held:")
+            from: 0
+            to: 999
+            value: page.cfg_auStack
+            onValueModified: page.cfg_auStack = value
+            QQC2.ToolTip.text: i18n("Amount of gold in the stack (0–999), in the unit of the price source")
+            QQC2.ToolTip.visible: hovered
+        }
+        QQC2.SpinBox {
+            Kirigami.FormData.label: i18n("Slippage (%):")
+            from: 0
+            to: 99
+            value: page.cfg_auSlip
+            onValueModified: page.cfg_auSlip = value
+            QQC2.ToolTip.text: i18n("Estimated loss when selling gold (0–99 %)")
+            QQC2.ToolTip.visible: hovered
+        }
 
-				// BTC stack size
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("BTC stack size:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: btcStack
-					text: "0.0"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Count of Bitcoin in the stack (0–999)")
-					validator: DoubleValidator {
-						bottom: 0.0
-						top: 1000.0
-						decimals: 6
-					}
-				}
-
-				// BTC stack cost basis
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("BTC cost basis:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				TextField {
-					id: btcCost
-					text: "0.0"
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Bitcoin cost basis (0–1000000)")
-					validator: DoubleValidator {
-						bottom: 0.0
-						top: 1000.0
-						decimals: 6
-					}
-				}
-
-				// BTC capital gains tax
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("BTC Capital gains tax (%):")
-					horizontalAlignment: Label.AlignLeft
-				}
-				SpinBox {
-					id: capGainBTC
-					from: 0
-					to: 99
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("BTC capital gains tax ammount (0–99)")
-				}
-
-				// Metals Au stack size
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Metals Au stack size:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				SpinBox {
-					id: auStack
-					from: 0
-					to: 999
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Count of Silver in the stack (0–999)")
-				}
-
-				// Metals Au slippage
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Au slippage (%):")
-					horizontalAlignment: Label.AlignLeft
-				}
-				SpinBox {
-					id: auSlip
-					from: 0
-					to: 99
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Au slippage (0–99)")
-				}
-
-				// Metals Ag stack size
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Metals Ag stack size:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				SpinBox {
-					id: agStack
-					from: 0
-					to: 999
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Count of Silver in the stack (0–999)")
-				}
-
-				// Metals Ag slippage
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Ag slippage (%):")
-					horizontalAlignment: Label.AlignLeft
-				}
-				SpinBox {
-					id: agSlip
-					from: 0
-					to: 99
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Ag slippage (0–99)")
-				}
-			}  // Closing GridLayout
-		}      // Closing ColumnLayout
-	}          // Closing ScrollView
-}              // Closing Item
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18n("Silver")
+        }
+        QQC2.SpinBox {
+            Kirigami.FormData.label: i18n("Amount held:")
+            from: 0
+            to: 999
+            value: page.cfg_agStack
+            onValueModified: page.cfg_agStack = value
+            QQC2.ToolTip.text: i18n("Amount of silver in the stack (0–999), in the unit of the price source")
+            QQC2.ToolTip.visible: hovered
+        }
+        QQC2.SpinBox {
+            Kirigami.FormData.label: i18n("Slippage (%):")
+            from: 0
+            to: 99
+            value: page.cfg_agSlip
+            onValueModified: page.cfg_agSlip = value
+            QQC2.ToolTip.text: i18n("Estimated loss when selling silver (0–99 %)")
+            QQC2.ToolTip.visible: hovered
+        }
+    }
+}

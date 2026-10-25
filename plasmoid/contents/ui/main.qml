@@ -1,546 +1,376 @@
 /*
-* SPDX-FileCopyrightText: Copyright 2025 Eugene San (eugenesan)
-* SPDX-License-Identifier: GPL-3.0-or-later
-* SPDX-SnippetComment: Financial Stats Widget for Plasma 6
-*/
-
+ * SPDX-FileCopyrightText: Copyright 2025 Eugene San (eugenesan)
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-SnippetComment: Financial Stats Widget for Plasma 6
+ */
 import QtQuick
 import QtQuick.Layouts
-import org.kde.plasma.core
+import QtQuick.Controls as QQC2
 import org.kde.plasma.plasmoid
-import org.kde.plasma.components
-import org.kde.kirigami
+import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.components as PlasmaComponents3
+import org.kde.plasma.extras as PlasmaExtras
+import org.kde.kirigami as Kirigami
+
+import "../code/finlogic.js" as Logic
 
 PlasmoidItem {
-	id: root
-	//Layout.fillHeight: true
-	Layout.minimumWidth: myLabel.implicitWidth + 5
-
-	// Global status of fetch process
-	property bool dataReadyFull: false
-	property int dataReadyAttemp: 0
-	property string dataReadyError: ""
-
-	// Status and data of individual fetches
-	property variant fetchState:
-	{
-		"btc":    {ready: false, price: [0.0], xhr: []},
-		"btcfee": {ready: false, price: [0.0], xhr: []},
-		"metals": {ready: false, price: [0.0,0.0,0.0], xhr: [,]} // 3rd price is for metals ratio
-	}
-
-	// General config vars
-	property bool appletColor: plasmoid.configuration.appletColor
-	property bool showBTC: plasmoid.configuration.showBTC
-	property bool showBTCTT: plasmoid.configuration.showBTCTT
-	property bool showBTCFee: plasmoid.configuration.showBTCFee
-	property bool showBTCFeeTT: plasmoid.configuration.showBTCFeeTT
-	property bool showMetals: plasmoid.configuration.showMetals
-	property bool showMetalsRatio: plasmoid.configuration.showMetalsRatio
-	property bool showMetalsTT: plasmoid.configuration.showMetalsTT
-	property bool showStack: plasmoid.configuration.showStack
-
-	// Appearance config vars
-	property string appletSymbol: plasmoid.configuration.appletSymbol
-	property string stackSymbol: plasmoid.configuration.stackSymbol
-	property string curSymbol: plasmoid.configuration.curSymbol
-	property string minorcurSymbol: plasmoid.configuration.minorcurSymbol
-	property string btcSymbol: plasmoid.configuration.btcSymbol
-	property string satsSymbol: plasmoid.configuration.satsSymbol
-	property string auSymbol: plasmoid.configuration.auSymbol
-	property string agSymbol: plasmoid.configuration.agSymbol
-	property string warnSymbol: plasmoid.configuration.warnSymbol
-	property string delimSymbol: plasmoid.configuration.delimSymbol
-
-	// Stack config vars
-	property real btcStack: plasmoid.configuration.btcStack
-	property int btcCost: plasmoid.configuration.btcCost
-	property int capGainBTC: plasmoid.configuration.capGainBTC
-	property int auStack: plasmoid.configuration.auStack
-	property int auSlip: plasmoid.configuration.auSlip
-	property int agStack: plasmoid.configuration.agStack
-	property int agSlip: plasmoid.configuration.agSlip
-	property int decPlaces: plasmoid.configuration.decPlaces
-	property int decPlacesTT: plasmoid.configuration.decPlacesTT
-	property int priceDivider: plasmoid.configuration.priceDivider
-
-	// Fetch paramaters from config
-	property string btcUrl: plasmoid.configuration.btcUrl
-	property string btcKey: plasmoid.configuration.btcKey
-	property string btcfeeUrl: plasmoid.configuration.btcfeeUrl
-	property string btcfeeKey: plasmoid.configuration.btcfeeKey
-	property string metalsUrl: plasmoid.configuration.metalsUrl
-	property string metalsSuffAu: plasmoid.configuration.metalsSuffAu
-	property string metalsSuffAg: plasmoid.configuration.metalsSuffAg
-	property string metalsKeyAu: plasmoid.configuration.metalsKeyAu
-	property string metalsKeyAg: plasmoid.configuration.metalsKeyAg
-	property int timeRefresh: plasmoid.configuration.timeRefresh
-	property int timeDataReady: plasmoid.configuration.timeDataReady
-	property int timeRefetch: plasmoid.configuration.timeRefetch
-
-	ToolTipArea {
-		id: toolTip
-		width: parent.width
-		height: parent.height
-		anchors.fill: parent
-		mainText: "Financial Stats"
-		active: true
-		interactive: true
-		textFormat: Text.MarkdownText // RichText StyledText
-	}
-
-	MouseArea {
-		id: mouseAreaValue
-		anchors.fill: parent
-		acceptedButtons: Qt.LeftButton
-		// Refresh the label and reset time on mouse click
-		onClicked: (mouse) => {
-			if (datareadyTimer.running) {
-				// Skip forced refresh if already monitoring data readiness
-				console.log("finstats::MouseArea::clicked::skip-refresh-data")
-			} else {
-				// Forced refresh if not monitoring data readiness
-				console.log("finstats::MouseArea::clicked::start-refresh-data")
-
-				// Stop refreshTimer
-				refreshTimer.stop()
-
-				// Change applet color to highlight if needed
-				if (appletColor) {
-					colorFeedback.from = myLabel.color
-					colorFeedback.to = Theme.highlightColor
-					colorFeedback.start()
-				}
-
-				// Send fetch requests and start monitoring data readiness
-				fetchData()
-				dataReadyAttemp = 0
-				dataReadyError = ""
-				datareadyTimer.restart()
-				console.debug("finstats::MouseArea::clicked::stop-timer-restart")
-			}
-		}
-
-		hoverEnabled: true
-		onEntered: {
-			toolTip.showToolTip()
-		}
-		onExited: {
-			toolTip.hideToolTip()
-		}
-	}
-
-	ColumnLayout {
-		// A simple label to display the JSON data
-		Label {
-			id: myLabel
-			horizontalAlignment: Text.AlignHCenter
-			verticalAlignment: Text.AlignVCenter
-		}
-	}
-
-	ColorAnimation {
-		id: colorFeedback
-		target: myLabel
-		property: "color"
-		duration: 1000
-	}
-
-	// Initialize and fetch on start
-	Component.onCompleted: {
-		// Set default applet content as a symbol
-		myLabel.text = appletSymbol
-
-		// Send fetch requests and start monitoring data readiness
-		fetchData()
-		dataReadyAttemp = 0
-		datareadyTimer.start()
-	}
-
-	// Refresh data according to timeRefresh
-	Timer {
-		id: refreshTimer
-		interval: timeRefresh * 60 * 1000
-		running: false
-		repeat: false
-		onTriggered: {
-			console.log("finstats::refreshTimer::timerTriggered")
-
-			// Change applet color to highlight needed
-			if (appletColor) {
-				colorFeedback.from = myLabel.color
-				colorFeedback.to = Theme.highlightColor
-				colorFeedback.restart()
-			}
-
-			// Send fetch requests and start monitoring data readiness
-			fetchData()
-			dataReadyAttemp = 0
-			dataReadyError = ""
-			datareadyTimer.restart()
-		}
-	}
-
-	// Wait for data to be fetched and build applet/tooltip text
-	Timer {
-		id: datareadyTimer
-		interval: (timeDataReady / 3) * 1000
-		running: false
-		repeat: false
-
-		onTriggered: {
-			console.debug("finstats::datareadyTimer::Triggered::interval:", datareadyTimer.interval,
-				"dataReadyAttemp:", dataReadyAttemp, "dataReadyFull:", dataReadyFull, "timeDataReady:", timeDataReady,
-				"showBTC:", showBTC, "showBTCFee:", showBTCFee, "showMetals:", showMetals,
-				"showBTCTT:", showBTCTT, "showBTCFeeTT:", showBTCFeeTT, "showMetalsTT:", showMetalsTT,
-				"btcReady:", fetchState["btc"].ready, "btcfeeReady:", fetchState["btcfee"].ready,
-				"metalsReady:", fetchState["metals"].ready,
-				"btcData:", fetchState["btc"].price[0], "btcfeeData[0]:", fetchState["btcfee"].price[0],
-				"metalsData[0]:", fetchState["metals"].price[0], "metalsData[1]:", fetchState["metals"].price[1])
-
-			// Check if all the results marked as fetched and dataready timer still enabled
-			if (( (fetchState["btc"].ready &&
-					(fetchState["btc"].price[0] > (1/100000000))) || (!showBTC && !showBTCTT) ) &&
-				( (fetchState["btcfee"].ready &&
-					(fetchState["btcfee"].price[0] > (1/100000000))) || (!showBTCFee && !showBTCFeeTT) ) &&
-				( (fetchState["metals"].ready &&
-					(fetchState["metals"].price[0] > (1/100000000))) || (!showMetals && !showMetalsTT) ) &&
-				( (fetchState["metals"].ready &&
-					(fetchState["metals"].price[1] > (1/100000000))) || (!showMetals && !showMetalsTT) ) )
-			{
-				console.log("finstats::datareadyTimer::Triggered::Ready")
-
-				// Once all data fetched, restore normal interval and build label
-				dataReadyFull = true
-				refreshTimer.interval = timeRefresh * 60 * 1000
-				buildData()
-
-				// Change applet color to normal if needed
-				if (appletColor) {
-					colorFeedback.from = myLabel.color
-					colorFeedback.to = Theme.textColor
-					colorFeedback.restart()
-				}
-
-				// Restart refreshTimer
-				refreshTimer.restart()
-			} else {
-				// Reset dataready state
-				dataReadyFull = false
-
-				if (dataReadyAttemp > 2) {
-					// Give up after 3 attempts
-					console.log("finstats::datareadyTimer::Triggered::Abort")
-
-					// Stop all fetch requests
-					if (typeof fetchState["btc"].xhr[0] != 'undefined') fetchState["btc"].xhr[0].abort()
-					if (typeof fetchState["btcfee"].xhr[0] != 'undefined') fetchState["btcfee"].xhr[0].abort()
-					if (typeof fetchState["metals"].xhr[0] != 'undefined') fetchState["metals"].xhr[0].abort()
-					if (typeof fetchState["metals"].xhr[1] != 'undefined') fetchState["metals"].xhr[1].abort()
-
-					// After giving up, set interval to refetch time and call partial build
-					refreshTimer.interval = timeRefetch * 60 * 1000
-					buildData()
-
-					// Change applet color to disabled if needed
-					if (appletColor) {
-						colorFeedback.from = myLabel.color
-						colorFeedback.to = Theme.disabledTextColor
-						colorFeedback.start()
-					}
-
-					// Restart refreshTimer
-					refreshTimer.restart()
-				} else {
-					console.log("finstats::datareadyTimer::Triggered::Retry")
-
-					// Not all data is ready, invalid results or duplicate call
-					dataReadyAttemp++
-
-					// Repeat timer to continue monitoring data readiness
-					datareadyTimer.restart()
-				}
-			}
-		}
-	}
-
-	function buildData() {
-		console.log("finstats::buildData::dataReadyFull:", dataReadyFull)
-
-		// Get current date and time
-		var currentTime = new Date()
-		// Format date and time for display
-		var formattedDate = Qt.formatDateTime(currentTime, "yyyy-MM-dd")
-		var formattedTime = Qt.formatDateTime(currentTime, "hh:mm")
-		var refreshTime = new Date(currentTime.getTime() + refreshTimer.interval)
-		var formattedRefresh = Qt.formatDateTime(refreshTime, "hh:mm")
-
-		// Calculate BTCFee (141Stas/vB is for Segwit 1*in 2*out Tx)
-		var btcStdFee = (( (fetchState["btcfee"].price[0] < 1) &&
-			(fetchState["btcfee"].price[0] > 0) ) ? 1 : fetchState["btcfee"].price[0]) * 141
-		// Price per Tx in currency
-		var btcStdFeePrice = btcStdFee / 100000000 * fetchState["btc"].price[0]
-
-		// Initialize stack values
-		var btcTax = 0
-		var btcNet = 0
-		var auNet = 0
-		var agNet = 0
-
-		// Initialize applet and tooltip strings (unicode symbols collection Ⓑ₿Ș$≐🜚🜛· ∣│◕ │ )
-		var aStr = ""
-		var ttMain = ""
-		var ttStack = ""
-		var ttFooter = ""
-
-		// Add BTC to applet
-		if (showBTC) {
-			aStr = ((fetchState["btc"].price[0] > priceDivider) ?
-				(fetchState["btc"].price[0] / priceDivider) : fetchState["btc"].price[0]).toFixed(decPlaces)
-		}
-
-		// Add BTC fee to applet
-		if (showBTCFee) {
-			aStr += ((aStr.length > 0) ? " " + delimSymbol + " " : "") + ((btcStdFeePrice < 1) ?
-				(btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT))
-		}
-
-		// Add metals to applet
-		if (showMetals) {
-			aStr += ((aStr.length > 0) ? " " + delimSymbol + " " : "") +
-				((fetchState["metals"].price[0] > priceDivider) ?
-					(fetchState["metals"].price[0] / priceDivider) : fetchState["metals"].price[0]).toFixed(decPlaces)
-			aStr += " " + delimSymbol + " " +
-				((fetchState["metals"].price[1] > priceDivider) ?
-					(fetchState["metals"].price[1] / priceDivider) : fetchState["metals"].price[1]).toFixed(decPlaces)
-			if (showMetalsRatio)
-					aStr += " " + delimSymbol + " " + (fetchState["metals"].price[2]).toFixed(decPlaces)
-		}
-
-		myLabel.text = (aStr.length > 0) ? aStr : curSymbol
-		console.log("finstats::buildData::applet-ready::myLabel.text:", myLabel.text)
-
-		// Start tooltip with timestamp and markdown table header
-		ttMain += "| 🗓 |" + formattedDate + " | ⏱ | " + formattedTime + " |\n"
-		ttMain += "| :--- | :--- | :--- | :--- |\n"
-
-		// Add BTC totooltip
-		if (showBTCTT) {
-			ttMain += "| **" + btcSymbol + (fetchState["btc"].ready ? "" : " <sup>" + warnSymbol + "</sup>") +
-					 "** | " + (fetchState["btc"].price[0]).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
-		}
-
-		// Add BTC Fee to tooltip
-		if (showBTCFeeTT) {
-			ttMain += " | **" + btcSymbol + "<sub>Fee</sub>" + (fetchState["btcfee"].ready ?
-					 "" : " <sup>" + warnSymbol + "</sup>") + "** | " + btcStdFee + " <sup>" + satsSymbol + "</sup>"
-			ttMain += " / " + ((btcStdFeePrice < 1) ?
-				(btcStdFeePrice * 100).toFixed(0) : btcStdFeePrice.toFixed(decPlacesTT)) + " <sup>" +
-					((btcStdFeePrice < 1) ? minorcurSymbol : curSymbol) + "</sup> |"
-		}
-		if (showBTCTT || showBTCFeeTT) ttMain += "\n"
-
-		// Add metals to tooltip
-		if (showMetalsTT) {
-			ttMain += "| **" + auSymbol + (fetchState["metals"].ready ?
-					 "" : " <sup>" + warnSymbol + "</sup>") + "** | " +
-					 (fetchState["metals"].price[0]).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
-			ttMain += " | **" + agSymbol + (fetchState["metals"].ready ?
-					 "" : " <sup>" + warnSymbol + "</sup>") + "** | " +
-					 (fetchState["metals"].price[1]).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
-			ttMain += " |\n"
-
-			if (showBTC || showBTCTT) ttMain += "| **" + btcSymbol + "/" + auSymbol + "** | " +
-				( ((fetchState["btc"].price[0] > 0) && (fetchState["metals"].price[0] > 0) ) ?
-					fetchState["btc"].price[0]/fetchState["metals"].price[0] : 0).toFixed(decPlacesTT)
-			ttMain += " | **" + auSymbol + "/" + agSymbol + "** | " +
-					 (fetchState["metals"].price[2]).toFixed(decPlacesTT)
-			ttMain += " |\n"
-		}
-
-		// Add stack to tooltip
-		if (showStack) {
-			if (showMetalsTT) {
-				// Calculate Metals related stack
-				auNet = fetchState["metals"].price[0] * auStack * (1 - (1 / 100 * auSlip))
-				agNet = fetchState["metals"].price[1] * agStack * (1 - (1 / 100 * agSlip))
-				ttStack += "| **" + stackSymbol + auSymbol + "** | " + auNet.toFixed(decPlacesTT) +
-					" <sup>" + curSymbol + "</sup>"
-				ttStack += " | **" + stackSymbol + agSymbol + "** | " + agNet.toFixed(decPlacesTT) +
-					" <sup>" + curSymbol + "</sup>"
-				ttStack += " |\n"
-			}
-
-			if (showBTC || showBTCTT) {
-				// Calculate BTC related stack
-				btcTax = ((fetchState["btc"].price[0] * btcStack) - (btcCost * btcStack)) / 100 * capGainBTC
-				btcNet = (fetchState["btc"].price[0] * btcStack) - ((btcTax < 0) ? 0 : btcTax)
-				ttStack += "| **" + stackSymbol + btcSymbol + "** | " +
-					(btcNet).toFixed(decPlacesTT) + " <sup>" + curSymbol + "</sup>"
-				ttStack += " | **" + stackSymbol + "<sub>Total</sub>** | " +
-				( ((showBTC || showBTCTT) ? btcNet : 0) + auNet + agNet).toFixed(decPlacesTT) +
-					" <sup>" + curSymbol + "</sup>"
-				ttStack += " |\n"
-			}
-		}
-
-		// Add footer to tooltip
-		if (!dataReadyFull) {
-			ttFooter += "*" + warnSymbol + " Error during last update*\n"
-			console.log("finstats::buildData::dataReadyError:", dataReadyError)
-			//ttFooter += "*(" + dataReadyError + ")*\n"
-		}
-		ttFooter += "*Next update at " +  formattedRefresh + " (click for now)*\n"
-
-		// Finalize the tooltip (skip stack in logs)
-		toolTip.subText = ttMain + ttStack + ttFooter
-		console.log("finstats::buildData::tooltip-ready::toolTip.subTextSanitized:", ttMain + ttFooter)
-	}
-
-	// Initiate fetch requests
-	function fetchData() {
-		var userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0esr) Gecko/20100101 Firefox/140.0esr"
-		var Paths = {"btc": [], "btcfee": [], "metals": []}
-		var Suffs = {"btc": [], "btcfee": [], "metals": []}
-
-		Paths["btc"].push(btcKey)
-		Paths["btcfee"].push(btcfeeKey)
-
-		if (metalsKeyAu.length > 0) Paths["metals"].push(metalsKeyAu)
-		if ((metalsKeyAg.length > 0) && (metalsKeyAu != metalsKeyAg)) Paths["metals"].push(metalsKeyAg)
-
-		if (metalsSuffAu.length > 0) Suffs["metals"].push(metalsSuffAu)
-		if ((metalsSuffAg.length > 0) && (metalsSuffAu != metalsSuffAg)) Suffs["metals"].push(metalsSuffAg)
-		console.debug("finstats::fetchData:", "btcPaths:", Paths["btc"], "btcfeePaths", Paths["btcfee"],
-					  "metalsPaths", Paths["metals"], "metalsSuffs", Suffs["metals"])
-
-		function parseData (xhr, idx) {
-			// Parse data from XML response
-			if (xhr.readyState === XMLHttpRequest.DONE) {
-				if (xhr.status === 200) {
-					try {
-						// Parse response
-						for (var y = 0; y < Paths[idx].length; y++) {
-							// Parse response
-							var data = JSON.parse(xhr.responseText)
-							// Save original response for later
-							var data_orig = data
-							// Explode keys for "dive search"
-							var keys = Paths[idx][y].split(".")
-
-							// Start "dive search" in JSON tree and derive which data index to use based on suffix
-							console.debug("finstats::fetchData::parseData::PreParsing::idx:", idx, "data:",
-										  data, "y:", y, "keys:", keys)
-							for (var x = 0; x < keys.length; x++) {
-								console.debug("finstats::fetchData::parseData::Parsing::idx:", idx, "x:", x,
-											  "Paths[y]:", Paths[idx][y], "keys[x]:", keys[x],
-											  "data[keys[x]]:", data[keys[x]])
-								if (typeof data[keys[x]] != 'undefined' ) {
-									// Strip one level from data
-									data = data[keys[x]]
-
-									// Signal data is ready (first hit is a must)
-									if (x == 0) fetchState[idx].ready = true
-
-									// Make sure suffixes are not enabled before we check
-									var suffUsed = false
-
-									// Check if data contains suffix symbol and use corresponding data index
-									for (var z = 0; z < Suffs[idx].length; z++) {
-										if ( (typeof data_orig["symbol"] != 'undefined' ) &&
-											(data_orig["symbol"] == Suffs[idx][z]) ) {
-											console.debug("finstats::fetchData::parseData::Parsing::z::idx:", idx,
-														  "z:", z, "data_orig[symbol]", data_orig["symbol"],
-														  "Suffs[z]:", Suffs[idx][z], "keys[x]:", keys[x],
-														  "data[keys[x]]:", data[keys[x]])
-
-											// Indicate suffix used and save filtered value
-											fetchState[idx].price[z] = parseFloat(data)
-											suffUsed = true
-										} else {
-											console.debug("finstats::fetchData::parseData::Parsing::z::skip::idx:", idx,
-														  "z:", z, "Suffs[z]:", Suffs[idx][z],
-														  "keys[x]:", keys[x], "data[keys[x]]:", data[keys[x]])
-										}
-									}
-
-									// Save filtered value if suffix not used above
-									if (!suffUsed) fetchState[idx].price[y] = parseFloat(data)
-								} else {
-									console.debug("finstats::fetchData::parseData::Parsing::undefined:idx:", idx)
-									// Fail parsing for now
-									fetchState[idx].ready = false
-								}
-							}
-							// Add metals ratio if possible
-							if (idx == "metals") {
-								fetchState[idx].price[2] =
-									((fetchState[idx].price[0] > 0) && (fetchState[idx].price[1] > 0)) ?
-										(fetchState[idx].price[0] / fetchState[idx].price[1]) : 0
-							}
-							console.debug("finstats::fetchData::parseData::PostParsing:idx:", idx, "y:", y,
-										  "data:", data)
-						}
-					} catch (e) {
-						console.error("finstats::fetchData::parseData::JSONParsingError::idx:", idx, "error:", e)
-						dataReadyError += ((dataReadyError === "") ? "" : ",") + idx + ":" + xhr.responseURL + ":" + ":parse:" + e
-					}
-				} else {
-					console.error("finstats::fetchData::parseData::HTTP Error::idx:", idx, "error:", xhr.status)
-					dataReadyError += ((dataReadyError === "") ? "" : ",") + idx  + ":" + xhr.responseURL + ":" + ":http:" + ((xhr.status == 0) ? "timeout" : xhr.status)
-				}
-
-				console.log("finstats::fetchData::parseData::PostFetch::Ready::idx:", idx, "ready:",
-							fetchState[idx].ready)
-			} else {
-				console.debug("finstats::fetchData::parseData::readyStatus::idx:", idx, "state:", xhr.readyState)
-			}
-		}
-
-		// Initialize and send BTC fetch request
-		if (showBTC || showBTCTT) {
-			fetchState["btc"].ready = false
-			fetchState["btc"].xhr[0] = new XMLHttpRequest()
-			fetchState["btc"].xhr[0].onreadystatechange = function() {
-				parseData(fetchState["btc"].xhr[0], "btc") }
-			fetchState["btc"].xhr[0].open("GET", btcUrl, true)
-			fetchState["btc"].xhr[0].setRequestHeader('User-Agent', userAgent)
-			fetchState["btc"].xhr[0].send()
-			console.debug("finstats::fetchData::BTC::send::URL:", btcUrl)
-		}
-
-		// Initialize and send BTCfee fetch request
-		if (showBTCFee || showBTCFeeTT) {
-			fetchState["btcfee"].ready = false
-			fetchState["btcfee"].xhr[0] = new XMLHttpRequest()
-			fetchState["btcfee"].xhr[0].onreadystatechange = function() {
-				parseData(fetchState["btcfee"].xhr[0], "btcfee") }
-			fetchState["btcfee"].xhr[0].open("GET", btcfeeUrl, true)
-			fetchState["btcfee"].xhr[0].setRequestHeader('User-Agent', userAgent)
-			fetchState["btcfee"].xhr[0].send()
-			console.debug("finstats::fetchData::BTCfee::send::URL:", btcfeeUrl)
-		}
-
-		// Initialize and send Metals fetch request (2 if 2nd suffix is provided)
-		if (showMetals || showMetalsTT) {
-			fetchState["metals"].ready = false
-			fetchState["metals"].xhr[0] = new XMLHttpRequest()
-			fetchState["metals"].xhr[0].onreadystatechange = function() {
-				parseData(fetchState["metals"].xhr[0], "metals") }
-			fetchState["metals"].xhr[0].open("GET", metalsUrl + metalsSuffAu, true)
-			fetchState["metals"].xhr[0].setRequestHeader('User-Agent', userAgent)
-			fetchState["metals"].xhr[0].send()
-			console.debug("finstats::fetchData::Metals1::send::URL:", metalsUrl, "suffix1:", metalsSuffAu)
-
-			if ( (metalsSuffAg.length > 0) && (metalsSuffAg != metalsSuffAu) ) {
-				fetchState["metals"].xhr[1] = new XMLHttpRequest()
-				fetchState["metals"].xhr[1].onreadystatechange = function() {
-					parseData(fetchState["metals"].xhr[1], "metals") }
-				fetchState["metals"].xhr[1].open("GET", metalsUrl + metalsSuffAg, true)
-				fetchState["metals"].xhr[1].setRequestHeader('User-Agent', userAgent)
-				fetchState["metals"].xhr[1].send()
-				console.debug("finstats::fetchData::Metals2::send::URL:", metalsUrl, "suffix2:", metalsSuffAg)
-			}
-		}
-	}
+    id: root
+
+    readonly property var cfg: Plasmoid.configuration
+
+    // ------------------------------------------------------------ state
+    property var prices: ({ btc: 0, fee: 0, au: 0, ag: 0 })   // last good values
+    property var okState: ({})        // source -> false when its last fetch failed
+    property var errors: ({})         // source -> message of the last fetch
+    property bool hasData: false
+    property bool fetching: false
+    property real lastCheck: 0        // ms since epoch
+    property real nextRefresh: 0      // ms since epoch
+    property real now: Date.now()     // ticks once a second only while the tooltip/popup is visible
+    property bool hovered: false
+    property int revision: 0          // bumped when prices/errors change (the maps are mutated copies)
+    property bool completed: false
+    property int generation: 0        // invalidates callbacks of aborted fetches
+    property var jobs: []
+    property var batch: ({ prices: {}, errors: {} })
+
+    readonly property bool wantBTC: cfg.showBTC || cfg.showBTCTT
+    readonly property bool wantFee: cfg.showBTCFee || cfg.showBTCFeeTT
+    readonly property bool wantMetals: cfg.showMetals || cfg.showMetalsTT
+    readonly property bool hasErrors: { revision; return Object.keys(errors).length > 0 }
+
+    // Everything the display code needs, read here so bindings notice any change
+    readonly property var viewCfg: ({
+        showBTC: cfg.showBTC, showBTCTT: cfg.showBTCTT, showBTCFee: cfg.showBTCFee, showBTCFeeTT: cfg.showBTCFeeTT,
+        showMetals: cfg.showMetals, showMetalsRatio: cfg.showMetalsRatio, showMetalsTT: cfg.showMetalsTT,
+        showStack: cfg.showStack,
+        stackSymbol: cfg.stackSymbol, curSymbol: cfg.curSymbol, minorcurSymbol: cfg.minorcurSymbol,
+        btcSymbol: cfg.btcSymbol, satsSymbol: cfg.satsSymbol, auSymbol: cfg.auSymbol, agSymbol: cfg.agSymbol,
+        warnSymbol: cfg.warnSymbol, delimSymbol: cfg.delimSymbol,
+        decPlaces: cfg.decPlaces, decPlacesTT: cfg.decPlacesTT, priceDivider: cfg.priceDivider,
+        btcStack: cfg.btcStack, btcCost: cfg.btcCost, capGainBTC: cfg.capGainBTC,
+        auStack: cfg.auStack, auSlip: cfg.auSlip, agStack: cfg.agStack, agSlip: cfg.agSlip
+    })
+
+    readonly property var calc: { revision; return Logic.calc(prices, viewCfg) }
+
+    readonly property string appletText: {
+        revision;
+        var t = hasData ? Logic.appletText(prices, viewCfg, calc) : "";
+        return t !== "" ? t : cfg.appletSymbol;
+    }
+
+    readonly property color labelColor: !cfg.appletColor ? Kirigami.Theme.textColor
+        : fetching ? Kirigami.Theme.highlightColor
+        : hasErrors ? Kirigami.Theme.disabledTextColor
+        : Kirigami.Theme.textColor
+
+    // ------------------------------------------------------------ table models
+    readonly property var popupCells: {
+        revision;
+        var cells = [];
+        Logic.popupRows(prices, viewCfg, calc, okState).forEach(function (row) {
+            row.forEach(function (pair, i) {
+                cells.push({ text: pair.label, bold: true, shade: true });
+                cells.push({ text: pair.value, span: row.length === 1 ? 3 : 1 });
+            });
+        });
+        return cells;
+    }
+
+    readonly property var statusCells: {
+        revision;
+        var next = fetching ? i18n("refreshing…")
+            : nextRefresh > 0
+                ? Qt.formatDateTime(new Date(nextRefresh), "hh:mm") + " ("
+                  + i18n("in %1", Logic.fmtCountdown(nextRefresh - now)) + ")"
+                : "—";
+        var cells = [
+            { text: i18n("Last check"), bold: true, shade: true },
+            { text: lastCheck > 0 ? Qt.formatDateTime(new Date(lastCheck), "yyyy-MM-dd hh:mm") : i18n("never") },
+            { text: i18n("Next update"), bold: true, shade: true },
+            { text: next }
+        ];
+        if (hasErrors) {
+            cells.push({ text: cfg.warnSymbol + " " + i18n("Error during last update"), span: 2, error: true });
+            Object.keys(errors).forEach(function (k) {
+                cells.push({ text: errors[k], span: 2, error: true });
+            });
+        }
+        return cells;
+    }
+
+    // ------------------------------------------------------------ plasmoid integration
+    toolTipMainText: i18n("Financial Stats")
+    toolTipItem: Loader {
+        sourceComponent: tooltipComponent
+        Layout.minimumWidth: item ? item.implicitWidth : 0
+        Layout.minimumHeight: item ? item.implicitHeight : 0
+        Layout.maximumWidth: Layout.minimumWidth
+        Layout.maximumHeight: Layout.minimumHeight
+    }
+
+    Plasmoid.contextualActions: [
+        PlasmaCore.Action {
+            text: i18n("Refresh now")
+            icon.name: "view-refresh"
+            enabled: !root.fetching
+            onTriggered: root.refreshNow()
+        }
+    ]
+
+    Component {
+        id: tooltipComponent
+        ColumnLayout {
+            spacing: Kirigami.Units.smallSpacing
+            PlasmaExtras.Heading {
+                level: 4
+                text: i18n("Financial Stats")
+            }
+            StatsTable {
+                columns: 2
+                cells: root.statusCells
+            }
+        }
+    }
+
+    compactRepresentation: MouseArea {
+        id: compactArea
+        hoverEnabled: true
+        acceptedButtons: Qt.LeftButton
+        Layout.minimumWidth: label.implicitWidth + Kirigami.Units.smallSpacing * 2
+        onClicked: root.expanded = !root.expanded
+        onContainsMouseChanged: root.hovered = containsMouse
+
+        PlasmaComponents3.Label {
+            id: label
+            anchors.fill: parent
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            text: root.appletText
+            color: root.labelColor
+            Behavior on color { ColorAnimation { duration: 500 } }
+        }
+    }
+
+    fullRepresentation: PlasmaExtras.Representation {
+        Layout.minimumWidth: Kirigami.Units.gridUnit * 18
+        Layout.preferredWidth: Kirigami.Units.gridUnit * 24
+        Layout.minimumHeight: Kirigami.Units.gridUnit * 8
+
+        header: PlasmaExtras.PlasmoidHeading {
+            RowLayout {
+                anchors.fill: parent
+                PlasmaExtras.Heading {
+                    level: 3
+                    text: i18n("Financial Stats")
+                    Layout.fillWidth: true
+                }
+                PlasmaComponents3.ToolButton {
+                    icon.name: "view-refresh"
+                    text: i18n("Refresh now")
+                    display: PlasmaComponents3.AbstractButton.IconOnly
+                    enabled: !root.fetching
+                    onClicked: root.refreshNow()
+                    QQC2.ToolTip.text: text
+                    QQC2.ToolTip.visible: hovered
+                }
+            }
+        }
+
+        contentItem: ColumnLayout {
+            spacing: Kirigami.Units.largeSpacing
+
+            StatsTable {
+                Layout.fillWidth: true
+                Layout.margins: Kirigami.Units.smallSpacing
+                visible: root.popupCells.length > 0
+                columns: 4
+                cells: root.popupCells
+            }
+
+            PlasmaExtras.PlaceholderMessage {
+                Layout.fillWidth: true
+                visible: root.popupCells.length === 0
+                text: root.hasData ? i18n("Nothing to show") : i18n("Waiting for data…")
+                explanation: i18n("Choose what to display in the popup in the widget settings.")
+            }
+
+            StatsTable {
+                Layout.fillWidth: true
+                Layout.margins: Kirigami.Units.smallSpacing
+                columns: 2
+                cells: root.statusCells
+            }
+
+            Item { Layout.fillHeight: true }
+        }
+    }
+
+    // ------------------------------------------------------------ fetching
+    function refreshNow() {
+        if (!fetching) startFetch();
+    }
+
+    // Abort whatever is running and start over (used after the settings changed)
+    function restartFetch() {
+        generation++;
+        watchdog.stop();
+        jobs.forEach(function (j) { if (!j.done) { try { j.xhr.abort(); } catch (e) {} } });
+        fetching = false;
+        startFetch();
+    }
+
+    function buildJobs() {
+        var list = [];
+        if (wantBTC)
+            list.push({ src: "btc", url: cfg.btcUrl, targets: [{ key: cfg.btcKey, field: "btc" }] });
+        if (wantFee)
+            list.push({ src: "fee", url: cfg.btcfeeUrl, targets: [{ key: cfg.btcfeeKey, field: "fee" }] });
+        if (wantMetals) {
+            var sAu = cfg.metalsSuffAu, sAg = cfg.metalsSuffAg;
+            if (sAg.length > 0 && sAg !== sAu) {
+                // one request per metal
+                list.push({ src: "metals", url: cfg.metalsUrl + sAu, targets: [{ key: cfg.metalsKeyAu, field: "au" }] });
+                list.push({ src: "metals", url: cfg.metalsUrl + sAg, targets: [{ key: cfg.metalsKeyAg, field: "ag" }] });
+            } else {
+                // both metals come from one response
+                list.push({ src: "metals", url: cfg.metalsUrl + sAu,
+                            targets: [{ key: cfg.metalsKeyAu, field: "au" }, { key: cfg.metalsKeyAg, field: "ag" }] });
+            }
+        }
+        return list;
+    }
+
+    function startFetch() {
+        var myGen = ++generation;
+        fetching = true;
+        batch = { prices: {}, errors: {} };
+        var list = buildJobs();
+        jobs = list;
+        if (list.length === 0) { finishFetch(); return; }
+
+        list.forEach(function (job) {
+            job.done = false;
+            var xhr = new XMLHttpRequest();
+            job.xhr = xhr;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState !== XMLHttpRequest.DONE || myGen !== generation || job.done) return;
+                job.done = true;
+                handleResponse(job, xhr);
+                if (list.every(function (j) { return j.done; })) finishFetch();
+            };
+            xhr.open("GET", job.url, true);
+            xhr.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0esr) Gecko/20100101 Firefox/140.0esr");
+            xhr.send();
+        });
+        watchdog.interval = Math.max(1, cfg.timeDataReady) * 1000;
+        watchdog.restart();
+    }
+
+    function failJob(job, msg) {
+        var prev = batch.errors[job.src];
+        batch.errors[job.src] = (prev ? prev + "; " : "") + msg;
+    }
+
+    function handleResponse(job, xhr) {
+        if (xhr.status !== 200) {
+            failJob(job, job.src + ": " + (xhr.status === 0 ? i18n("no response") : "HTTP " + xhr.status));
+            return;
+        }
+        var data;
+        try {
+            data = JSON.parse(xhr.responseText);
+        } catch (e) {
+            failJob(job, job.src + ": " + i18n("invalid JSON"));
+            return;
+        }
+        job.targets.forEach(function (t) {
+            if (t.key === "") return;
+            var v = Logic.dive(data, t.key);
+            if (Logic.valid(v)) batch.prices[t.field] = v;
+            else failJob(job, job.src + ": " + i18n("no value for key “%1”", t.key));
+        });
+    }
+
+    function finishFetch() {
+        watchdog.stop();
+        var p = Object.assign({}, prices, batch.prices);
+        var ok = {};
+        buildJobs().forEach(function (j) { ok[j.src] = !batch.errors[j.src]; });
+        prices = p;
+        okState = ok;
+        errors = batch.errors;
+        if (Object.keys(batch.prices).length > 0) hasData = true;
+        lastCheck = Date.now();
+        now = lastCheck;
+        fetching = false;
+        revision++;
+        schedule();
+    }
+
+    // Time budget exceeded: whatever has not answered is failed
+    Timer {
+        id: watchdog
+        repeat: false
+        onTriggered: {
+            root.jobs.forEach(function (j) {
+                if (j.done) return;
+                j.done = true;
+                try { j.xhr.abort(); } catch (e) {}
+                root.failJob(j, j.src + ": " + i18n("timeout"));
+            });
+            root.finishFetch();
+        }
+    }
+
+    // ------------------------------------------------------------ scheduling
+    function schedule() {
+        var failed = Object.keys(errors).length > 0;
+        var minutes = Math.max(1, failed ? cfg.timeRefetch : cfg.timeRefresh);
+        var base = lastCheck > 0 ? lastCheck : Date.now();
+        nextRefresh = Math.max(base + minutes * 60000, Date.now() + 1000);
+        refreshTimer.interval = nextRefresh - Date.now();
+        refreshTimer.restart();
+    }
+
+    Timer {
+        id: refreshTimer
+        repeat: false
+        onTriggered: root.startFetch()
+    }
+
+    // Countdown tick, only while somebody can see it
+    Timer {
+        interval: 1000
+        repeat: true
+        running: root.hovered || root.expanded
+        triggeredOnStart: true
+        onTriggered: root.now = Date.now()
+    }
+
+    // Changes to what/where we fetch re-fetch (debounced while the user is typing in the settings)
+    readonly property string fetchSignature: [cfg.btcUrl, cfg.btcKey, cfg.btcfeeUrl, cfg.btcfeeKey,
+        cfg.metalsUrl, cfg.metalsSuffAu, cfg.metalsSuffAg, cfg.metalsKeyAu, cfg.metalsKeyAg,
+        wantBTC, wantFee, wantMetals].join("|")
+    onFetchSignatureChanged: if (completed) refetchTimer.restart()
+
+    Timer {
+        id: refetchTimer
+        interval: 1000
+        repeat: false
+        onTriggered: root.restartFetch()
+    }
+
+    Connections {
+        target: root.cfg
+        function onTimeRefreshChanged() { if (root.completed && !root.fetching && root.lastCheck > 0) root.schedule() }
+        function onTimeRefetchChanged() { if (root.completed && !root.fetching && root.lastCheck > 0) root.schedule() }
+    }
+
+    Component.onCompleted: {
+        completed = true;
+        startFetch();
+    }
 }

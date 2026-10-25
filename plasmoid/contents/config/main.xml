@@ -33,8 +33,6 @@
 		</entry>
 		<entry name="appletSymbol" type="String">
 			<default>💰</default>
-			<alt>🪙</alt>
-			<alt>💲</alt>
 		</entry>
 		<entry name="stackSymbol" type="String">
 			<default>∑</default>
@@ -47,34 +45,21 @@
 		</entry>
 		<entry name="btcSymbol" type="String">
 			<default>₿</default>
-			<alt>Ⓑ</alt>
 		</entry>
 		<entry name="satsSymbol" type="String">
 			<default>Ș</default>
-			<alt>≐</alt>
-			<alt>丰</alt>
 		</entry>
 		<entry name="auSymbol" type="String">
 			<default>Au</default>
-			<alt>☀</alt>
-			<alt>🥇</alt>
-			<alt>🜚</alt>
 		</entry>
 		<entry name="agSymbol" type="String">
 			<default>Ag</default>
-			<alt>☾</alt>
-			<alt>🥈</alt>
-			<alt>🜛</alt>
 		</entry>
 		<entry name="warnSymbol" type="String">
 			<default>⚠</default>
-			<alt>☝</alt>
-			<alt>!</alt>
 		</entry>
 		<entry name="delimSymbol" type="String">
 			<default>│</default>
-			<alt>·</alt>
-			<alt>!</alt>
 		</entry>
 		<entry name="decPlaces" type="Int">
 			<default>1</default>
@@ -107,7 +92,6 @@
 		</entry>
 		<entry name="btcfeeKey" type="String">
 			<default>economyFee</default>
-			<options>fastestFee,halfHourFee,hourFee,economyFee,minimumFee</options>
 		</entry>
 		<entry name="metalsUrl" type="String">
 			<default>https://api.gold-api.com/price/</default>

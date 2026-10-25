@@ -4,126 +4,62 @@
  * SPDX-SnippetComment: Financial Stats Applet for Plasma 6
  */
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick.Controls as QQC2
+import org.kde.kirigami as Kirigami
 
-Item {
-	id: root
+CfgPage {
+    id: page
 
-	property alias cfg_showBTC: showBTC.checked
-	property alias cfg_showBTCTT: showBTCTT.checked
-	property alias cfg_showBTCFee: showBTCFee.checked
-	property alias cfg_showBTCFeeTT: showBTCFeeTT.checked
-	property alias cfg_showMetals: showMetals.checked
-	property alias cfg_showMetalsRatio: showMetalsRatio.checked
-	property alias cfg_showMetalsTT: showMetalsTT.checked
-	property alias cfg_showStack: showStack.checked
+    Kirigami.FormLayout {
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18n("Shown on the panel")
+        }
+        QQC2.CheckBox {
+            text: i18n("Bitcoin price")
+            checked: page.cfg_showBTC
+            onToggled: page.cfg_showBTC = checked
+        }
+        QQC2.CheckBox {
+            text: i18n("Bitcoin transaction fee")
+            checked: page.cfg_showBTCFee
+            onToggled: page.cfg_showBTCFee = checked
+        }
+        QQC2.CheckBox {
+            text: i18n("Gold and silver prices")
+            checked: page.cfg_showMetals
+            onToggled: page.cfg_showMetals = checked
+        }
+        QQC2.CheckBox {
+            text: i18n("Gold/silver ratio")
+            enabled: page.cfg_showMetals
+            checked: page.cfg_showMetalsRatio
+            onToggled: page.cfg_showMetalsRatio = checked
+        }
 
-	ScrollView {
-		width: parent.width
-		height: parent.height
-
-		ColumnLayout {
-			GridLayout {
-				id: gridLayout
-				columns: 2
-
-				// Show btc
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Show BTC:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				CheckBox {
-					id: showBTC
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display BTC on Applet")
-				}
-
-				// Show btc tooltip
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Show BTC tootltip:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				CheckBox {
-					id: showBTCTT
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display BTC on ToolTip")
-				}
-
-				// Show btcfee
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Show BTC Fee:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				CheckBox {
-					id: showBTCFee
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display BTC Fee on Applet")
-				}
-
-				// Show btcfee tooltip
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Show BTC Fee tooltip:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				CheckBox {
-					id: showBTCFeeTT
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display BTC Fee on ToolTip")
-				}
-
-				// Show metals
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Show Metals:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				CheckBox {
-					id: showMetals
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display metals on Applet")
-				}
-
-				// Show metals ratio on applet
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Show Metals ratio:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				CheckBox {
-					id: showMetalsRatio
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display metals ratio on Applet")
-				}
-
-				// Show metals tooltip
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Show Metals tooltip:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				CheckBox {
-					id: showMetalsTT
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display metals on ToolTip")
-				}
-
-				// Show stack
-				Label {
-					Layout.minimumWidth: root.width / 3
-					text: i18n("Show Stack:")
-					horizontalAlignment: Label.AlignLeft
-				}
-				CheckBox {
-					id: showStack
-					ToolTip.visible: hovered
-					ToolTip.text: i18n("Wether to display Stack on ToolTip")
-				}
-			}  // Closing GridLayout
-		}      // Closing ColumnLayout
-	}          // Closing ScrollView
-}              // Closing Item
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18n("Shown in the popup")
+        }
+        QQC2.CheckBox {
+            text: i18n("Bitcoin price")
+            checked: page.cfg_showBTCTT
+            onToggled: page.cfg_showBTCTT = checked
+        }
+        QQC2.CheckBox {
+            text: i18n("Bitcoin transaction fee")
+            checked: page.cfg_showBTCFeeTT
+            onToggled: page.cfg_showBTCFeeTT = checked
+        }
+        QQC2.CheckBox {
+            text: i18n("Gold and silver prices and ratios")
+            checked: page.cfg_showMetalsTT
+            onToggled: page.cfg_showMetalsTT = checked
+        }
+        QQC2.CheckBox {
+            text: i18n("Stack value (configured on the Stack page)")
+            checked: page.cfg_showStack
+            onToggled: page.cfg_showStack = checked
+        }
+    }
+}
