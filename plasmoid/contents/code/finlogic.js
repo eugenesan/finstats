@@ -133,9 +133,9 @@ function popupRows(p, c, k, ok) {
     return rows;
 }
 
+// "in 29 min" / "in 2 h 5 min": minutes, rounded up, no seconds
 function fmtCountdown(ms) {
-    var s = Math.max(0, Math.round(ms / 1000));
-    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-    var pad = function (n) { return (n < 10 ? "0" : "") + n; };
-    return h > 0 ? h + ":" + pad(m) + ":" + pad(sec) : pad(m) + ":" + pad(sec);
+    var m = Math.max(0, Math.ceil(ms / 60000));
+    if (m >= 60) return Math.floor(m / 60) + " h " + (m % 60) + " min";
+    return m + " min";
 }

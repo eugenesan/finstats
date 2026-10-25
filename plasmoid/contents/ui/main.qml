@@ -27,7 +27,7 @@ PlasmoidItem {
     property bool fetching: false
     property real lastCheck: 0        // ms since epoch
     property real nextRefresh: 0      // ms since epoch
-    property real now: Date.now()     // ticks once a second only while the tooltip/popup is visible
+    property real now: Date.now()     // ticks every few seconds, only while the tooltip/popup is visible
     property bool hovered: false
     property int revision: 0          // bumped when prices/errors change (the maps are mutated copies)
     property bool completed: false
@@ -341,9 +341,9 @@ PlasmoidItem {
         onTriggered: root.startFetch()
     }
 
-    // Countdown tick, only while somebody can see it
+    // Countdown tick (minute resolution), only while somebody can see it
     Timer {
-        interval: 1000
+        interval: 10000
         repeat: true
         running: root.hovered || root.expanded
         triggeredOnStart: true
