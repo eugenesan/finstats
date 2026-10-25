@@ -133,19 +133,19 @@ PlasmoidItem {
     Component {
         id: tooltipComponent
         ColumnLayout {
-            spacing: Kirigami.Units.smallSpacing
+            spacing: Kirigami.Units.largeSpacing
             PlasmaExtras.Heading {
                 level: 4
                 text: i18n("Financial Stats")
             }
             StatsTable {
-                columns: 2
-                cells: root.statusCells
-            }
-            StatsTable {
                 visible: root.tipStatCells.length > 0
                 columns: 4
                 cells: root.tipStatCells
+            }
+            StatsTable {
+                columns: 2
+                cells: root.statusCells
             }
         }
     }
@@ -197,14 +197,6 @@ PlasmoidItem {
         contentItem: ColumnLayout {
             spacing: Kirigami.Units.largeSpacing
 
-            // last check / next update (with errors), same table as in the tooltip
-            StatsTable {
-                Layout.fillWidth: true
-                Layout.margins: Kirigami.Units.smallSpacing
-                columns: 2
-                cells: root.statusCells
-            }
-
             StatsTable {
                 Layout.fillWidth: true
                 Layout.margins: Kirigami.Units.smallSpacing
@@ -218,6 +210,14 @@ PlasmoidItem {
                 visible: root.popupCells.length === 0
                 text: root.hasData ? i18n("Nothing to show") : i18n("Waiting for data…")
                 explanation: i18n("Choose what to display in the popup in the widget settings.")
+            }
+
+            // last check / next update (with errors), same table as in the tooltip
+            StatsTable {
+                Layout.fillWidth: true
+                Layout.margins: Kirigami.Units.smallSpacing
+                columns: 2
+                cells: root.statusCells
             }
 
             Item { Layout.fillHeight: true }
