@@ -139,13 +139,13 @@ PlasmoidItem {
                 text: i18n("Financial Stats")
             }
             StatsTable {
+                columns: 2
+                cells: root.statusCells
+            }
+            StatsTable {
                 visible: root.tipStatCells.length > 0
                 columns: 4
                 cells: root.tipStatCells
-            }
-            StatsTable {
-                columns: 2
-                cells: root.statusCells
             }
         }
     }
