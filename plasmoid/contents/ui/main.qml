@@ -138,12 +138,15 @@ PlasmoidItem {
                 level: 4
                 text: i18n("Financial Stats")
             }
+            // both tables stretch to the same width so their right edges line up
             StatsTable {
+                Layout.fillWidth: true
                 visible: root.tipStatCells.length > 0
                 columns: 4
                 cells: root.tipStatCells
             }
             StatsTable {
+                Layout.fillWidth: true
                 columns: 2
                 cells: root.statusCells
             }
