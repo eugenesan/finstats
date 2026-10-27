@@ -94,7 +94,7 @@ PlasmoidItem {
         var next = fetching ? i18n("refreshing…")
             : nextRefresh > 0
                 ? Qt.formatDateTime(new Date(nextRefresh), "hh:mm") + " ("
-                  + i18n("in %1", Logic.fmtCountdown(nextRefresh - now)) + ")"
+                  + (nextRefresh - now <= 0 ? i18n("due now") : i18n("in %1", Logic.fmtCountdown(nextRefresh - now))) + ")"
                 : "—";
         var cells = [
             { text: i18n("Last check"), bold: true, shade: true },
@@ -350,14 +350,16 @@ PlasmoidItem {
         var minutes = Math.max(1, failed ? cfg.timeRefetch : cfg.timeRefresh);
         var base = lastCheck > 0 ? lastCheck : Date.now();
         nextRefresh = Math.max(base + minutes * 60000, Date.now() + 1000);
-        refreshTimer.interval = nextRefresh - Date.now();
-        refreshTimer.restart();
     }
 
+    // Wall-clock scheduler. A QML Timer counts monotonic time, which does not advance while the computer
+    // sleeps: one long timer fires hours late after a resume. A one-minute tick compares with the real clock,
+    // so a refresh that became due during sleep runs within a minute of waking.
     Timer {
-        id: refreshTimer
-        repeat: false
-        onTriggered: root.startFetch()
+        interval: 60000
+        repeat: true
+        running: true
+        onTriggered: if (!root.fetching && root.nextRefresh > 0 && Date.now() >= root.nextRefresh) root.startFetch()
     }
 
     // Countdown tick (minute resolution), only while somebody can see it
