@@ -327,6 +327,32 @@ PlasmoidItem {
         fetching = false;
         revision++;
         schedule();
+        saveCache();
+    }
+
+    // ------------------------------------------------------------ price cache
+    // The last prices are kept in the widget configuration. After a restart of Plasma or the computer they are
+    // shown at once and the servers are only asked again when the refresh interval has really elapsed, so
+    // repeated restarts do not look like abuse to the price APIs.
+    function saveCache() {
+        cfg.cacheJson = JSON.stringify({ prices: prices, ok: okState, errors: errors, lastCheck: lastCheck,
+                                         sig: fetchSignature });
+    }
+
+    // returns true when the cached prices are complete for the current settings and still fresh
+    function loadCache() {
+        var c;
+        try { c = JSON.parse(cfg.cacheJson || "{}"); } catch (e) { return false; }
+        if (!c || !c.prices || !(c.lastCheck > 0)) return false;
+        prices = Object.assign({ btc: 0, fee: 0, au: 0, ag: 0 }, c.prices);
+        okState = c.ok || {};
+        errors = c.errors || {};
+        lastCheck = Math.min(c.lastCheck, Date.now());      // clock set back: do not wait for the future
+        hasData = prices.btc > 0 || prices.fee > 0 || prices.au > 0 || prices.ag > 0;
+        revision++;
+
+        var covers = (!wantBTC || prices.btc > 0) && (!wantFee || prices.fee > 0) && (!wantMetals || prices.au > 0);
+        return hasData && covers && c.sig === fetchSignature && Date.now() < dueTime();
     }
 
     // Time budget exceeded: whatever has not answered is failed
@@ -345,11 +371,15 @@ PlasmoidItem {
     }
 
     // ------------------------------------------------------------ scheduling
-    function schedule() {
+    // when the next fetch is due: refresh interval after a good fetch, retry interval after a failed one
+    function dueTime() {
         var failed = Object.keys(errors).length > 0;
         var minutes = Math.max(1, failed ? cfg.timeRefetch : cfg.timeRefresh);
-        var base = lastCheck > 0 ? lastCheck : Date.now();
-        nextRefresh = Math.max(base + minutes * 60000, Date.now() + 1000);
+        return (lastCheck > 0 ? lastCheck : Date.now()) + minutes * 60000;
+    }
+
+    function schedule() {
+        nextRefresh = Math.max(dueTime(), Date.now() + 1000);
     }
 
     // Wall-clock scheduler. A QML Timer counts monotonic time, which does not advance while the computer
@@ -392,6 +422,7 @@ PlasmoidItem {
 
     Component.onCompleted: {
         completed = true;
-        startFetch();
+        if (loadCache()) schedule();      // fresh cached prices: show them, fetch when the interval has elapsed
+        else startFetch();
     }
 }

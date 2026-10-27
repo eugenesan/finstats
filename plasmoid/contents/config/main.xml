@@ -93,6 +93,10 @@
 		<entry name="timeRefetch" type="Int">
 			<default>30</default>
 		</entry>
+		<!-- internal: last fetched prices (survives restarts, see loadCache in main.qml) -->
+		<entry name="cacheJson" type="String">
+			<default>{}</default>
+		</entry>
 		<entry name="btcUrl" type="String">
 			<default>https://api.gemini.com/v1/pubticker/btcusd</default>
 		</entry>

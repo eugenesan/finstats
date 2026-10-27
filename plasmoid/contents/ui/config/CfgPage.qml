@@ -68,6 +68,8 @@ KCM.SimpleKCM {
     property int cfg_timeDataReadyDefault
     property int cfg_timeRefetch
     property int cfg_timeRefetchDefault
+    property string cfg_cacheJson
+    property string cfg_cacheJsonDefault
     property string cfg_btcUrl
     property string cfg_btcUrlDefault
     property string cfg_btcKey
