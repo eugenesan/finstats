@@ -31,6 +31,9 @@ PlasmoidItem {
     property bool hovered: false
     property int revision: 0          // bumped when prices/errors change (the maps are mutated copies)
     property bool completed: false
+    property int failCount: 0         // consecutive failed updates (drives the retry back-off)
+    property real lastBeat: 0         // last time one of the scheduler timers ran (to notice a resume from sleep)
+    property real holdUntil: 0        // after a resume: wait for the network until this time
     property int generation: 0        // invalidates callbacks of aborted fetches
     property var jobs: []
     property var batch: ({ prices: {}, errors: {} })
@@ -326,8 +329,16 @@ PlasmoidItem {
         now = lastCheck;
         fetching = false;
         revision++;
+        var failed = Object.keys(errors).length > 0;
+        failCount = failed ? failCount + 1 : 0;
         schedule();
         saveCache();
+        var wait = Math.round((nextRefresh - Date.now()) / 1000);
+        if (failed)
+            console.warn("finstats: update failed (" + Object.keys(errors).map(function (k) { return errors[k]; }).join("; ")
+                         + "), attempt " + failCount + ", retrying in " + wait + " s");
+        else
+            console.info("finstats: update ok, next in " + Math.round(wait / 60) + " min");
     }
 
     // ------------------------------------------------------------ price cache
@@ -347,6 +358,7 @@ PlasmoidItem {
         prices = Object.assign({ btc: 0, fee: 0, au: 0, ag: 0 }, c.prices);
         okState = c.ok || {};
         errors = c.errors || {};
+        failCount = Object.keys(errors).length > 0 ? 1 : 0;
         lastCheck = Math.min(c.lastCheck, Date.now());      // clock set back: do not wait for the future
         hasData = prices.btc > 0 || prices.fee > 0 || prices.au > 0 || prices.ag > 0;
         revision++;
@@ -372,57 +384,71 @@ PlasmoidItem {
 
     // ------------------------------------------------------------ scheduling
     // when the next fetch is due: refresh interval after a good fetch, retry interval after a failed one
+    // How long to wait after a failed update. "No response" / timeout usually means the network is not up
+    // yet (right after a resume or at login): retry quickly, 20 s, 40 s, 80 s ... A server that answers with
+    // an error (HTTP 429 / 5xx) is treated gently: 2, 4, 8 ... minutes. Never longer than the retry interval.
+    function retryDelayMs() {
+        var cap = Math.max(1, cfg.timeRefetch) * 60000;
+        var httpErr = Object.keys(errors).some(function (k) { return /HTTP \d+/.test(errors[k]); });
+        var base = httpErr ? 120000 : 20000;
+        return Math.min(cap, base * Math.pow(2, Math.max(0, failCount - 1)));
+    }
+
+    // when the next fetch is due: refresh interval after a good fetch, back-off delay after a failed one
     function dueTime() {
         var failed = Object.keys(errors).length > 0;
-        var minutes = Math.max(1, failed ? cfg.timeRefetch : cfg.timeRefresh);
-        return (lastCheck > 0 ? lastCheck : Date.now()) + minutes * 60000;
+        var delay = failed ? retryDelayMs() : Math.max(1, cfg.timeRefresh) * 60000;
+        return (lastCheck > 0 ? lastCheck : Date.now()) + delay;
     }
 
     function schedule() {
         nextRefresh = Math.max(dueTime(), Date.now() + 1000);
+        var d = nextRefresh - Date.now();
+        if (d <= 120000) { shortTimer.interval = d; shortTimer.restart(); }   // short delays: exact timer
+        else shortTimer.stop();
     }
 
     // Wall-clock scheduler. A QML Timer counts monotonic time, which does not advance while the computer
-    // sleeps: one long timer fires hours late after a resume. A one-minute tick compares with the real clock,
-    // so a refresh that became due during sleep runs within a minute of waking.
+    // sleeps: one long timer fires hours late after a resume. A one-minute tick compares with the real clock.
+    // If the time since the previous tick is far longer than a tick, the computer was asleep: the network is
+    // probably not up yet, so the fetch waits a little (and a failed one is retried quickly, see above).
+    function heartbeat() {
+        var t = Date.now();
+        if (lastBeat > 0 && t - lastBeat > 180000) {
+            holdUntil = t + 20000;
+            console.info("finstats: resumed after " + Math.round((t - lastBeat) / 60000) + " min, waiting for the network");
+        }
+        lastBeat = t;
+        if (fetching || t < holdUntil) return;
+        if (nextRefresh > 0 && t + 500 >= nextRefresh) {
+            console.info("finstats: update due, fetching");
+            startFetch();
+        }
+    }
+
     Timer {
         interval: 60000
         repeat: true
         running: true
-        onTriggered: if (!root.fetching && root.nextRefresh > 0 && Date.now() >= root.nextRefresh) root.startFetch()
+        onTriggered: root.heartbeat()
     }
 
-    // Countdown tick (minute resolution), only while somebody can see it
     Timer {
-        interval: 10000
-        repeat: true
-        running: root.hovered || root.expanded
-        triggeredOnStart: true
-        onTriggered: root.now = Date.now()
-    }
-
-    // Changes to what/where we fetch re-fetch (debounced while the user is typing in the settings)
-    readonly property string fetchSignature: [cfg.btcUrl, cfg.btcKey, cfg.btcfeeUrl, cfg.btcfeeKey,
-        cfg.metalsUrl, cfg.metalsSuffAu, cfg.metalsSuffAg, cfg.metalsKeyAu, cfg.metalsKeyAg,
-        wantBTC, wantFee, wantMetals].join("|")
-    onFetchSignatureChanged: if (completed) refetchTimer.restart()
-
-    Timer {
-        id: refetchTimer
-        interval: 1000
+        id: shortTimer
         repeat: false
-        onTriggered: root.restartFetch()
-    }
-
-    Connections {
-        target: root.cfg
-        function onTimeRefreshChanged() { if (root.completed && !root.fetching && root.lastCheck > 0) root.schedule() }
-        function onTimeRefetchChanged() { if (root.completed && !root.fetching && root.lastCheck > 0) root.schedule() }
+        onTriggered: root.heartbeat()
     }
 
     Component.onCompleted: {
         completed = true;
-        if (loadCache()) schedule();      // fresh cached prices: show them, fetch when the interval has elapsed
-        else startFetch();
+        lastBeat = Date.now();
+        if (loadCache()) {                // fresh cached prices: show them, fetch when the interval has elapsed
+            schedule();
+            console.info("finstats: started with cached prices (" + Math.round((Date.now() - lastCheck) / 60000)
+                         + " min old), next update in " + Math.round((nextRefresh - Date.now()) / 60000) + " min");
+        } else {
+            console.info("finstats: started, fetching");
+            startFetch();
+        }
     }
 }
