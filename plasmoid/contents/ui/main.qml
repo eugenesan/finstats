@@ -23,6 +23,7 @@ PlasmoidItem {
     property var prices: ({ btc: 0, fee: 0, au: 0, ag: 0 })   // last good values
     property var okState: ({})        // source -> false when its last fetch failed
     property var errors: ({})         // source -> message of the last fetch
+    property var errorKinds: ({})     // source -> "network" (no response) | "http" | "timeout" | "data"
     property bool hasData: false
     property bool fetching: false
     property real lastCheck: 0        // ms since epoch
@@ -36,7 +37,7 @@ PlasmoidItem {
     property real holdUntil: 0        // after a resume: wait for the network until this time
     property int generation: 0        // invalidates callbacks of aborted fetches
     property var jobs: []
-    property var batch: ({ prices: {}, errors: {} })
+    property var batch: ({ prices: {}, errors: {}, kinds: {} })
 
     readonly property bool wantBTC: cfg.showBTC || cfg.showBTCTT || cfg.showBTCTip
     readonly property bool wantFee: cfg.showBTCFee || cfg.showBTCFeeTT || cfg.showBTCFeeTip
@@ -268,7 +269,7 @@ PlasmoidItem {
     function startFetch() {
         var myGen = ++generation;
         fetching = true;
-        batch = { prices: {}, errors: {} };
+        batch = { prices: {}, errors: {}, kinds: {} };
         var list = buildJobs();
         jobs = list;
         if (list.length === 0) { finishFetch(); return; }
@@ -291,28 +292,30 @@ PlasmoidItem {
         watchdog.restart();
     }
 
-    function failJob(job, msg) {
+    function failJob(job, msg, kind) {
         var prev = batch.errors[job.src];
         batch.errors[job.src] = (prev ? prev + "; " : "") + msg;
+        batch.kinds[job.src] = kind;
     }
 
     function handleResponse(job, xhr) {
         if (xhr.status !== 200) {
-            failJob(job, job.src + ": " + (xhr.status === 0 ? i18n("no response") : "HTTP " + xhr.status));
+            failJob(job, job.src + ": " + (xhr.status === 0 ? i18n("no response") : "HTTP " + xhr.status),
+                    xhr.status === 0 ? "network" : "http");
             return;
         }
         var data;
         try {
             data = JSON.parse(xhr.responseText);
         } catch (e) {
-            failJob(job, job.src + ": " + i18n("invalid JSON"));
+            failJob(job, job.src + ": " + i18n("invalid JSON"), "data");
             return;
         }
         job.targets.forEach(function (t) {
             if (t.key === "") return;
             var v = Logic.dive(data, t.key);
             if (Logic.valid(v)) batch.prices[t.field] = v;
-            else failJob(job, job.src + ": " + i18n("no value for key “%1”", t.key));
+            else failJob(job, job.src + ": " + i18n("no value for key “%1”", t.key), "data");
         });
     }
 
@@ -324,6 +327,7 @@ PlasmoidItem {
         prices = p;
         okState = ok;
         errors = batch.errors;
+        errorKinds = batch.kinds;
         if (Object.keys(batch.prices).length > 0) hasData = true;
         lastCheck = Date.now();
         now = lastCheck;
@@ -346,7 +350,7 @@ PlasmoidItem {
     // shown at once and the servers are only asked again when the refresh interval has really elapsed, so
     // repeated restarts do not look like abuse to the price APIs.
     function saveCache() {
-        cfg.cacheJson = JSON.stringify({ prices: prices, ok: okState, errors: errors, lastCheck: lastCheck,
+        cfg.cacheJson = JSON.stringify({ prices: prices, ok: okState, errors: errors, kinds: errorKinds, lastCheck: lastCheck,
                                          sig: fetchSignature });
     }
 
@@ -358,6 +362,7 @@ PlasmoidItem {
         prices = Object.assign({ btc: 0, fee: 0, au: 0, ag: 0 }, c.prices);
         okState = c.ok || {};
         errors = c.errors || {};
+        errorKinds = c.kinds || {};
         failCount = Object.keys(errors).length > 0 ? 1 : 0;
         lastCheck = Math.min(c.lastCheck, Date.now());      // clock set back: do not wait for the future
         hasData = prices.btc > 0 || prices.fee > 0 || prices.au > 0 || prices.ag > 0;
@@ -376,7 +381,7 @@ PlasmoidItem {
                 if (j.done) return;
                 j.done = true;
                 try { j.xhr.abort(); } catch (e) {}
-                root.failJob(j, j.src + ": " + i18n("timeout"));
+                root.failJob(j, j.src + ": " + i18n("timeout"), "timeout");
             });
             root.finishFetch();
         }
@@ -384,17 +389,21 @@ PlasmoidItem {
 
     // ------------------------------------------------------------ scheduling
     // when the next fetch is due: refresh interval after a good fetch, retry interval after a failed one
-    // How long to wait after a failed update. "No response" / timeout usually means the network is not up
-    // yet (right after a resume or at login): retry quickly, 20 s, 40 s, 80 s ... A server that answers with
-    // an error (HTTP 429 / 5xx) is treated gently: 2, 4, 8 ... minutes. Never longer than the retry interval.
+    // How long to wait after a failed update.
+    // - "No response" (no network yet: right after a resume or at login) is retried quickly with a growing
+    //   delay, 20 s, 40 s, 80 s ..., never longer than the retry interval. No server was reached, so there is
+    //   nothing to protect.
+    // - Everything else (HTTP 429 / 5xx, timeouts, bad data) waits the configured retry interval: that delay
+    //   is what keeps a server that is refusing us from blocking us for good.
     function retryDelayMs() {
         var cap = Math.max(1, cfg.timeRefetch) * 60000;
-        var httpErr = Object.keys(errors).some(function (k) { return /HTTP \d+/.test(errors[k]); });
-        var base = httpErr ? 120000 : 20000;
-        return Math.min(cap, base * Math.pow(2, Math.max(0, failCount - 1)));
+        var kinds = Object.keys(errors).map(function (k) { return errorKinds[k]; });
+        var networkOnly = kinds.length > 0 && kinds.every(function (k) { return k === "network"; });
+        if (!networkOnly) return cap;
+        return Math.min(cap, 20000 * Math.pow(2, Math.max(0, failCount - 1)));
     }
 
-    // when the next fetch is due: refresh interval after a good fetch, back-off delay after a failed one
+    // when the next fetch is due: refresh interval after a good fetch, retry delay after a failed one
     function dueTime() {
         var failed = Object.keys(errors).length > 0;
         var delay = failed ? retryDelayMs() : Math.max(1, cfg.timeRefresh) * 60000;
