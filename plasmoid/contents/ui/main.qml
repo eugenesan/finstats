@@ -388,7 +388,6 @@ PlasmoidItem {
     }
 
     // ------------------------------------------------------------ scheduling
-    // when the next fetch is due: refresh interval after a good fetch, retry interval after a failed one
     // How long to wait after a failed update.
     // - "No response" (no network yet: right after a resume or at login) is retried quickly with a growing
     //   delay, 20 s, 40 s, 80 s ..., never longer than the retry interval. No server was reached, so there is
@@ -446,6 +445,34 @@ PlasmoidItem {
         id: shortTimer
         repeat: false
         onTriggered: root.heartbeat()
+    }
+
+    // Countdown tick (minute resolution), only while somebody can see it
+    Timer {
+        interval: 10000
+        repeat: true
+        running: root.hovered || root.expanded
+        triggeredOnStart: true
+        onTriggered: root.now = Date.now()
+    }
+
+    // Changes to what/where we fetch re-fetch (debounced while the user is typing in the settings)
+    readonly property string fetchSignature: [cfg.btcUrl, cfg.btcKey, cfg.btcfeeUrl, cfg.btcfeeKey,
+        cfg.metalsUrl, cfg.metalsSuffAu, cfg.metalsSuffAg, cfg.metalsKeyAu, cfg.metalsKeyAg,
+        wantBTC, wantFee, wantMetals].join("|")
+    onFetchSignatureChanged: if (completed) refetchTimer.restart()
+
+    Timer {
+        id: refetchTimer
+        interval: 1000
+        repeat: false
+        onTriggered: root.restartFetch()
+    }
+
+    Connections {
+        target: root.cfg
+        function onTimeRefreshChanged() { if (root.completed && !root.fetching && root.lastCheck > 0) root.schedule() }
+        function onTimeRefetchChanged() { if (root.completed && !root.fetching && root.lastCheck > 0) root.schedule() }
     }
 
     Component.onCompleted: {
